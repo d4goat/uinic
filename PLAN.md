@@ -49,7 +49,26 @@ Tanpa backend Express. RBAC divalidasi di DB, bukan di app → tidak bisa dilewa
 | F10 | Materi aksesibel | `/materi/:id` |
 | F11 | Mode siswa (jadwal visual) | `/mode-siswa/:id` |
 
+## Status & infrastruktur (per 25 Okt)
+
+| Hal | Nilai |
+|---|---|
+| Repo | https://github.com/d4goat/uinic (publik) |
+| Demo | https://uinic.vercel.app/ — akun `d4goats-pro` (milik teman tim) |
+| Database | Supabase project `hvykeauvtwnwefrnnzln` |
+| RLS/RPC | terbukti di database nyata: `npm run seed` (alur bahagia) + `npm run uji:rls` (14 asersi penolakan) |
+
+Jalankan `npm run verifikasi:deploy -- https://uinic.vercel.app/ "Selamat datang" --routes=/,/login,/siswa`
+untuk memastikan produksi benar-benar build terbaru (rute SPA, sidik jari aset, header keamanan).
+
+Catatan deploy: commit yang di-deploy harus ditulis akun yang punya akses ke project Vercel.
+Pada repo **private** + tim **Hobby**, hanya commit milik pemilik tim yang di-deploy (build
+"blocked", bukan gagal) — inilah yang membuat push dari akun lain tidak pernah muncul di
+produksi. Repo sudah publik; kalau muncul blokir serupa, minta pemilik Vercel push satu commit
+kosong.
+
 ## Pending / butuh dari user
 
-- Project Supabase (URL + anon key) → `.env.local`. Belum ada; skema tetap bisa ditulis tanpa itu.
-- Repo dijadikan **publik** sebelum submit.
+- Nama GPK/dosen PLB peninjau untuk kolom `ditinjau_oleh` di `supabase/seed.sql` (masih placeholder `GANTI:`).
+- Hasil wawancara 5 guru/GPK + skor SUS untuk bagian "Hasil Pengujian" proposal.
+- Guidebook UINIC 8.0 hal. 14-15 (format PPI sekolah mitra + struktur proposal).
