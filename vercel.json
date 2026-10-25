@@ -1,11 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    {
-      "comment": "SPA: rute dalam (/siswa, /orangtua, ...) dilayani index.html. Berkas statis yang benar-benar ada tetap dilayani lebih dulu.",
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
