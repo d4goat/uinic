@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "check:sql": "node scripts/check-sql.mjs",
     "check": "npm run check:sql && tsc -b --pretty false && eslint .",
-    "seed": "node scripts/seed-demo.mjs"
+    "db": "node scripts/db-run.mjs",
+    "seed": "node scripts/seed-demo.mjs",
+    "uji:rls": "node scripts/uji-rls.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ambilRekam, buatTransfer, catatAkses, daftarConsent, daftarSekolah, daftarSiswa, daftarTransfer,
+  ambilRekam, buatTransfer, catatAkses, daftarConsent, daftarSekolahTujuan, daftarSiswa, daftarTransfer,
 } from '../../lib/api';
 import type { Sekolah, Siswa, TransferHasil } from '../../lib/types';
 
@@ -16,14 +16,17 @@ type BarisConsent = Awaited<ReturnType<typeof daftarConsent>>[number];
 const waktu = (iso: string) =>
   new Date(iso).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 
-/** Wali aktif = consent 'berbagi_rekam' berstatus disetujui dan belum kedaluwarsa. */
-const adaConsentAktif = (baris: BarisConsent[]) =>
-  baris.some(
-    (c) =>
-      c.jenis === 'berbagi_rekam' &&
-      c.status === 'disetujui' &&
-      (!c.berlaku_hingga || new Date(c.berlaku_hingga) > new Date()),
+/** Wali aktif = keputusan TERBARU jenis berbagi_rekam berstatus disetujui & belum kedaluwarsa.
+    (Daftar dari API sudah urut terbaru dulu; persetujuan yang dicabut tidak boleh
+    "hidup kembali" hanya karena ada baris lama yang masih disetujui.) */
+const adaConsentAktif = (baris: BarisConsent[]) => {
+  const terbaru = baris.find((c) => c.jenis === 'berbagi_rekam');
+  return (
+    !!terbaru &&
+    terbaru.status === 'disetujui' &&
+    (!terbaru.berlaku_hingga || new Date(terbaru.berlaku_hingga) > new Date())
   );
+};
 
 function unduhJson(data: unknown, namaBerkas: string) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -92,7 +95,7 @@ export default function Transfer() {
     catatAkses('transfers', '-', { aksi: 'buka' }).catch(() => {});
     (async () => {
       try {
-        const [s, sk, tr] = await Promise.all([daftarSiswa(), daftarSekolah(), daftarTransfer()]);
+        const [s, sk, tr] = await Promise.all([daftarSiswa(), daftarSekolahTujuan(), daftarTransfer()]);
         setSiswa(s);
         setSekolah(sk);
         setRiwayat(tr);

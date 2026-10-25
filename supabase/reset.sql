@@ -18,7 +18,7 @@ drop function if exists
   rpc_consent_save(uuid, consent_jenis, consent_status, timestamptz),
   rpc_transfer_create(uuid, uuid, int), rpc_record_fetch(text),
   rpc_student_delete(uuid), rpc_wali_ringkasan(uuid),
-  rpc_log_read(text, text, jsonb)
+  rpc_log_read(text, text, jsonb), rpc_sekolah_tujuan()
   cascade;
 
 drop type if exists

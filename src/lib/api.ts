@@ -28,6 +28,13 @@ export const ambilProfil = async (): Promise<Profil | null> =>
 export const daftarSekolah = (): Promise<Sekolah[]> =>
   u<Sekolah[]>(supabase.from('schools').select('*').order('nama'));
 
+/**
+ * F8: sekolah LAIN sebagai tujuan transfer. `schools` sendiri hanya terlihat
+ * oleh sekolah sendiri di bawah RLS, jadi daftar tujuan diambil lewat RPC
+ * `rpc_sekolah_tujuan()` (kolomnya sengaja cuma id, nama, kode_instansi).
+ */
+export const daftarSekolahTujuan = () => rpc<Sekolah[]>('rpc_sekolah_tujuan', {});
+
 export const login = async (email: string, password: string) => {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw new Error(error.message);

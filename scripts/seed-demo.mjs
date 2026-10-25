@@ -140,7 +140,13 @@ async function alurWali(siswa) {
 
 async function alurTransfer(siswa) {
   await masuk('koordinator@demo.test');
-  const tujuan = await db(sb.from('schools').select('id').eq('kode_instansi', 'SHB').single());
+  // Sekolah tujuan diambil lewat RPC direktori: `schools` di bawah RLS hanya
+  // memperlihatkan sekolah sendiri, jadi query langsung akan mengembalikan 0 baris.
+  const daftarTujuan = await rpc('rpc_sekolah_tujuan', {});
+  const tujuan = daftarTujuan.find((s) => s.kode_instansi === 'SHB');
+  if (!tujuan) throw new Error('Sekolah SHB tidak ada di rpc_sekolah_tujuan()');
+  // Sekolah tujuan = sekolah lain (RLS menyembunyikan sekolah sendiri, jadi daftar
+  // ini datang dari rpc_sekolah_tujuan(); filter di bawah tinggal jadi pengaman).
   const { token } = await rpc('rpc_transfer_create', {
     p_student: siswa.id, p_ke_school: tujuan.id, p_berlaku_jam: 72,
   });
@@ -164,7 +170,10 @@ console.log('Membuat akun demo…');
 const ids = await akunDemo();
 
 const siswa = await db(admin.from('students').select('id').eq('kode', 'SIA-001').single());
-await db(admin.from('guardian_links').upsert({ student_id: siswa.id, user_id: ids['sari@demo.test'], hubungan: 'ibu' }));
+await db(admin.from('guardian_links').upsert(
+  { student_id: siswa.id, user_id: ids['sari@demo.test'], hubungan: 'ibu' },
+  { onConflict: 'student_id,user_id' },
+));
 
 console.log('Menjalankan alur nyata…');
 await alurGuru();

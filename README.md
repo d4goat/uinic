@@ -42,14 +42,24 @@ Lalu di Supabase SQL Editor, jalankan berurutan:
 1. `supabase/schema.sql` — tabel, RLS, trigger audit, RPC
 2. `supabase/seed.sql` — dua sekolah demo, tabel referensi hambatan/akomodasi/aturan, siswa sintetis
 
+Atau dari terminal sekali jalan (isi `SUPABASE_ACCESS_TOKEN` atau `SUPABASE_DB_URL` dulu):
+
 ```bash
-npm run seed      # membuat akun demo + menjalankan alur nyata (jadwal, sesi, transfer)
+npm run db          # reset.sql -> schema.sql -> seed.sql, lalu verifikasi jumlah baris
+```
+
+```bash
+npm run seed        # membuat akun demo + menjalankan alur nyata (jadwal, sesi, transfer)
+npm run uji:rls     # membuktikan penolakan peran: apa yang GAGAL dilakukan tiap peran
 npm run dev
 ```
 
 `npm run seed` bukan sekadar isi data: ia masuk sebagai tiap akun demo lalu menjalankan
 asesmen → saran akomodasi → draf PPI → log sesi → persetujuan wali → transfer token →
-pengambilan rekam. Kalau RLS atau RPC salah, skrip gagal di langkah itu.
+pengambilan rekam. `npm run uji:rls` menyerang dari sisi sebaliknya (14 asersi: guru mencoba
+menghapus siswa, wali mencoba mengisi asesmen, transfer tanpa persetujuan aktif, token dipakai
+dua kali). Keduanya berbicara ke database sungguhan — kalau RLS atau RPC salah, keduanya gagal
+di langkah itu.
 
 ## Peran
 

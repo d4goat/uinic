@@ -260,22 +260,31 @@ create or replace function fn_enc(p text) returns bytea
 language sql stable security definer set search_path = public, extensions as
 $$ select case when p is null then null else extensions.pgp_sym_encrypt(p, fn_kunci()) end $$;
 
--- Staf sekolah (guru/gpk/koordinator) yang mengurus siswa tertentu.
-create or replace function fn_boleh_student(p_student uuid) returns boolean
-language sql stable security definer set search_path = public as
-$$ select exists (
-     select 1 from students s
-     where s.id = p_student
-       and (fn_role() = 'admin' or s.school_id = fn_school())
-   ) $$;
-
--- Orang tua/wali yang tertaut ke siswa tertentu.
+-- Orang tua/wali yang tertaut ke siswa tertentu. Didefinisikan SEBELUM
+-- fn_boleh_student karena fungsi SQL divalidasi saat dibuat.
 create or replace function fn_boleh_wali(p_student uuid) returns boolean
 language sql stable security definer set search_path = public as
 $$ select exists (
      select 1 from guardian_links g
      where g.student_id = p_student and g.user_id = auth.uid()
    ) $$;
+
+-- Staf sekolah (guru/gpk/koordinator) yang mengurus siswa tertentu; admin semua;
+-- orang tua HANYA anak yang tertaut. PENTING: orang tua juga punya school_id
+-- (mereka memang bagian sekolah itu), jadi tanpa cabang per-peran di sini mereka
+-- akan melihat seluruh siswa sekolahnya.
+create or replace function fn_boleh_student(p_student uuid) returns boolean
+language sql stable security definer set search_path = public as
+$$
+  select exists (
+    select 1 from students s
+    where s.id = p_student
+      and (
+        fn_role() = 'admin'
+        or (fn_role() in ('guru','gpk','koordinator') and s.school_id = fn_school())
+        or fn_boleh_wali(p_student)
+      )
+  ) $$;
 
 -- ============================================================ audit (F12) ==
 create or replace function fn_audit() returns trigger
@@ -350,9 +359,10 @@ create policy profiles_self_update on profiles for update to authenticated
 create policy profiles_admin_all on profiles for all to authenticated
   using (fn_role() = 'admin') with check (fn_role() = 'admin');
 
--- students (F2): staf sekolah sendiri; wali hanya anak yang tertaut; admin semua.
+-- students (F2): fn_boleh_student sudah sadar peran -> staf sekolahnya, admin semua,
+-- orang tua hanya anak yang tertaut.
 create policy students_read on students for select to authenticated
-  using (fn_role() = 'admin' or school_id = fn_school() or fn_boleh_wali(id));
+  using (fn_boleh_student(id));
 create policy students_staff_write on students for all to authenticated
   using (fn_role() in ('guru','gpk','koordinator') and school_id = fn_school())
   with check (fn_role() in ('guru','gpk','koordinator') and school_id = fn_school());
@@ -375,9 +385,10 @@ create policy rules_read on barrier_accommodation_rules for select to authentica
 create policy rules_admin on barrier_accommodation_rules for all to authenticated
   using (fn_role() = 'admin') with check (fn_role() = 'admin');
 
--- assessments + barrier: staf sekolah (wali tidak melihat asesmen mentah).
+-- assessments + barrier: staf sekolah saja. Orang tua TIDAK membaca asesmen
+-- mentah walau tertaut (PRD §7 minimisasi; F7 hanya ringkasan PPI + sesi).
 create policy assessments_read on assessments for select to authenticated
-  using (fn_boleh_student(student_id));
+  using (fn_role() in ('guru','gpk','koordinator','admin') and fn_boleh_student(student_id));
 create policy assessments_write on assessments for all to authenticated
   using (fn_role() in ('guru','gpk') and fn_boleh_student(student_id))
   with check (fn_role() in ('guru','gpk') and fn_boleh_student(student_id));
@@ -436,14 +447,17 @@ create policy sessions_write on sessions for all to authenticated
            select 1 from ppis p where p.id = ppi_id and fn_boleh_student(p.student_id)));
 
 -- materials: staf sekolah sendiri (Mode siswa dijalankan oleh guru yang login).
+-- Orang tua tidak termasuk: materi kelas bukan bagian dari tampilan wali.
 create policy materials_read on materials for select to authenticated
-  using (fn_role() = 'admin' or school_id = fn_school());
+  using (fn_role() in ('guru','gpk','koordinator','admin')
+         and (fn_role() = 'admin' or school_id = fn_school()));
 create policy materials_write on materials for all to authenticated
   using (fn_role() in ('guru','gpk') and school_id = fn_school())
   with check (fn_role() in ('guru','gpk') and school_id = fn_school());
 create policy variants_read on material_variants for select to authenticated
-  using (exists (select 1 from materials m where m.id = material_id
-                 and (fn_role() = 'admin' or m.school_id = fn_school())));
+  using (fn_role() in ('guru','gpk','koordinator','admin')
+         and exists (select 1 from materials m where m.id = material_id
+                     and (fn_role() = 'admin' or m.school_id = fn_school())));
 create policy variants_write on material_variants for all to authenticated
   using (fn_role() in ('guru','gpk') and exists (
            select 1 from materials m where m.id = material_id and m.school_id = fn_school()))
@@ -542,19 +556,30 @@ begin
         where a.id = (select id from assessments where student_id = p_student
                       order by tanggal desc limit 1)), '[]'::jsonb),
     'akomodasi', coalesce((
-        select jsonb_agg(distinct jsonb_build_object(
-                 'accommodation_id', ac.id, 'kode', ac.kode, 'nama', ac.nama,
-                 'deskripsi', ac.deskripsi, 'tingkat_bukti', ac.tingkat_bukti,
-                 'sumber', ac.sumber, 'alasan', r.alasan,
-                 'ditinjau_oleh', r.ditinjau_oleh, 'tanggal_tinjau', r.tanggal_tinjau,
-                 'dari_hambatan', b.nama))
-        from assessments a
-        join assessment_barriers ab on ab.assessment_id = a.id
-        join barriers b on b.id = ab.barrier_id
-        join barrier_accommodation_rules r on r.barrier_id = b.id
-        join accommodations ac on ac.id = r.accommodation_id
-        where a.id = (select id from assessments where student_id = p_student
-                      order by tanggal desc limit 1)), '[]'::jsonb)
+        -- Satu baris per akomodasi. Bila akomodasi sama datang dari dua hambatan,
+        -- nama hambatan dan alasannya digabung di sini, bukan dikirim sebagai dua
+        -- baris (dulu menyebabkan tabrakan primary key di rpc_ppi_save).
+        select jsonb_agg(jsonb_build_object(
+                 'accommodation_id', x.id, 'kode', x.kode, 'nama', x.nama,
+                 'deskripsi', x.deskripsi, 'tingkat_bukti', x.tingkat_bukti,
+                 'sumber', x.sumber, 'alasan', trim(x.alasan),
+                 'ditinjau_oleh', x.ditinjau_oleh, 'tanggal_tinjau', x.tanggal_tinjau,
+                 'dari_hambatan', x.hambatan))
+        from (
+          select ac.id, ac.kode, ac.nama, ac.deskripsi, ac.tingkat_bukti, ac.sumber,
+                 string_agg(distinct b.nama, '; ')   as hambatan,
+                 string_agg(distinct r.alasan, ' ')  as alasan,
+                 min(r.ditinjau_oleh)                as ditinjau_oleh,
+                 min(r.tanggal_tinjau)               as tanggal_tinjau
+          from assessments a
+          join assessment_barriers ab on ab.assessment_id = a.id
+          join barriers b on b.id = ab.barrier_id
+          join barrier_accommodation_rules r on r.barrier_id = b.id
+          join accommodations ac on ac.id = r.accommodation_id
+          where a.id = (select id from assessments where student_id = p_student
+                        order by tanggal desc limit 1)
+          group by ac.id, ac.kode, ac.nama, ac.deskripsi, ac.tingkat_bukti, ac.sumber
+        ) x), '[]'::jsonb)
   ) into v;
 
   return v;
@@ -596,10 +621,18 @@ begin
     values (v_versi, v_item->>'tujuan', v_item->>'indikator');
   end loop;
 
-  for v_item in select * from jsonb_array_elements(coalesce(p_akomodasi,'[]'::jsonb)) loop
+  -- distinct on: klien boleh mengirim akomodasi yang sama lebih dari sekali
+  -- (mis. karena masih menampilkan baris kembar dari versi lama) -> tetap satu baris.
+  for v_item in
+    select distinct on (i ->> 'accommodation_id') i
+    from jsonb_array_elements(coalesce(p_akomodasi,'[]'::jsonb)) i
+    where i ->> 'accommodation_id' is not null
+  loop
     insert into ppi_accommodations(ppi_version_id, accommodation_id, disetujui, catatan)
     values (v_versi, (v_item->>'accommodation_id')::uuid,
-            coalesce((v_item->>'disetujui')::boolean, false), v_item->>'catatan');
+            coalesce((v_item->>'disetujui')::boolean, false), v_item->>'catatan')
+    on conflict (ppi_version_id, accommodation_id) do update
+      set disetujui = excluded.disetujui, catatan = excluded.catatan;
   end loop;
 
   update ppis set versi_aktif = v_no, status = 'draf' where id = v_ppi;
@@ -666,12 +699,17 @@ end $$;
 
 -- F8: koordinator membuat token sekali pakai. Token asli hanya muncul di sini
 -- sekali; yang tersimpan hanya sha256-nya.
+-- Aturan persetujuan: keputusan wali yang TERBARU yang berlaku. Persetujuan lama
+-- yang sudah dicabut tidak boleh "hidup kembali" hanya karena ada baris lama
+-- berstatus disetujui.
 create or replace function rpc_transfer_create(
   p_student uuid, p_ke_school uuid, p_berlaku_jam int default 72
 ) returns jsonb
 language plpgsql security definer set search_path = public, extensions as
 $$
-declare v_consent uuid; v_dari uuid; v_token text; v_id uuid;
+declare
+  v_consent uuid; v_status consent_status; v_hingga timestamptz;
+  v_dari uuid; v_token text; v_id uuid;
 begin
   if fn_role() not in ('koordinator','admin') then
     raise exception 'hanya koordinator yang mengajukan transfer' using errcode = '42501';
@@ -683,13 +721,21 @@ begin
     raise exception 'masa berlaku token harus 1-720 jam';
   end if;
 
-  select id into v_consent from consents
-  where student_id = p_student and jenis = 'berbagi_rekam' and status = 'disetujui'
-    and (berlaku_hingga is null or berlaku_hingga > now())
-  order by dibuat_pada desc limit 1;
+  select id, status, berlaku_hingga into v_consent, v_status, v_hingga
+  from consents
+  where student_id = p_student and jenis = 'berbagi_rekam'
+  order by dibuat_pada desc
+  limit 1;
 
   if v_consent is null then
-    raise exception 'belum ada persetujuan wali yang aktif' using errcode = '42501';
+    raise exception 'belum ada persetujuan wali untuk berbagi rekam' using errcode = '42501';
+  end if;
+  if v_status <> 'disetujui' then
+    raise exception 'persetujuan wali berstatus % — transfer tidak dapat dibuat', v_status
+      using errcode = '42501';
+  end if;
+  if v_hingga is not null and v_hingga <= now() then
+    raise exception 'persetujuan wali sudah kedaluwarsa' using errcode = '42501';
   end if;
 
   select school_id into v_dari from students where id = p_student;
@@ -838,6 +884,20 @@ begin
   return v_out;
 end $$;
 
+-- F8: koordinator harus memilih sekolah TUJUAN, yang tentu bukan sekolahnya sendiri
+-- dan karena itu tidak terlihat oleh policy schools_read. Fungsi ini membuka
+-- direktori sekolah secara sengaja dan sempit (id, nama, kode saja) untuk
+-- koordinator/admin — bukan seluruh kolom sekolah.
+create or replace function rpc_sekolah_tujuan() returns jsonb
+language sql stable security definer set search_path = public as
+$$
+  select coalesce(jsonb_agg(jsonb_build_object(
+           'id', s.id, 'nama', s.nama, 'kode_instansi', s.kode_instansi) order by s.nama), '[]'::jsonb)
+  from schools s
+  where fn_role() in ('koordinator','admin')
+    and (fn_school() is null or s.id <> fn_school())
+$$;
+
 -- F12: trigger di atas tidak bisa menangkap SELECT (Postgres tidak punya trigger
 -- baca). Untuk pembacaan yang benar-benar sensitif (membuka satu siswa, tampilan
 -- orang tua, unduh rekam) klien memanggil ini secara eksplisit.
@@ -870,6 +930,7 @@ grant execute on function rpc_transfer_create(uuid, uuid, int)         to authen
 grant execute on function rpc_student_delete(uuid)                     to authenticated;
 grant execute on function rpc_log_read(text, text, jsonb)               to authenticated;
 grant execute on function rpc_wali_ringkasan(uuid)                     to authenticated;
+grant execute on function rpc_sekolah_tujuan()                         to authenticated;
 grant execute on function fn_dec(bytea)                                to authenticated;
 grant execute on function rpc_record_fetch(text)                       to anon, authenticated;
 
