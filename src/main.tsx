@@ -1,10 +1,20 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
+import { BrowserRouter } from 'react-router-dom'
+import './styles/theme.css'
 import App from './App.tsx'
+import { AuthProvider } from './auth/AuthContext'
+import { pasangSinkronisasi } from './lib/offline'
+
+// Kirim sesi yang tertunda begitu jaringan kembali (F6).
+pasangSinkronisasi()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </BrowserRouter>
   </StrictMode>,
 )
