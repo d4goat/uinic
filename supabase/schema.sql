@@ -220,14 +220,16 @@ create table audit_logs (
 );
 create index audit_logs_waktu_idx on audit_logs(waktu desc);
 
--- Kunci enkripsi. TIDAK ada policy RLS dan TIDAK ada grant -> hanya fungsi
--- security definer (baca: pemilik tabel) yang bisa menyentuhnya.
+-- Kunci enkripsi: teks hex (64 karakter = 256 bit), bukan bytea, karena
+-- pgp_sym_encrypt/pgp_sym_decrypt menerima kunci bertipe text.
+-- TIDAK ada policy RLS dan TIDAK ada grant -> hanya fungsi security definer
+-- (baca: pemilik tabel) yang bisa menyentuhnya.
 create table app_secrets (
   id    text primary key,
-  kunci bytea not null
+  kunci text not null
 );
 insert into app_secrets(id, kunci)
-values ('catatan', extensions.gen_random_bytes(32))
+values ('catatan', encode(extensions.gen_random_bytes(32), 'hex'))
 on conflict (id) do nothing;
 
 alter table app_secrets enable row level security;
@@ -244,8 +246,8 @@ create or replace function fn_school() returns uuid
 language sql stable security definer set search_path = public as
 $$ select school_id from profiles where id = auth.uid() $$;
 
-create or replace function fn_kunci() returns bytea
-language sql stable security definer set search_path = public, extensions as
+create or replace function fn_kunci() returns text
+language sql stable security definer set search_path = public as
 $$ select kunci from app_secrets where id = 'catatan' $$;
 
 -- Dekripsi catatan. Aman karena barisnya sendiri tetap dijaga RLS: tanpa hak
