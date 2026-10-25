@@ -784,6 +784,58 @@ begin
   delete from students where id = p_student;
 end $$;
 
+-- F7: satu panggilan untuk tampilan orang tua — baca-saja, tanpa data asesmen
+-- mentah, maksimal 10 sesi terakhir. Dipisah dari rpc_ppi_suggest supaya wali
+-- tidak pernah menerima catatan asesmen (minimisasi data, PRD §7).
+create or replace function rpc_wali_ringkasan(p_student uuid) returns jsonb
+language plpgsql security definer set search_path = public, extensions as
+$$
+declare v_ppi uuid; v_versi uuid; v_out jsonb;
+begin
+  if not fn_boleh_wali(p_student) then
+    raise exception 'Anda tidak tertaut ke siswa ini' using errcode = '42501';
+  end if;
+
+  select id into v_ppi from ppis where student_id = p_student;
+  select id into v_versi from ppi_versions where ppi_id = v_ppi
+  order by nomor_versi desc limit 1;
+
+  select jsonb_build_object(
+    'siswa', (select jsonb_build_object('id', s.id, 'kode', s.kode, 'inisial', s.inisial,
+                                        'kelas', s.kelas)
+              from students s where s.id = p_student),
+    'sekolah', (select s.nama from students st join schools s on s.id = st.school_id
+                where st.id = p_student),
+    'ppi', case when v_versi is null then null else jsonb_build_object(
+      'ppi_id', v_ppi,
+      'versi', (select nomor_versi from ppi_versions where id = v_versi),
+      'ringkasan', (select ringkasan from ppi_versions where id = v_versi),
+      'diperbarui', (select dibuat_pada from ppi_versions where id = v_versi),
+      'tujuan', coalesce((select jsonb_agg(jsonb_build_object('tujuan', tujuan,
+                                                              'indikator', indikator))
+                          from ppi_goals where ppi_version_id = v_versi), '[]'::jsonb),
+      'akomodasi', coalesce((select jsonb_agg(jsonb_build_object(
+                                'nama', ac.nama, 'disetujui', pa.disetujui))
+                             from ppi_accommodations pa
+                             join accommodations ac on ac.id = pa.accommodation_id
+                             where pa.ppi_version_id = v_versi), '[]'::jsonb)) end,
+    'sesi', coalesce((select jsonb_agg(x) from (
+        select jsonb_build_object('tanggal', se.tanggal, 'capaian', se.status_capaian,
+                                  'catatan', fn_dec(se.catatan_enc)) as x
+        from sessions se where se.ppi_id = v_ppi
+        order by se.tanggal desc limit 10) q), '[]'::jsonb),
+    'persetujuan', coalesce((select jsonb_agg(jsonb_build_object(
+                                'id', c.id, 'status', c.status, 'jenis', c.jenis,
+                                'berlaku_hingga', c.berlaku_hingga, 'dibuat_pada', c.dibuat_pada)
+                             order by c.dibuat_pada desc)
+                             from consents c where c.student_id = p_student), '[]'::jsonb)
+  ) into v_out;
+
+  insert into audit_logs(user_id, aksi, objek, objek_id, keterangan)
+  values (auth.uid(), 'select', 'wali_ringkasan', p_student::text, '{}'::jsonb);
+  return v_out;
+end $$;
+
 -- F12: trigger di atas tidak bisa menangkap SELECT (Postgres tidak punya trigger
 -- baca). Untuk pembacaan yang benar-benar sensitif (membuka satu siswa, tampilan
 -- orang tua, unduh rekam) klien memanggil ini secara eksplisit.
@@ -815,6 +867,7 @@ grant execute on function rpc_consent_save(uuid, consent_jenis, consent_status, 
 grant execute on function rpc_transfer_create(uuid, uuid, int)         to authenticated;
 grant execute on function rpc_student_delete(uuid)                     to authenticated;
 grant execute on function rpc_log_read(text, text, jsonb)               to authenticated;
+grant execute on function rpc_wali_ringkasan(uuid)                     to authenticated;
 grant execute on function fn_dec(bytea)                                to authenticated;
 grant execute on function rpc_record_fetch(text)                       to anon, authenticated;
 

@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "check:sql": "node scripts/check-sql.mjs",
+    "check": "npm run check:sql && tsc -b --pretty false && eslint .",
     "seed": "node scripts/seed-demo.mjs"
   },
   "dependencies": {
@@ -22,7 +23,7 @@
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
-    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-react": "^5.2.0",
     "eslint": "^10.10.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.6",
@@ -30,6 +31,6 @@
     "libpg-query": "^18.2.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.69.0",
-    "vite": "^8.3.0"
+    "vite": "^7.3.7"
   }
 }

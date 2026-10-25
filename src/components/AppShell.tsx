@@ -23,9 +23,7 @@ export default function AppShell() {
         <span className="bilah-merek">PPI-Link</span>
         <nav aria-label="Navigasi utama">
           {terlihat.map((m) => (
-            <NavLink key={m.ke} to={m.ke}
-              className={({ isActive }) => (isActive ? 'aktif' : '')}
-              aria-current={undefined}>
+            <NavLink key={m.ke} to={m.ke}>
               {m.label}
             </NavLink>
           ))}

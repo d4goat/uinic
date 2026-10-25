@@ -18,5 +18,18 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // Setiap halaman mengambil data saat mount lalu setState di dalam efek
+      // (pola fetch-on-mount). Aturan ini menandai setState sinkron di badan
+      // efek sebagai bahaya; di sini justru itu jalur yang benar karena sumber
+      // datanya basis data, bukan state React.
+      'react-hooks/set-state-in-effect': 'off',
+    },
+  },
+  {
+    // Modul auth memang mengekspor Provider/hook/guard bersama komponen.
+    // Fast refresh hanya relevan saat menyunting, bukan saat build.
+    files: ['src/auth/**/*.tsx', 'src/lib/**/*.ts'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
 ])

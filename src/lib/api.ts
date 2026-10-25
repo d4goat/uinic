@@ -67,14 +67,18 @@ export const simpanAsesmen = (
 ) => rpc<string>('rpc_assessment_save', { p_student: studentId, p_hambatan: hambatan, p_catatan: catatan });
 
 export const riwayatAsesmen = (studentId: string) =>
-  u<{ id: string; tanggal: string; assessment_barriers: { tingkat: string; barriers: HambatanRef }[] }[]>(
+  u<{
+    id: string; tanggal: string; catatan_enc: string | null;
+    assessment_barriers: { tingkat: string; barriers: HambatanRef }[];
+  }[]>(
     supabase
       .from('assessments')
-      .select('id, tanggal, assessment_barriers(tingkat, barriers(*))')
+      .select('id, tanggal, catatan_enc, assessment_barriers(tingkat, barriers(*))')
       .eq('student_id', studentId)
       .order('tanggal', { ascending: false }),
   );
 
+/** Dekripsi satu nilai catatan (bytea dari PostgREST datang sebagai string hex). */
 export const catatanAsesmen = (enc: string) => rpc<string>('fn_dec', { p: enc });
 
 // ------------------------------------------------------------------ PPI -----
@@ -144,6 +148,28 @@ export const simpanMateri = async (
 };
 
 // ------------------------------------------------------- persetujuan --------
+export const siswaWali = (): Promise<Siswa[]> =>
+  u<{ students: Siswa }[]>(supabase.from('guardian_links').select('students(*)'))
+    .then((rows) => rows.map((r) => r.students));
+
+/** F7: satu panggilan, baca-saja, maksimal 10 sesi terakhir — bukan data asesmen. */
+export interface RingkasanWali {
+  siswa: { id: string; kode: string; inisial: string; kelas: string };
+  sekolah: string;
+  ppi: {
+    ppi_id: string; versi: number; ringkasan: string | null; diperbarui: string;
+    tujuan: { tujuan: string; indikator: string }[];
+    akomodasi: { nama: string; disetujui: boolean }[];
+  } | null;
+  sesi: { tanggal: string; capaian: Capaian; catatan: string | null }[];
+  persetujuan: {
+    id: string; jenis: string; status: ConsentStatus;
+    berlaku_hingga: string | null; dibuat_pada: string;
+  }[];
+}
+export const ringkasanWali = (studentId: string) =>
+  rpc<RingkasanWali>('rpc_wali_ringkasan', { p_student: studentId });
+
 export const daftarConsent = (studentId: string) =>
   u<{ id: string; jenis: string; status: ConsentStatus; berlaku_hingga: string | null; dibuat_pada: string }[]>(
     supabase.from('consents').select('*').eq('student_id', studentId).order('dibuat_pada', { ascending: false }),
