@@ -12,7 +12,8 @@
     "check": "npm run check:sql && tsc -b --pretty false && eslint .",
     "db": "node scripts/db-run.mjs",
     "seed": "node scripts/seed-demo.mjs",
-    "uji:rls": "node scripts/uji-rls.mjs"
+    "uji:rls": "node scripts/uji-rls.mjs",
+    "verifikasi:deploy": "node scripts/verify-deploy.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
