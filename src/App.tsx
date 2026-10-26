@@ -15,10 +15,12 @@ import ModeSiswa from './pages/ModeSiswa';
 import ApiDocs from './pages/ApiDocs';
 import { Berjaga, koordinator, penyusun, staf, wali } from './auth/ProtectedRoute';
 import { useAuth } from './auth/AuthContext';
+import GalatSesi from './components/GalatSesi';
 
 function GerbangUtama() {
-  const { profil, siap } = useAuth();
-  if (!siap) return <div className="wadah"><p className="hint">Memuat…</p></div>;
+  const { profil, siap, galat, segarkan } = useAuth();
+  if (!siap) return <main className="wadah"><p className="hint">Memuat…</p></main>;
+  if (galat) return <GalatSesi galat={galat} segarkan={segarkan} />;
   if (!profil) return <Landing />;
   return (
     <AppShell>
