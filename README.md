@@ -9,6 +9,14 @@ API dengan persetujuan orang tua.
 
 Proyek untuk Web Development Competition UINIC 8.0 (subtema Pendidikan).
 
+## Dokumentasi
+
+| Dokumen | Isi |
+|---|---|
+| [`docs/PANDUAN.md`](docs/PANDUAN.md) | Panduan lengkap: tujuan, peran, alur end-to-end, arsitektur, model data, RLS, audit, RPC, aksesibilitas, offline, peta kode, dan pelajaran dari bug nyata |
+| [`docs/CHEATSHEET-DEMO.md`](docs/CHEATSHEET-DEMO.md) | Satu halaman hari-H: akun demo, urutan demo 6 menit, pertanyaan juri + jawaban, angka bukti |
+| [`PLAN.md`](PLAN.md) | Rencana kerja, pemetaan fitur PRD → rute, status infrastruktur |
+
 ## Yang tidak dilakukan produk ini
 
 Bukan alat diagnosis, tidak menggantikan asesmen psikolog/GPK, tidak mengklaim peningkatan hasil
