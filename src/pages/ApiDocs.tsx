@@ -1,4 +1,19 @@
+import { useRef, useState } from 'react';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
+import {
+  Check,
+  Code2,
+  Copy,
+  Database,
+  ExternalLink,
+  Layers,
+  Server,
+  Terminal,
+} from 'lucide-react';
 import { openApiUrl } from '../lib/supabase';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
 
 /** [F9] Dokumentasi API internal: PostgREST + RPC, apa adanya dari supabase/schema.sql. */
 
@@ -13,181 +28,233 @@ const RPC: Rpc[] = [
   {
     nama: 'rpc_assessment_save',
     argumen: 'p_student uuid, p_hambatan jsonb, p_catatan text',
-    siapa: 'guru, gpk (authenticated), siswa harus satu sekolah; mengembalikan uuid asesmen',
+    siapa: 'guru, gpk (authenticated)',
     catatan: 'Menyimpan hambatan terpilih + catatan asesmen (dienkripsi pgcrypto) dalam satu transaksi.',
   },
   {
     nama: 'rpc_ppi_suggest',
     argumen: 'p_student uuid',
-    siapa: 'guru, gpk, koordinator, admin (satu sekolah) dan wali yang tertaut ke siswa',
+    siapa: 'guru, gpk, koordinator, admin, wali tertaut',
     catatan: 'Hanya membaca: hambatan terbaru + akomodasi saran beserta alasan dan tingkat bukti.',
   },
   {
     nama: 'rpc_ppi_save',
     argumen: 'p_student uuid, p_ppi uuid, p_ringkasan text, p_tujuan jsonb, p_akomodasi jsonb',
-    siapa: 'guru, gpk (authenticated), siswa harus satu sekolah',
+    siapa: 'guru, gpk (authenticated)',
     catatan: 'Selalu menulis versi baru (nomor_versi naik); riwayat lama tidak pernah ditimpa.',
   },
   {
     nama: 'rpc_session_log',
     argumen: 'p_ppi uuid, p_goal uuid, p_tanggal date, p_status capaian_status, p_catatan text, p_client_uuid uuid',
-    siapa: 'guru, gpk (authenticated), PPI harus satu sekolah',
+    siapa: 'guru, gpk (authenticated)',
     catatan: 'Idempoten lewat p_client_uuid, jadi aman dikirim ulang setelah offline.',
   },
   {
     nama: 'rpc_consent_save',
     argumen: 'p_student uuid, p_jenis consent_jenis, p_status consent_status, p_berlaku_hingga timestamptz',
-    siapa: 'hanya wali yang tertaut ke siswa tersebut',
+    siapa: 'hanya wali tertaut',
     catatan: 'Jenis persetujuan yang dipakai tampilan orang tua: berbagi_rekam.',
   },
   {
     nama: 'rpc_transfer_create',
-    argumen: 'p_student uuid, p_ke_school uuid, p_berlaku_jam int (1-720, bawaan 72)',
-    siapa: 'koordinator, admin (authenticated), siswa harus satu sekolah',
-    catatan: 'Butuh persetujuan wali berbagi_rekam yang masih aktif; token asli hanya muncul sekali, yang disimpan sha256-nya.',
+    argumen: 'p_student uuid, p_ke_school uuid, p_berlaku_jam int',
+    siapa: 'koordinator, admin (authenticated)',
+    catatan: 'Butuh persetujuan wali berbagi_rekam aktif; token asli sekali tampil, hash sha256 disimpan di DB.',
   },
   {
     nama: 'rpc_record_fetch',
     argumen: 'p_token text',
-    siapa: 'anon dan authenticated - tanpa login, token itu sendiri yang jadi hak akses',
-    catatan: 'Sekali pakai: langsung ditandai terpakai setelah berhasil dibaca. catatan_enc didekripsi di server.',
+    siapa: 'anon & authenticated',
+    catatan: 'Token sekali pakai: hangus setelah dibaca. catatan_enc didekripsi di server.',
   },
   {
     nama: 'rpc_student_delete',
     argumen: 'p_student uuid',
-    siapa: 'koordinator, admin (authenticated), siswa harus satu sekolah',
-    catatan: 'Hapus data atas permintaan; cascade ke seluruh turunannya (asesmen, PPI, sesi, consent, transfer).',
+    siapa: 'koordinator, admin',
+    catatan: 'Hapus data atas permintaan; cascade ke seluruh turunannya (UU PDP compliance).',
   },
   {
     nama: 'rpc_wali_ringkasan',
     argumen: 'p_student uuid',
-    siapa: 'hanya wali yang tertaut ke siswa tersebut',
-    catatan: 'Baca-saja untuk [F7]: identitas, PPI versi terbaru, 10 sesi terakhir, riwayat persetujuan. Catatan asesmen tidak ikut (minimisasi data).',
+    siapa: 'hanya wali tertaut',
+    catatan: 'Baca-saja ringkasan PPI & 10 sesi terakhir tanpa catatan asesmen internal.',
   },
   {
     nama: 'rpc_log_read',
-    argumen: "p_objek text, p_objek_id text, p_keterangan jsonb (bawaan '{}')",
+    argumen: 'p_objek text, p_objek_id text, p_keterangan jsonb',
     siapa: 'authenticated',
-    catatan: 'Trigger audit tidak menangkap SELECT, jadi pembacaan sensitif dicatat eksplisit lewat fungsi ini.',
+    catatan: 'Pencatatan manual pembacaan data sensitif untuk melengkapi trigger audit.',
   },
   {
     nama: 'fn_dec',
     argumen: 'p bytea',
-    siapa: 'authenticated saja; execute untuk anon dicabut',
-    catatan: 'Dekripsi satu nilai terenkripsi (pgp_sym_decrypt). Tidak dipakai untuk menarik banyak catatan sekaligus.',
+    siapa: 'authenticated saja',
+    catatan: 'Fungsi pembantu dekripsi individual (pgp_sym_decrypt).',
   },
 ];
 
 const TABEL: { nama: string; isi: string }[] = [
-  { nama: 'schools, profiles', isi: 'Tenant sekolah dan akun pengguna beserta perannya.' },
-  { nama: 'students, guardian_links', isi: 'Siswa pseudonim (kode + inisial) dan tautan wali ke siswa.' },
-  { nama: 'barriers, accommodations, barrier_accommodation_rules', isi: 'Tabel referensi hambatan, akomodasi, dan aturan pasangan beserta alasan.' },
-  { nama: 'assessments, assessment_barriers', isi: 'Asesmen hambatan per siswa; catatan tersimpan terenkripsi.' },
-  { nama: 'ppis, ppi_versions, ppi_goals, ppi_accommodations', isi: 'PPI beserta versinya, tujuan/indikator, dan akomodasi yang disetujui.' },
-  { nama: 'sessions', isi: 'Log sesi dengan client_uuid unik untuk sinkronisasi idempoten.' },
-  { nama: 'consents, transfers', isi: 'Persetujuan wali dan token transfer antar sekolah (hanya hash yang disimpan).' },
-  { nama: 'materials, material_variants', isi: 'Materi ajar dan variannya (teks besar, kalimat pendek, bacakan).' },
-  { nama: 'audit_logs', isi: 'Jejak baca dan ubah data; diisi trigger dan rpc_log_read.' },
+  { nama: 'schools, profiles', isi: 'Tenant sekolah dan akun pengguna beserta RBAC role.' },
+  { nama: 'students, guardian_links', isi: 'Siswa pseudonim (kode + inisial) dan relasi wali.' },
+  { nama: 'barriers, accommodations, barrier_accommodation_rules', isi: 'Tabel referensi hambatan & aturan akomodasi tertinjau manusia.' },
+  { nama: 'assessments, assessment_barriers', isi: 'Asesmen hambatan per siswa dengan catatan terenkripsi.' },
+  { nama: 'ppis, ppi_versions, ppi_goals, ppi_accommodations', isi: 'PPI berversi, target indikator terukur, dan status persetujuan akomodasi.' },
+  { nama: 'sessions', isi: 'Log sesi dengan client_uuid untuk sinkronisasi idempoten.' },
+  { nama: 'consents, transfers', isi: 'Persetujuan wali dan token transfer hash SHA-256.' },
+  { nama: 'materials, material_variants', isi: 'Materi ajar teks besar dan kalimat pendek.' },
+  { nama: 'audit_logs', isi: 'Jejak mutasi data otomatis trigger dan rpc_log_read.' },
 ];
 
 export default function ApiDocs() {
+  const wadahRef = useRef<HTMLDivElement>(null);
+  const [salinTeks, setSalinTeks] = useState<string | null>(null);
+
+  useGSAP(
+    () => {
+      gsap.from('.anim-muncul', {
+        opacity: 0,
+        y: 16,
+        stagger: 0.08,
+        duration: 0.6,
+        ease: 'power3.out',
+      });
+    },
+    { scope: wadahRef },
+  );
+
+  const salin = async (kode: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(kode);
+      setSalinTeks(id);
+      setTimeout(() => setSalinTeks(null), 2000);
+    } catch {
+      //
+    }
+  };
+
   return (
-    <>
-      <h1>Dokumentasi API</h1>
-      <p className="lede">
-        PPI-Link tanpa server aplikasi sendiri. Antarmuka React + Vite berbicara langsung ke
-        Supabase Postgres, dan Supabase mengekspos tabel serta fungsi sebagai REST API lewat
-        PostgREST. Karena itu, apa yang dijelaskan di halaman ini adalah API yang benar-benar
-        dipakai aplikasi.
-      </p>
+    <div ref={wadahRef} className="space-y-8">
+      {/* Header Dokumentasi API */}
+      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+            F9 · Spesifikasi OpenAPI & RPC
+          </Badge>
+          <span className="text-xs text-[var(--tinta-lembut)]">PostgREST Engine & RLS PostgreSQL</span>
+        </div>
 
-      <section className="kartu">
-        <h2 style={{ marginTop: 0 }}>Arsitektur singkat</h2>
-        <ul>
-          <li>React + Vite (TypeScript) di peramban memanggil PostgREST dengan kunci anon publik.</li>
-          <li>
-            Otorisasi tidak dipegang aplikasi: Row Level Security di Postgres yang menentukan baris
-            dan kolom mana yang boleh dibaca atau ditulis oleh setiap peran (guru, GPK, koordinator,
-            orang tua, admin), dibatasi school_id.
-          </li>
-          <li>
-            Aksi yang menyentuh banyak tabel dibungkus fungsi Postgres <code>security definer</code>{' '}
-            yang memeriksa peran sendiri, jadi tidak bisa dilewati dari klien.
-          </li>
-          <li>
-            Audit diisi trigger Postgres pada setiap perubahan, sedangkan pembacaan sensitif dicatat
-            lewat <code>rpc_log_read</code>.
-          </li>
-          <li>Catatan asesmen dan catatan sesi tersimpan terenkripsi (pgcrypto) di dalam basis data.</li>
-        </ul>
-      </section>
-
-      <section className="kartu">
-        <h2 style={{ marginTop: 0 }}>Endpoints tabel</h2>
-        <p>
-          Pola jalur: <code>/rest/v1/&lt;tabel&gt;</code> dengan metode GET, POST, PATCH, DELETE.
-          Semua permintaan memerlukan header <code>apikey</code> dan, untuk data terlindungi,
-          header <code>Authorization: Bearer &lt;access_token&gt;</code> hasil login Supabase Auth.
+        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+          Dokumentasi Antarmuka Pemrograman (API)
+        </h1>
+        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-3xl leading-relaxed">
+          PPI-Link menerapkan arsitektur serverless langsung di atas Supabase Postgres. Otorisasi dan validasi
+          ditegakkan di tingkat basis data menggunakan Row Level Security (RLS) dan fungsi tersimpan berpredikat{' '}
+          <code>security definer</code>.
         </p>
-        <ul>
-          {TABEL.map((t) => (
-            <li key={t.nama}>
-              <code>{t.nama}</code> - {t.isi}
+      </header>
+
+      {/* Grid Arsitektur & OpenAPI Endpoint */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Arsitektur Singkat */}
+        <div className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
+          <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
+            <Server className="w-4 h-4 text-[var(--aksen)]" />
+            <h2 className="font-display text-base font-bold text-[var(--tinta)]">Arsitektur Tanpa Backend Express</h2>
+          </div>
+          <ul className="text-xs text-[var(--tinta-lembut)] space-y-2.5 leading-relaxed">
+            <li className="flex items-start gap-2">
+              <span className="font-mono font-bold text-[var(--aksen)]">&rarr;</span>
+              <span><strong>Tanpa Middleware Rentan:</strong> Klien memanggil REST PostgREST secara langsung dengan token JWT terotentikasi.</span>
             </li>
+            <li className="flex items-start gap-2">
+              <span className="font-mono font-bold text-[var(--aksen)]">&rarr;</span>
+              <span><strong>RLS Multi-Tenant:</strong> Isolasi antar-sekolah dan antar-peran (guru, GPK, koordinator, wali) divalidasi oleh engine Postgres.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="font-mono font-bold text-[var(--aksen)]">&rarr;</span>
+              <span><strong>Enkripsi pgcrypto:</strong> Kolom catatan guru dienkripsi asimetris di dalam tabel database.</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* OpenAPI Specification URL */}
+        <div className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4 flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
+              <Code2 className="w-4 h-4 text-[var(--aksen)]" />
+              <h2 className="font-display text-base font-bold text-[var(--tinta)]">Spesifikasi OpenAPI Terbuka</h2>
+            </div>
+            <p className="text-xs text-[var(--tinta-lembut)] leading-relaxed">
+              PostgREST menerbitkan spesifikasi OpenAPI 2.0 / Swagger secara dinamis sesuai skema database aktif.
+              Dokumentasi ini selalu sinkron 100% dan tidak pernah basi.
+            </p>
+            <div className="p-3 bg-[var(--latar-lembut)] border border-[var(--garis)] rounded-sm font-mono text-xs break-all text-[var(--tinta)]">
+              {openApiUrl}
+            </div>
+          </div>
+
+          <Button asChild size="sm" variant="default" className="w-full text-xs font-mono">
+            <a href={openApiUrl} target="_blank" rel="noreferrer">
+              <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
+              Buka Spesifikasi OpenAPI JSON
+            </a>
+          </Button>
+        </div>
+      </div>
+
+      {/* Tabel Entitas REST */}
+      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
+        <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
+          <Database className="w-4 h-4 text-[var(--aksen)]" />
+          <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Endpoints Tabel PostgREST (/rest/v1/*)</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+          {TABEL.map((t) => (
+            <div key={t.nama} className="p-3 border border-[var(--garis)] rounded-sm bg-[var(--latar-lembut)]/20">
+              <span className="font-bold text-[var(--aksen)] block">{t.nama}</span>
+              <span className="font-sans text-[var(--tinta-lembut)] text-[11px] mt-1 block">{t.isi}</span>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
 
-      <section className="kartu">
-        <h2 style={{ marginTop: 0 }}>Spesifikasi OpenAPI</h2>
-        <p>
-          PostgREST menerbitkan spesifikasi OpenAPI sendiri. Isinya selalu mengikuti skema yang
-          sedang aktif, jadi tidak ada berkas dokumentasi yang bisa basi.
-        </p>
-        <p>
-          <a href={openApiUrl} target="_blank" rel="noreferrer">
-            {openApiUrl}
-          </a>
-        </p>
-        <p className="hint">
-          Buka di peramban sebagai JSON, atau impor ke alat seperti Swagger UI / Postman sebagai
-          sumber OpenAPI untuk mencoba permintaan langsung.
-        </p>
-      </section>
+      {/* Tabel RPC Functions */}
+      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm overflow-hidden space-y-4 p-6">
+        <div className="flex items-center justify-between border-b border-[var(--garis)] pb-4">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[var(--aksen)]" />
+            <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Katalog Fungsi RPC (Remote Procedure Call)</h2>
+          </div>
+          <Badge variant="outline" className="font-mono text-xs">{RPC.length} Prosedur</Badge>
+        </div>
 
-      <section className="kartu">
-        <h2 style={{ marginTop: 0 }}>Fungsi RPC</h2>
-        <p>
-          Semua fungsi dipanggil lewat <code>POST /rest/v1/rpc/&lt;nama&gt;</code> dengan isi JSON
-          berisi argumen, misalnya <code>{'{"p_student":"<uuid>"}'}</code>. Argumen yang punya nilai
-          bawaan boleh dihilangkan.
-        </p>
-        <div className="bisa-digulir">
-          <table>
-            <caption>Fungsi RPC PPI-Link: argumen, hak akses, dan catatan</caption>
-            <thead>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead className="bg-[var(--latar-lembut)] border-b border-[var(--garis)] font-mono text-[11px] uppercase text-[var(--tinta-lembut)]">
               <tr>
-                <th scope="col">Fungsi</th>
-                <th scope="col">Metode</th>
-                <th scope="col">Jalur contoh</th>
-                <th scope="col">Argumen</th>
-                <th scope="col">Siapa yang boleh</th>
-                <th scope="col">Catatan</th>
+                <th className="px-3 py-2.5 font-semibold">Nama Prosedur</th>
+                <th className="px-3 py-2.5 font-semibold">Argumen Input</th>
+                <th className="px-3 py-2.5 font-semibold">Hak Otorisasi</th>
+                <th className="px-3 py-2.5 font-semibold">Keterangan</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[var(--garis)] font-mono">
               {RPC.map((r) => (
-                <tr key={r.nama}>
-                  <td>
-                    <code>{r.nama}</code>
+                <tr key={r.nama} className="hover:bg-[var(--latar-lembut)]/30 transition-colors">
+                  <td className="px-3 py-2.5 font-bold text-[var(--aksen)] whitespace-nowrap">
+                    {r.nama}
                   </td>
-                  <td>POST</td>
-                  <td>
-                    <code>/rest/v1/rpc/{r.nama}</code>
+                  <td className="px-3 py-2.5 text-[var(--tinta)] max-w-xs truncate" title={r.argumen}>
+                    {r.argumen}
                   </td>
-                  <td>{r.argumen}</td>
-                  <td>{r.siapa}</td>
-                  <td>{r.catatan}</td>
+                  <td className="px-3 py-2.5 whitespace-nowrap">
+                    <Badge variant="secondary" className="text-[10px] uppercase font-mono">
+                      {r.siapa}
+                    </Badge>
+                  </td>
+                  <td className="px-3 py-2.5 font-sans text-xs text-[var(--tinta-lembut)]">
+                    {r.catatan}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -195,60 +262,94 @@ export default function ApiDocs() {
         </div>
       </section>
 
-      <section className="kartu">
-        <h2 style={{ marginTop: 0 }}>Contoh permintaan</h2>
-        <p>
-          Ganti <code>$SUPABASE_URL</code>, <code>$ANON_KEY</code>, dan <code>$ACCESS_TOKEN</code>{' '}
-          dengan nilai proyek Anda. Kunci tidak pernah ditulis di dalam kode aplikasi ini.
-        </p>
-        <h3>Saran akomodasi dengan akun guru</h3>
-        <pre className="bisa-digulir">
-          <code>{`curl -X POST "$SUPABASE_URL/rest/v1/rpc/rpc_ppi_suggest" \\
+      {/* Contoh Request cURL */}
+      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
+        <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-4">
+          <Terminal className="w-4 h-4 text-[var(--aksen)]" />
+          <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Contoh Permintaan HTTP (cURL)</h2>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between mb-1.5 text-xs">
+              <span className="font-bold text-[var(--tinta)]">1. Ambil Rekam dengan Token Sekali Pakai (Tanpa Login)</span>
+              <button
+                type="button"
+                onClick={() =>
+                  void salin(
+                    `curl -X POST "$SUPABASE_URL/rest/v1/rpc/rpc_record_fetch" \\\n  -H "apikey: $ANON_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"p_token":"<token_transfer>"}'`,
+                    'curl-fetch',
+                  )
+                }
+                className="text-[var(--aksi)] hover:underline flex items-center gap-1 font-mono text-[11px]"
+              >
+                {salinTeks === 'curl-fetch' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                {salinTeks === 'curl-fetch' ? 'Disalin!' : 'Salin cURL'}
+              </button>
+            </div>
+            <pre className="p-3 bg-black text-green-400 font-mono text-xs rounded-sm overflow-x-auto leading-relaxed border border-[var(--garis)]">
+{`curl -X POST "$SUPABASE_URL/rest/v1/rpc/rpc_record_fetch" \\
+  -H "apikey: $ANON_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"p_token":"<token_transfer>"}'`}
+            </pre>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1.5 text-xs">
+              <span className="font-bold text-[var(--tinta)]">2. Minta Rekomendasi Akomodasi PPI (Akun Guru / GPK)</span>
+              <button
+                type="button"
+                onClick={() =>
+                  void salin(
+                    `curl -X POST "$SUPABASE_URL/rest/v1/rpc/rpc_ppi_suggest" \\\n  -H "apikey: $ANON_KEY" \\\n  -H "Authorization: Bearer $ACCESS_TOKEN" \\\n  -H "Content-Type: application/json" \\\n  -d '{"p_student":"<student_uuid>"}'`,
+                    'curl-suggest',
+                  )
+                }
+                className="text-[var(--aksi)] hover:underline flex items-center gap-1 font-mono text-[11px]"
+              >
+                {salinTeks === 'curl-suggest' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                {salinTeks === 'curl-suggest' ? 'Disalin!' : 'Salin cURL'}
+              </button>
+            </div>
+            <pre className="p-3 bg-black text-green-400 font-mono text-xs rounded-sm overflow-x-auto leading-relaxed border border-[var(--garis)]">
+{`curl -X POST "$SUPABASE_URL/rest/v1/rpc/rpc_ppi_suggest" \\
   -H "apikey: $ANON_KEY" \\
   -H "Authorization: Bearer $ACCESS_TOKEN" \\
   -H "Content-Type: application/json" \\
-  -d '{"p_student":"00000000-0000-0000-0000-000000000000"}'`}</code>
-        </pre>
-        <h3>Ambil rekam dengan token sekali pakai (tanpa login)</h3>
-        <pre className="bisa-digulir">
-          <code>{`curl -X POST "$SUPABASE_URL/rest/v1/rpc/rpc_record_fetch" \\
-  -H "apikey: $ANON_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{"p_token":"<token dari koordinator>"}'`}</code>
-        </pre>
+  -d '{"p_student":"<student_uuid>"}'`}
+            </pre>
+          </div>
+        </div>
       </section>
 
-      <section className="kartu">
-        <h2 style={{ marginTop: 0 }}>Kode galat</h2>
-        <div className="bisa-digulir">
-          <table>
-            <caption>Kode galat Postgres yang mungkin muncul di halaman ini</caption>
-            <thead>
+      {/* Tabel Kode Galat */}
+      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
+        <h2 className="font-display text-base font-bold text-[var(--tinta)]">Kode Status & Galat PostgreSQL</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead className="bg-[var(--latar-lemaut)] border-b border-[var(--garis)] font-mono text-[11px] uppercase text-[var(--tinta-lembut)]">
               <tr>
-                <th scope="col">Kode</th>
-                <th scope="col">Arti</th>
-                <th scope="col">Tindakan</th>
+                <th className="px-3 py-2 font-semibold">Kode SQLSTATE</th>
+                <th className="px-3 py-2 font-semibold">Penyebab Galat</th>
+                <th className="px-3 py-2 font-semibold">Tindakan Penyelesaian</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-[var(--garis)]">
               <tr>
-                <td>
-                  <code>42501</code>
-                </td>
-                <td>Tidak berhak: peran tidak sesuai, siswa di luar sekolah, atau wali tidak tertaut ke siswa itu.</td>
-                <td>Masuk dengan akun yang sesuai; jangan coba menembus lewat klien.</td>
+                <td className="px-3 py-2 font-mono font-bold text-red-700">42501 (insufficient_privilege)</td>
+                <td className="px-3 py-2">Pelanggaran RLS: akun tidak memiliki hak akses atas tenant sekolah ini.</td>
+                <td className="px-3 py-2 text-[var(--tinta-lembut)]">Masuk dengan kredensial staf sekolah yang bersangkutan.</td>
               </tr>
               <tr>
-                <td>
-                  <code>22023</code>
-                </td>
-                <td>Token tidak valid, sudah kedaluwarsa, atau sudah dipakai.</td>
-                <td>Minta koordinator menerbitkan token baru; token sekali pakai tidak bisa diulang.</td>
+                <td className="px-3 py-2 font-mono font-bold text-amber-700">22023 (invalid_parameter_value)</td>
+                <td className="px-3 py-2">Token transfer kedaluwarsa, tidak cocok, atau sudah pernah terpakai.</td>
+                <td className="px-3 py-2 text-[var(--tinta-lembut)]">Minta koordinator sekolah asal menerbitkan token baru.</td>
               </tr>
             </tbody>
           </table>
         </div>
       </section>
-    </>
+    </div>
   );
 }

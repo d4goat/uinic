@@ -74,8 +74,9 @@ di langkah itu.
 ## Pemeriksaan
 
 ```bash
-npm run check:sql   # sintaks SQL dengan parser Postgres asli (libpg-query)
-npm run build       # tsc -b + vite build
+npm run check:sql    # sintaks SQL dengan parser Postgres asli (libpg-query)
+npm run cek:kontras  # rasio kontras token desain di mode normal & kontras tinggi (WCAG 2.1 AA)
+npm run build        # tsc -b + vite build
 npm run lint
 ```
 
@@ -86,9 +87,11 @@ supabase/schema.sql      tabel, RLS, trigger audit, RPC (satu sumber otorisasi)
 supabase/seed.sql        data referensi + dua instansi demo
 scripts/seed-demo.mjs    akun demo + uji alur end-to-end
 scripts/check-sql.mjs    cek sintaks SQL
+scripts/cek-kontras.mjs  penjaga rasio kontras token desain (WCAG 2.1 AA)
 src/lib/api.ts           satu-satunya lapisan akses data
 src/lib/offline.ts       antrean sesi offline (F6)
-src/styles/theme.css     token desain + utilitas aksesibilitas
+src/styles/theme.css     token Tailwind v4 (@theme) + kelas komponen + mode aksesibilitas
+src/components/          cangkang aplikasi + lapisan gerak (SmoothScrollProvider, RevealText, Magnetik)
 src/pages/               halaman per alur
 PLAN.md                  rencana kerja dan pemetaan fitur → halaman
 ```

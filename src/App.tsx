@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import AppShell from './components/AppShell';
 import Login from './pages/Login';
 import Beranda from './pages/Beranda';
+import Landing from './pages/Landing';
 import SiswaList from './pages/guru/SiswaList';
 import Asesmen from './pages/guru/Asesmen';
 import PpiEditor from './pages/guru/PpiEditor';
@@ -13,13 +14,25 @@ import MateriAksesibel from './pages/MateriAksesibel';
 import ModeSiswa from './pages/ModeSiswa';
 import ApiDocs from './pages/ApiDocs';
 import { Berjaga, koordinator, penyusun, staf, wali } from './auth/ProtectedRoute';
+import { useAuth } from './auth/AuthContext';
+
+function GerbangUtama() {
+  const { profil, siap } = useAuth();
+  if (!siap) return <div className="wadah"><p className="hint">Memuat…</p></div>;
+  if (!profil) return <Landing />;
+  return (
+    <AppShell>
+      <Beranda />
+    </AppShell>
+  );
+}
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<GerbangUtama />} />
       <Route path="/login" element={<Login />} />
       <Route element={<AppShell />}>
-        <Route index element={<Beranda />} />
         <Route path="/siswa" element={<Berjaga peran={staf}><SiswaList /></Berjaga>} />
         <Route path="/siswa/:id/asesmen" element={<Berjaga peran={penyusun}><Asesmen /></Berjaga>} />
         <Route path="/siswa/:id/ppi" element={<Berjaga peran={penyusun}><PpiEditor /></Berjaga>} />

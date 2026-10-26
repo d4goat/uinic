@@ -1,13 +1,37 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
 import {
-  ambilRekam, buatTransfer, catatAkses, daftarConsent, daftarSekolahTujuan, daftarSiswa, daftarTransfer,
+  AlertCircle,
+  CheckCircle2,
+  Copy,
+  Download,
+  History,
+  KeyRound,
+  RefreshCw,
+  School,
+  ShieldAlert,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
+import {
+  ambilRekam,
+  buatTransfer,
+  catatAkses,
+  daftarConsent,
+  daftarSekolahTujuan,
+  daftarSiswa,
+  daftarTransfer,
 } from '../../lib/api';
 import type { Sekolah, Siswa, TransferHasil } from '../../lib/types';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 
 const MASA_BERLAKU = [
-  { jam: 24, label: '24 jam — berlaku 1 hari' },
-  { jam: 72, label: '72 jam — berlaku 3 hari' },
-  { jam: 168, label: '168 jam — berlaku 7 hari' },
+  { jam: 24, label: '24 Jam (1 Hari)' },
+  { jam: 72, label: '72 Jam (3 Hari)' },
+  { jam: 168, label: '168 Jam (7 Hari)' },
 ];
 
 type BarisTransfer = Awaited<ReturnType<typeof daftarTransfer>>[number];
@@ -16,9 +40,6 @@ type BarisConsent = Awaited<ReturnType<typeof daftarConsent>>[number];
 const waktu = (iso: string) =>
   new Date(iso).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 
-/** Wali aktif = keputusan TERBARU jenis berbagi_rekam berstatus disetujui & belum kedaluwarsa.
-    (Daftar dari API sudah urut terbaru dulu; persetujuan yang dicabut tidak boleh
-    "hidup kembali" hanya karena ada baris lama yang masih disetujui.) */
 const adaConsentAktif = (baris: BarisConsent[]) => {
   const terbaru = baris.find((c) => c.jenis === 'berbagi_rekam');
   return (
@@ -38,31 +59,32 @@ function unduhJson(data: unknown, namaBerkas: string) {
   URL.revokeObjectURL(url);
 }
 
-/** Peta pesan galat server -> kalimat yang bisa dibaca operator sekolah. */
 function pesanAmbilRekam(e: unknown): { teks: string; saran: string } {
   const m = e instanceof Error ? e.message : String(e);
   if (/tidak dikenali/i.test(m)) {
     return {
       teks: 'Token tidak dikenali.',
-      saran: 'Periksa kembali token yang Anda terima. Satu karakter salah membuat token tidak cocok.',
+      saran: 'Periksa kembali token yang Anda masukkan. Satu karakter salah membuat token tidak cocok.',
     };
   }
   if (/sudah dipakai/i.test(m)) {
     return {
       teks: 'Token sudah dipakai.',
-      saran: 'Token hanya bisa dipakai sekali. Minta sekolah asal membuat token baru.',
+      saran: 'Token bersifat sekali pakai dan telah hangus. Minta sekolah asal membuat token baru.',
     };
   }
   if (/kedaluwarsa/i.test(m)) {
     return {
       teks: 'Token sudah kedaluwarsa.',
-      saran: 'Masa berlaku token habis. Minta sekolah asal membuat token baru dengan masa berlaku lebih panjang.',
+      saran: 'Masa berlaku token telah lewat. Minta sekolah asal membuat token baru.',
     };
   }
   return { teks: 'Rekam gagal diambil.', saran: `Pesan dari server: ${m}` };
 }
 
 export default function Transfer() {
+  const wadahRef = useRef<HTMLDivElement>(null);
+
   const [siswa, setSiswa] = useState<Siswa[]>([]);
   const [sekolah, setSekolah] = useState<Sekolah[]>([]);
   const [memuat, setMemuat] = useState(true);
@@ -90,7 +112,6 @@ export default function Transfer() {
   const [galatAmbil, setGalatAmbil] = useState<{ teks: string; saran: string } | null>(null);
   const [sedangAmbil, setSedangAmbil] = useState(false);
 
-  // F12: halaman ini membaca tabel transfers -> catat pembacaan secara eksplisit.
   useEffect(() => {
     catatAkses('transfers', '-', { aksi: 'buka' }).catch(() => {});
     (async () => {
@@ -107,9 +128,21 @@ export default function Transfer() {
     })();
   }, []);
 
+  useGSAP(
+    () => {
+      gsap.from('.anim-muncul', {
+        opacity: 0,
+        y: 16,
+        stagger: 0.08,
+        duration: 0.6,
+        ease: 'power3.out',
+      });
+    },
+    { scope: wadahRef, dependencies: [memuat] },
+  );
+
   const siswaDipilih = useMemo(() => siswa.find((s) => s.id === siswaId) ?? null, [siswa, siswaId]);
 
-  // Sekolah asal siswa tidak boleh jadi tujuan: rekam hanya dikirim ke instansi lain.
   const sekolahTujuan = useMemo(
     () => sekolah.filter((s) => !siswaDipilih || s.id !== siswaDipilih.school_id),
     [sekolah, siswaDipilih],
@@ -117,7 +150,6 @@ export default function Transfer() {
 
   const namaSekolah = (id: string) => sekolah.find((s) => s.id === id)?.nama ?? id;
 
-  // Persetujuan diperiksa ulang setiap siswa berganti.
   useEffect(() => {
     setHasil(null);
     setGalatBuat(null);
@@ -149,9 +181,9 @@ export default function Transfer() {
     if (!hasil) return;
     try {
       await navigator.clipboard.writeText(hasil.token);
-      setStatusSalin('Token disalin ke papan klip.');
+      setStatusSalin('Token berhasil disalin ke papan klip!');
     } catch {
-      setStatusSalin('Penyalinan otomatis ditolak peramban. Salin token dengan tangan dari kotak di atas.');
+      setStatusSalin('Gagal menyalin otomatis. Silakan salin teks manual.');
     }
   }
 
@@ -167,8 +199,8 @@ export default function Transfer() {
       const m = e instanceof Error ? e.message : '';
       setGalatBuat(
         /persetujuan/i.test(m)
-          ? 'Transfer tidak dapat dibuat: persetujuan wali yang aktif tidak ditemukan.'
-          : `Token gagal dibuat. ${m || 'Coba lagi sebentar lagi.'}`,
+          ? 'Transfer ditolak: persetujuan aktif orang tua belum ditemukan untuk siswa ini.'
+          : `Token gagal dibuat. ${m || 'Coba lagi beberapa saat lagi.'}`,
       );
     } finally {
       setSedangBuat(false);
@@ -181,7 +213,7 @@ export default function Transfer() {
     setGalatBuat(null);
     try {
       const rekam = await ambilRekam(hasil.token);
-      unduhJson(rekam, `rekam-${siswaDipilih?.kode ?? 'siswa'}.json`);
+      unduhJson(rekam, `rekam-ppi-${siswaDipilih?.kode ?? 'siswa'}.json`);
     } catch (e) {
       const { teks, saran } = pesanAmbilRekam(e);
       setGalatBuat(`${teks} ${saran}`);
@@ -213,259 +245,330 @@ export default function Transfer() {
   }
 
   return (
-    <div className="wadah wadah-lebar">
-      <h1>Transfer rekam antar sekolah</h1>
-      <p className="lede">
-        Koordinator membuat token sekali pakai untuk memindahkan rekam siswa ke sekolah tujuan. Transfer hanya
-        berlaku antar dua instansi demo di PPI-Link dan tidak terhubung ke Dapodik — tidak ada integrasi resmi
-        dengan sistem mana pun.
-      </p>
+    <div ref={wadahRef} className="space-y-8">
+      {/* Header Koordinator */}
+      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+            F8 · Protokol Transfer Rekam
+          </Badge>
+          <span className="text-xs text-[var(--tinta-lembut)]">Otentikasi Kriptografis Token Sekali Pakai</span>
+        </div>
+
+        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+          Transfer Rekam Antar-Sekolah
+        </h1>
+        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-3xl leading-relaxed">
+          Koordinator menerbitkan token sekali pakai bertenggat waktu untuk mengirim rekam PPI ke sekolah mitra.
+          Transfer dilindungi RLS, wajib mendapatkan persetujuan wali aktif, dan hanya menyimpan sidik hash SHA-256 di basis data.
+        </p>
+      </header>
 
       {galatMuat && (
-        <p className="pesan pesan-galat" role="alert">
-          {galatMuat}
-        </p>
+        <div className="anim-muncul rounded-sm border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">Gagal Memuat Data</p>
+            <p>{galatMuat}</p>
+          </div>
+        </div>
       )}
 
-      <section className="kartu" aria-labelledby="judul-buat">
-        <h2 id="judul-buat">1. Buat token transfer</h2>
-        {memuat ? (
-          <p className="hint">Memuat daftar siswa dan sekolah…</p>
-        ) : (
-          <>
-            <div>
-              <label htmlFor="pilih-siswa">Siswa</label>
-              <select id="pilih-siswa" value={siswaId} onChange={(e) => setSiswaId(e.target.value)}>
-                <option value="">— pilih siswa —</option>
-                {siswa.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.kode} — {s.inisial} ({s.kelas}, {namaSekolah(s.school_id)})
-                  </option>
-                ))}
-              </select>
+      {/* Grid Asimetris: Buat & Ambil Token (7 Kolom) + Riwayat Transfer (5 Kolom) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Kolom Kiri: Buat Token & Ambil Rekam */}
+        <div className="anim-muncul lg:col-span-7 space-y-8">
+          {/* 1. Buat Token Transfer */}
+          <section className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
+            <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-4">
+              <KeyRound className="w-4 h-4 text-[var(--aksen)]" />
+              <h2 className="font-display text-xl font-bold text-[var(--tinta)]">1. Terbitkan Token Transfer</h2>
             </div>
 
-            {siswaId && memuatConsent && <p className="hint">Memeriksa persetujuan wali…</p>}
+            {memuat ? (
+              <div className="p-8 text-center font-mono text-xs text-[var(--tinta-lembut)]">
+                Memuat data siswa dan sekolah mitra...
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <div>
+                  <label htmlFor="pilih-siswa" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                    PILIH SISWA <span className="text-[var(--aksen)]">*</span>
+                  </label>
+                  <select
+                    id="pilih-siswa"
+                    value={siswaId}
+                    onChange={(e) => setSiswaId(e.target.value)}
+                    className="w-full text-sm rounded-sm border border-[var(--garis)] bg-[var(--kartu)] p-2.5 font-medium outline-hidden"
+                  >
+                    <option value="">&mdash; Pilih Siswa yang Akan Ditransfer &mdash;</option>
+                    {siswa.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.kode} &mdash; {s.inisial} (Kelas {s.kelas}, {namaSekolah(s.school_id)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            {siswaId && galatConsent && (
-              <p className="pesan pesan-galat" role="alert">
-                Persetujuan gagal diperiksa. {galatConsent}
-              </p>
+                {/* Validasi Persetujuan Orang Tua */}
+                {siswaId && (
+                  <div className="p-3.5 border rounded-sm text-xs space-y-1.5 transition-all">
+                    {memuatConsent ? (
+                      <span className="text-[var(--tinta-lembut)] font-mono">Memeriksa status persetujuan wali...</span>
+                    ) : galatConsent ? (
+                      <p className="text-[var(--galat)]">{galatConsent}</p>
+                    ) : consent && !adaConsentAktif(consent) ? (
+                      <div className="flex items-start gap-2.5 text-amber-800">
+                        <ShieldAlert className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+                        <div>
+                          <p className="font-bold">Menunggu Persetujuan Orang Tua</p>
+                          <p className="text-[11px] text-amber-700 mt-0.5">
+                            Belum ada persetujuan aktif dari wali murid. Token transfer tidak dapat dibuat sebelum orang tua memberikan izin di portalnya.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2.5 text-emerald-800">
+                        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span className="font-semibold">Persetujuan wali murid aktif. Token siap diterbitkan.</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="pilih-tujuan" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                    SEKOLAH TUJUAN <span className="text-[var(--aksen)]">*</span>
+                  </label>
+                  <select
+                    id="pilih-tujuan"
+                    value={keSchoolId}
+                    onChange={(e) => setKeSchoolId(e.target.value)}
+                    disabled={!siswaId}
+                    className="w-full text-sm rounded-sm border border-[var(--garis)] bg-[var(--kartu)] p-2.5 outline-hidden disabled:opacity-50"
+                  >
+                    <option value="">&mdash; Pilih Sekolah Tujuan Transfer &mdash;</option>
+                    {sekolahTujuan.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.nama} ({s.kode_instansi})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                    MASA BERLAKU TOKEN (EXPIRATION)
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {MASA_BERLAKU.map((p) => (
+                      <button
+                        key={p.jam}
+                        type="button"
+                        onClick={() => setJam(p.jam)}
+                        className={`text-xs py-2 px-3 border rounded-sm font-medium transition-all ${
+                          jam === p.jam
+                            ? 'border-[var(--aksen)] bg-[var(--aksen)]/5 text-[var(--aksen)] font-bold'
+                            : 'border-[var(--garis)] text-[var(--tinta-lembut)] hover:text-[var(--tinta)]'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <Button
+                    type="button"
+                    onClick={() => void buat()}
+                    disabled={!bolehBuat || sedangBuat}
+                    className="w-full sm:w-auto"
+                  >
+                    <KeyRound className="w-4 h-4 mr-1.5" />
+                    {sedangBuat ? 'Menerbitkan Token...' : 'Buat Token Transfer'}
+                  </Button>
+                </div>
+
+                {galatBuat && (
+                  <p className="text-xs text-[var(--galat)] p-3 border border-[var(--galat)] bg-red-50/50 rounded-sm">
+                    {galatBuat}
+                  </p>
+                )}
+              </div>
             )}
 
-            {siswaId && !memuatConsent && !galatConsent && consent && !adaConsentAktif(consent) && (
-              <p className="pesan pesan-peringatan" role="status">
-                Transfer menunggu persetujuan orang tua. Belum ada persetujuan berbagi rekam yang aktif untuk
-                siswa ini, jadi token belum bisa dibuat. Minta wali memberi persetujuan lebih dulu, atau tunggu
-                persetujuan sebelumnya masih berlaku.
-              </p>
-            )}
+            {/* Hasil Terbit Token (Sekali Tampil) */}
+            {hasil && (
+              <div className="p-5 border-2 border-[var(--aksen)] bg-[var(--latar-lembut)]/40 rounded-sm space-y-4">
+                <div className="flex items-center gap-2 text-[var(--aksen)] font-bold text-sm">
+                  <Sparkles className="w-4 h-4" />
+                  <span>TOKEN TRANSFER BERHASIL DITERBITKAN</span>
+                </div>
+                <p className="text-xs text-[var(--tinta-lembut)] leading-relaxed">
+                  <strong>Penting:</strong> Token ini hanya ditampilkan satu kali sekarang demi keamanan data.
+                  Segera salin dan serahkan kepada koordinator sekolah tujuan.
+                </p>
 
-            {siswaId && !memuatConsent && !galatConsent && consent && adaConsentAktif(consent) && (
-              <p className="pesan pesan-berhasil" role="status">
-                Persetujuan wali aktif. Token transfer boleh dibuat.
-              </p>
-            )}
+                <div className="p-3 bg-white border border-[var(--garis)] rounded-sm font-mono text-sm break-all font-bold text-[var(--tinta)] select-all">
+                  {hasil.token}
+                </div>
 
-            <div>
-              <label htmlFor="pilih-tujuan">Sekolah tujuan</label>
-              <select
-                id="pilih-tujuan"
-                value={keSchoolId}
-                onChange={(e) => setKeSchoolId(e.target.value)}
-                disabled={!siswaId}
-              >
-                <option value="">— pilih sekolah tujuan —</option>
-                {sekolahTujuan.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.nama} ({s.kode_instansi})
-                  </option>
-                ))}
-              </select>
-              <p className="hint">
-                Sekolah asal siswa tidak muncul di daftar ini: rekam hanya dikirim ke instansi lain.
-              </p>
+                <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+                  <span className="font-mono text-[var(--tinta-lembut)]">
+                    Kedaluwarsa: <strong>{waktu(hasil.kedaluwarsa)}</strong>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" onClick={() => void salinToken()} className="text-xs font-mono">
+                      <Copy className="w-3.5 h-3.5 mr-1" />
+                      Salin Token
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => void unduhRekamDenganToken()}
+                      disabled={sedangUnduh}
+                      className="text-xs font-mono"
+                    >
+                      <Download className="w-3.5 h-3.5 mr-1" />
+                      {sedangUnduh ? 'Mengunduh...' : 'Tes Unduh JSON'}
+                    </Button>
+                  </div>
+                </div>
+
+                {statusSalin && (
+                  <p className="text-xs text-emerald-700 font-mono">{statusSalin}</p>
+                )}
+              </div>
+            )}
+          </section>
+
+          {/* 2. Ambil Rekam di Sekolah Tujuan */}
+          <section className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
+            <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-4">
+              <Download className="w-4 h-4 text-[var(--aksen)]" />
+              <h2 className="font-display text-xl font-bold text-[var(--tinta)]">2. Terima Rekam di Sekolah Tujuan</h2>
             </div>
+            <p className="text-xs text-[var(--tinta-lembut)]">
+              Digunakan oleh sekolah tujuan untuk menukar token transfer dengan bundel data JSON lengkap siswa.
+            </p>
 
-            <fieldset style={{ border: 0, padding: 0, margin: '0 0 0.5rem' }}>
-              <legend style={{ fontWeight: 600, padding: 0 }}>Masa berlaku token</legend>
-              <p className="hint" id="hint-masa">
-                Token otomatis tidak berlaku lagi setelah masa ini lewat, meskipun belum dipakai.
-              </p>
-              {MASA_BERLAKU.map((p) => (
-                <label className="pilihan" key={p.jam}>
-                  <input
-                    type="radio"
-                    name="masa-berlaku"
-                    value={p.jam}
-                    checked={jam === p.jam}
-                    onChange={() => setJam(p.jam)}
-                    aria-describedby="hint-masa"
-                  />
-                  <span className="pilihan-teks">{p.label}</span>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="input-token" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                  TOKEN TRANSFER DARI SEKOLAH ASAL
                 </label>
-              ))}
-            </fieldset>
+                <Input
+                  id="input-token"
+                  type="text"
+                  value={token}
+                  onChange={(e) => setToken(e.target.value)}
+                  placeholder="Tempelkan token transfer di sini..."
+                  className="font-mono text-xs"
+                />
+              </div>
 
-            <div className="baris">
-              <button type="button" onClick={buat} disabled={!bolehBuat || sedangBuat}>
-                {sedangBuat ? 'Membuat token…' : 'Buat token'}
-              </button>
-              {!siswaId && <span className="hint">Pilih siswa lebih dulu.</span>}
-            </div>
-
-            {galatBuat && (
-              <p className="pesan pesan-galat" role="alert">
-                {galatBuat}
-              </p>
-            )}
-          </>
-        )}
-
-        {hasil && (
-          <div className="pesan pesan-berhasil" role="status">
-            <h3>Token transfer dibuat</h3>
-            <p>
-              <strong>Perhatian:</strong> token ini hanya tampil sekarang, sekali saja. Salin atau catat sebelum
-              meninggalkan halaman — setelah halaman ditutup, token tidak bisa ditampilkan lagi. Token juga
-              hanya bisa dipakai satu kali oleh sekolah tujuan.
-            </p>
-            <p className="bisa-digulir">
-              <code style={{ fontSize: '1.1rem', wordBreak: 'break-all' }}>{hasil.token}</code>
-            </p>
-            <p>
-              Kedaluwarsa: <strong>{waktu(hasil.kedaluwarsa)}</strong>
-            </p>
-            <div className="baris">
-              <button type="button" className="tombol-sekunder tombol-kecil" onClick={salinToken}>
-                Salin token
-              </button>
-              <button
+              <Button
                 type="button"
-                className="tombol-sekunder tombol-kecil"
-                onClick={unduhRekamDenganToken}
-                disabled={sedangUnduh}
+                onClick={() => void ambil()}
+                disabled={!token.trim() || sedangAmbil}
+                className="w-full sm:w-auto"
               >
-                {sedangUnduh ? 'Mengunduh…' : 'Unduh rekam dengan token ini'}
-              </button>
+                {sedangAmbil ? 'Mengambil Data...' : 'Klaim & Ambil Rekam'}
+              </Button>
+
+              {galatAmbil && (
+                <div className="p-3.5 border border-[var(--galat)] bg-red-50/50 rounded-sm text-xs text-[var(--galat)] space-y-1">
+                  <p className="font-bold">{galatAmbil.teks}</p>
+                  <p>{galatAmbil.saran}</p>
+                </div>
+              )}
+
+              {hasilAmbil !== null && (
+                <div className="space-y-3 pt-3 border-t border-[var(--garis)]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      Rekam Berhasil Diunduh (Token Hangus)
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs font-mono"
+                      onClick={() => unduhJson(hasilAmbil, `rekam-transfer-${token.trim().slice(0, 8)}.json`)}
+                    >
+                      <Download className="w-3.5 h-3.5 mr-1" />
+                      Simpan File JSON
+                    </Button>
+                  </div>
+                  <pre className="p-3 rounded-sm border border-[var(--garis)] bg-black text-green-400 font-mono text-[11px] max-h-64 overflow-y-auto leading-snug">
+                    {JSON.stringify(hasilAmbil, null, 2)}
+                  </pre>
+                </div>
+              )}
             </div>
-            <p className="hint">
-              Mengunduh rekam dengan token ini juga menandai token sudah terpakai dan hangus.
-            </p>
-            {statusSalin && (
-              <p className="hint" role="status">
-                {statusSalin}
-              </p>
-            )}
-          </div>
-        )}
-      </section>
-
-      <section className="kartu" aria-labelledby="judul-ambil">
-        <h2 id="judul-ambil">2. Ambil rekam di sekolah tujuan</h2>
-        <p className="hint">
-          Bagian ini dipakai petugas sekolah tujuan. Token dari sekolah asal cukup ditempel di sini; petugas
-          tidak perlu akun PPI-Link sekolah asal.
-        </p>
-        <div>
-          <label htmlFor="input-token">Token transfer</label>
-          <input
-            id="input-token"
-            type="text"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            autoComplete="off"
-            spellCheck={false}
-          />
-        </div>
-        <div className="baris">
-          <button type="button" onClick={ambil} disabled={!token.trim() || sedangAmbil}>
-            {sedangAmbil ? 'Mengambil rekam…' : 'Ambil rekam'}
-          </button>
+          </section>
         </div>
 
-        {galatAmbil && (
-          <p className="pesan pesan-galat" role="alert">
-            <strong>{galatAmbil.teks}</strong> {galatAmbil.saran}
-          </p>
-        )}
+        {/* Kolom Kanan: Log Riwayat Transfer (5 Kolom) */}
+        <aside className="anim-muncul lg:col-span-5 space-y-6">
+          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--garis)] pb-3">
+              <div className="flex items-center gap-2">
+                <History className="w-4 h-4 text-[var(--aksen)]" />
+                <h2 className="font-display text-base font-bold text-[var(--tinta)]">Log Aktivitas Transfer</h2>
+              </div>
+              <Button size="sm" variant="ghost" className="h-7 text-xs px-2 font-mono" onClick={() => void muatRiwayat()}>
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Muat Ulang
+              </Button>
+            </div>
 
-        {hasilAmbil !== null && (
-          <div>
-            <p className="pesan pesan-berhasil" role="status">
-              Rekam berhasil diambil. Token sekarang sudah terpakai dan tidak bisa dipakai lagi.
-            </p>
-            <pre
-              className="bisa-digulir"
-              style={{ border: '1px solid var(--garis)', padding: '0.75rem', maxHeight: '28rem' }}
-            >
-              {JSON.stringify(hasilAmbil, null, 2)}
-            </pre>
-            <button
-              type="button"
-              className="tombol-sekunder tombol-kecil"
-              onClick={() => unduhJson(hasilAmbil, `rekam-${token.trim().slice(0, 8) || 'token'}.json`)}
-            >
-              Unduh rekam sebagai JSON
-            </button>
-          </div>
-        )}
-      </section>
+            {galatRiwayat && <p className="text-xs text-[var(--galat)]">{galatRiwayat}</p>}
 
-      <section className="kartu" aria-labelledby="judul-riwayat">
-        <div className="baris renggang">
-          <h2 id="judul-riwayat">3. Riwayat transfer</h2>
-          <button type="button" className="tombol-sekunder tombol-kecil" onClick={muatRiwayat}>
-            Muat ulang
-          </button>
-        </div>
-        {galatRiwayat && (
-          <p className="pesan pesan-galat" role="alert">
-            {galatRiwayat}
-          </p>
-        )}
-        {riwayat.length === 0 ? (
-          <p className="hint">Belum ada transfer tercatat.</p>
-        ) : (
-          <div className="bisa-digulir">
-            <table>
-              <caption>Token transfer yang pernah dibuat, terbaru lebih dulu</caption>
-              <thead>
-                <tr>
-                  <th scope="col">Siswa</th>
-                  <th scope="col">Ke sekolah</th>
-                  <th scope="col">Dibuat</th>
-                  <th scope="col">Kedaluwarsa</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
+            {riwayat.length === 0 ? (
+              <p className="text-xs text-[var(--tinta-lembut)] py-4">Belum ada token transfer tercatat.</p>
+            ) : (
+              <div className="space-y-3">
                 {riwayat.map((r) => {
                   const s = siswa.find((x) => x.id === r.student_id);
+                  const sudahDipakai = Boolean(r.dipakai_pada);
+
                   return (
-                    <tr key={r.id}>
-                      <td>{s ? `${s.kode} — ${s.inisial}` : r.student_id}</td>
-                      <td>{namaSekolah(r.ke_school)}</td>
-                      <td>{waktu(r.dibuat_pada)}</td>
-                      <td>{waktu(r.kedaluwarsa)}</td>
-                      <td>
-                        <span className="lencana">{r.dipakai_pada ? 'Sudah dipakai' : 'Belum dipakai'}</span>{' '}
-                        <span className="hint">
-                          {r.dipakai_pada ? `diambil ${waktu(r.dipakai_pada)}` : 'menunggu diambil'}
+                    <div key={r.id} className="p-3.5 border border-[var(--garis)] rounded-sm text-xs space-y-2 bg-transparent">
+                      <div className="flex items-center justify-between font-mono">
+                        <span className="font-bold text-[var(--tinta)]">
+                          {s ? `${s.kode} (${s.inisial})` : r.student_id}
                         </span>
-                      </td>
-                    </tr>
+                        <Badge
+                          variant={sudahDipakai ? 'secondary' : 'default'}
+                          className={`text-[10px] uppercase font-mono ${
+                            !sudahDipakai ? 'bg-[var(--aksen)] text-white' : ''
+                          }`}
+                        >
+                          {sudahDipakai ? 'Terpakai' : 'Aktif'}
+                        </Badge>
+                      </div>
+
+                      <div className="text-[11px] text-[var(--tinta-lembut)] space-y-0.5">
+                        <p className="flex items-center gap-1">
+                          <School className="w-3 h-3" />
+                          Tujuan: <span className="font-semibold text-[var(--tinta)]">{namaSekolah(r.ke_school)}</span>
+                        </p>
+                        <p className="font-mono">Dibuat: {waktu(r.dibuat_pada)}</p>
+                        <p className="font-mono">Kedaluwarsa: {waktu(r.kedaluwarsa)}</p>
+                        {r.dipakai_pada && (
+                          <p className="text-emerald-700 font-mono font-medium">Diambil: {waktu(r.dipakai_pada)}</p>
+                        )}
+                      </div>
+                    </div>
                   );
                 })}
-              </tbody>
-            </table>
+              </div>
+            )}
           </div>
-        )}
-        <p className="hint">
-          Token aslinya tidak disimpan di basis data, hanya sidik SHA-256-nya, sehingga token lama tidak bisa
-          ditampilkan lagi di halaman ini.
-        </p>
-      </section>
+        </aside>
+      </div>
     </div>
   );
 }

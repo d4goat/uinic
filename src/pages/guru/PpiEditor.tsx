@@ -1,21 +1,45 @@
 /**
- * F4 + F5 — inti PPI-Link.
+ * F4 + F5 — Inti PPI-Link: Rekomendasi Akomodasi & Draf PPI Berversi.
  * Setiap saran akomodasi wajib tampil bersama alasan, tingkat bukti, dan peninjau
  * dari tabel aturan; guru menyetujui atau menolak. Setiap simpan menambah versi
- * baru — versi lama tidak pernah ditimpa, dan riwayatnya bisa dibuka/dibandingkan.
+ * baru — versi lama tidak pernah ditimpa, dan riwayatnya bisa dibandingkan.
  */
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  Check,
+  CheckCircle2,
+  Diff,
+  FileText,
+  GitCompare,
+  History,
+  Info,
+  Plus,
+  Save,
+  Sparkles,
+  Target,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { ambilPpi, catatAkses, saranPpi, simpanPpi, versiPpi } from '../../lib/api';
 import type { Ppi, PpiSaran, PpiVersi, SaranAkomodasi, TingkatBukti } from '../../lib/types';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Textarea } from '../../components/ui/textarea';
 
 const BULAN = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
 ];
 
-/** Tanggal ISO -> "5 Maret 2026". Sengaja tanpa Date agar tanggal asesmen tidak bergeser. */
 function tanggal(nilai: string | null): string {
   if (!nilai) return 'tidak tercatat';
   const pola = /^(\d{4})-(\d{2})-(\d{2})/.exec(nilai);
@@ -24,14 +48,9 @@ function tanggal(nilai: string | null): string {
   return `${Number(pola[3])} ${bulan} ${pola[1]}`;
 }
 
-/** Tingkat bukti tampil sebagai lencana DAN teks — warna saja tidak cukup. */
-function kelasBukti(t: TingkatBukti): string {
-  if (t === 'kuat' || t === 'sedang-kuat') return 'lencana lencana-kuat';
-  if (t === 'sedang') return 'lencana lencana-sedang';
-  return 'lencana lencana-lemah';
+function teksBukti(t: TingkatBukti): string {
+  return `Bukti: ${t.replace('-', ' sampai ')}`;
 }
-
-const teksBukti = (t: TingkatBukti) => `Tingkat bukti: ${t.replace('-', ' sampai ')}`;
 
 interface Kelompok {
   akomodasi: SaranAkomodasi;
@@ -39,7 +58,6 @@ interface Kelompok {
   alasan: string[];
 }
 
-/** Satu akomodasi bisa datang dari beberapa hambatan: gabungkan, jangan tampilkan kembar. */
 function kelompokkan(daftar: SaranAkomodasi[]): Kelompok[] {
   const peta = new Map<string, Kelompok>();
   for (const a of daftar) {
@@ -66,7 +84,6 @@ interface Ubah {
   baru: string;
 }
 
-/** Beda teks tingkat tujuan/indikator; bukan diff kata-per-kata. */
 function hitungBeda(tua: BarisTujuan[], baru: BarisTujuan[]) {
   const inti = (t: { tujuan: string }) => t.tujuan.trim().toLowerCase();
   const petaTua = new Map(tua.map((t) => [inti(t), t]));
@@ -93,6 +110,7 @@ const pesanGalat = (e: unknown) =>
 
 export default function PpiEditor() {
   const { id: siswaId = '' } = useParams<{ id: string }>();
+  const wadahRef = useRef<HTMLDivElement>(null);
 
   const [memuat, setMemuat] = useState(true);
   const [galat, setGalat] = useState<string | null>(null);
@@ -153,7 +171,7 @@ export default function PpiEditor() {
           const daftar = await versiPpi(p.id);
           if (!aktif) return;
           setVersi(daftar);
-          isiDariVersi(daftar[0]); // prefill dari versi terbaru supaya isi lama tidak hilang
+          isiDariVersi(daftar[0]);
         } else {
           setTujuan([buatBaris()]);
         }
@@ -170,8 +188,19 @@ export default function PpiEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [siswaId]);
 
-  // ponytail: default tiap saran = "Setujui" supaya simpan selalu punya keputusan;
-  // jadikan tiga keadaan (belum dipilih) bila guru minta ditanyakan eksplisit.
+  useGSAP(
+    () => {
+      gsap.from('.anim-muncul', {
+        opacity: 0,
+        y: 16,
+        stagger: 0.08,
+        duration: 0.6,
+        ease: 'power3.out',
+      });
+    },
+    { scope: wadahRef, dependencies: [memuat] },
+  );
+
   const pilihan = (id: string) => keputusan[id] ?? { disetujui: true, catatan: '' };
 
   const putuskan = (id: string, disetujui: boolean) =>
@@ -250,25 +279,38 @@ export default function PpiEditor() {
     }
   }
 
-  if (memuat) return <p className="pesan">Memuat saran akomodasi…</p>;
+  if (memuat) {
+    return (
+      <div className="p-16 text-center border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[var(--aksen)] border-t-transparent" />
+        <p className="mt-3 text-sm text-[var(--tinta-lembut)] font-mono">Memuat saran akomodasi & draf PPI...</p>
+      </div>
+    );
+  }
 
   if (galat) {
     return (
-      <>
-        <h1>Draf PPI</h1>
-        <p className="pesan pesan-galat" role="alert">{galat}</p>
-        <p><Link to="/siswa">Kembali ke daftar siswa</Link></p>
-      </>
+      <div className="p-6 border border-[var(--galat)] bg-red-50/50 rounded-sm space-y-4">
+        <div className="flex items-center gap-2 text-[var(--galat)] font-bold">
+          <AlertCircle className="w-5 h-5" />
+          <span>Gagal Memuat Draf PPI</span>
+        </div>
+        <p className="text-sm text-[var(--galat)]">{galat}</p>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/siswa">Kembali ke Daftar Siswa</Link>
+        </Button>
+      </div>
     );
   }
 
   if (!saran || !saran.student) {
     return (
-      <>
-        <h1>Draf PPI</h1>
-        <p className="pesan pesan-galat" role="alert">Data siswa tidak ditemukan.</p>
-        <p><Link to="/siswa">Kembali ke daftar siswa</Link></p>
-      </>
+      <div className="p-6 border border-[var(--galat)] bg-red-50/50 rounded-sm space-y-4">
+        <p className="text-sm text-[var(--galat)]">Data siswa tidak ditemukan di database.</p>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/siswa">Kembali ke Daftar Siswa</Link>
+        </Button>
+      </div>
     );
   }
 
@@ -276,15 +318,37 @@ export default function PpiEditor() {
 
   if (!saran.assessment) {
     return (
-      <>
-        <h1>Draf PPI: {siswa.kode} ({siswa.inisial})</h1>
-        <p className="lede">Kelas {siswa.kelas}, lahir tahun {siswa.tahun_lahir}.</p>
-        <p className="pesan pesan-peringatan" role="status">
-          Belum ada asesmen hambatan untuk siswa ini. Saran akomodasi dihitung dari asesmen
-          terakhir, jadi isi asesmen lebih dulu.
-        </p>
-        <p><Link className="tombol" to={`/siswa/${siswaId}/asesmen`}>Isi asesmen hambatan</Link></p>
-      </>
+      <div className="space-y-6">
+        <header className="border-b border-[var(--garis)] pb-4">
+          <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs -ml-2 text-[var(--tinta-lembut)] mb-2">
+            <Link to="/siswa">
+              <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+              Daftar Siswa
+            </Link>
+          </Button>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)]">
+            Draf PPI: {siswa.kode} ({siswa.inisial})
+          </h1>
+          <p className="text-sm text-[var(--tinta-lembut)] mt-1">Kelas {siswa.kelas}, tahun lahir {siswa.tahun_lahir}.</p>
+        </header>
+
+        <div className="p-8 border border-[var(--peringatan)] bg-amber-50/40 rounded-sm space-y-4">
+          <div className="flex items-center gap-2 text-[var(--peringatan)] font-bold">
+            <Info className="w-5 h-5" />
+            <span>Asesmen Belum Ditemukan</span>
+          </div>
+          <p className="text-sm text-[var(--tinta-lembut)] leading-relaxed max-w-2xl">
+            Saran akomodasi PPI dikalkulasi langsung dari profil hambatan yang dicatat pada asesmen guru. Siswa ini belum
+            memiliki catatan asesmen, sehingga draf PPI belum dapat disusun secara terarah.
+          </p>
+          <Button asChild className="bg-[var(--aksen)] hover:bg-[var(--aksen)]/90 text-white">
+            <Link to={`/siswa/${siswaId}/asesmen`}>
+              <Sparkles className="w-4 h-4 mr-1.5" />
+              Isi Asesmen Hambatan Sekarang
+            </Link>
+          </Button>
+        </div>
+      </div>
     );
   }
 
@@ -292,357 +356,496 @@ export default function PpiEditor() {
   const jumlahSetuju = kelompok.filter((g) => pilihan(g.akomodasi.accommodation_id).disetujui).length;
 
   return (
-    <>
-      <h1>Draf PPI: {siswa.kode} ({siswa.inisial})</h1>
-      <p className="lede">
-        Kelas {siswa.kelas}, lahir tahun {siswa.tahun_lahir}. Asesmen terakhir {tanggal(saran.assessment.tanggal)}.
-        {ppi ? ` Versi aktif PPI: ${ppi.versi_aktif}.` : ' Belum ada draf PPI tersimpan.'}
-      </p>
+    <div ref={wadahRef} className="space-y-8">
+      {/* Header Editorial */}
+      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs -ml-2 text-[var(--tinta-lembut)]">
+            <Link to="/siswa">
+              <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+              Daftar Siswa
+            </Link>
+          </Button>
+          <span className="text-xs text-[var(--garis)]">/</span>
+          <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+            F4 & F5 · Draf PPI Berversi
+          </Badge>
+          {ppi && (
+            <Badge variant="secondary" className="font-mono text-xs">
+              Versi Aktif: v{ppi.versi_aktif}
+            </Badge>
+          )}
+        </div>
 
-      <form onSubmit={simpan} noValidate>
-        <h2>Saran akomodasi dari aturan</h2>
-        <p className="pesan pesan-peringatan">
-          Saran ini berasal dari tabel aturan yang ditinjau manusia, bukan diagnosis. Guru boleh
-          menolak saran mana pun; keputusan guru yang berlaku.
-        </p>
-        <p className="hint">
-          {saran.hambatan.length} hambatan terpilih menghasilkan {kelompok.length} saran akomodasi.
-          {saran.assessment.catatan ? ` Catatan asesmen: ${saran.assessment.catatan}` : ''}
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+              Program Pembelajaran Individual
+            </h1>
+            <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-2xl leading-relaxed">
+              Saran akomodasi diturunkan transparan dari aturan berbasis bukti. Setiap perubahan tersimpan sebagai versi baru
+              tanpa menghilangkan riwayat sebelumnya.
+            </p>
+          </div>
 
-        {kelompok.length === 0 ? (
-          <p className="pesan">
-            Tidak ada aturan yang cocok untuk hambatan pada asesmen terakhir. Anda masih bisa
-            menyimpan tujuan dan ringkasan PPI di bawah.
-          </p>
-        ) : (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {kelompok.map((g) => {
-              const a = g.akomodasi;
-              const id = a.accommodation_id;
-              const k = pilihan(id);
-              const idc = `akomodasi-${id}`;
-              return (
-                <li key={id} className="kartu">
-                  <h3 id={`${idc}-judul`} style={{ marginTop: 0 }}>{a.nama}</h3>
-                  <p className="hint" style={{ marginBottom: '0.35rem' }}>
-                    Dari hambatan: {g.hambatan.join('; ')}.
-                    {a.sumber ? ` Sumber: ${a.sumber}.` : ''}
-                  </p>
-                  {a.deskripsi && <p style={{ marginBottom: '0.35rem' }}>{a.deskripsi}</p>}
-                  {g.alasan.map((alasan, i) => (
-                    <p key={i} style={{ marginBottom: '0.35rem' }}>
-                      <strong>Alasan:</strong> {alasan}
-                    </p>
-                  ))}
-                  <p className="baris" style={{ marginBottom: '0.5rem' }}>
-                    <span className={kelasBukti(a.tingkat_bukti)}>{teksBukti(a.tingkat_bukti)}</span>
-                    <span className="hint" style={{ margin: 0 }}>
-                      Ditinjau oleh {a.ditinjau_oleh} pada {tanggal(a.tanggal_tinjau)}
-                    </span>
-                  </p>
+          <div className="bg-[var(--kartu)] border border-[var(--garis)] p-3 rounded-sm shrink-0 font-mono text-right">
+            <span className="text-[11px] text-[var(--tinta-lembut)] block">SUBJEK SISWA</span>
+            <span className="text-lg font-bold text-[var(--tinta)]">{siswa.kode} ({siswa.inisial})</span>
+            <span className="text-xs text-[var(--tinta-lembut)] block">Kelas {siswa.kelas} · Asesmen: {tanggal(saran.assessment.tanggal)}</span>
+          </div>
+        </div>
 
-                  <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
-                    <legend style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Keputusan guru</legend>
-                    <div className="baris">
-                      <label className="inline" htmlFor={`${idc}-setuju`}>
-                        <input
-                          type="radio"
-                          id={`${idc}-setuju`}
-                          name={idc}
-                          checked={k.disetujui}
-                          onChange={() => putuskan(id, true)}
-                        />
-                        Setujui
-                      </label>
-                      <label className="inline" htmlFor={`${idc}-tolak`}>
-                        <input
-                          type="radio"
-                          id={`${idc}-tolak`}
-                          name={idc}
-                          checked={!k.disetujui}
-                          onChange={() => putuskan(id, false)}
-                        />
-                        Tolak
-                      </label>
-                    </div>
-                  </fieldset>
-
-                  <p style={{ margin: '0.5rem 0 0' }}>
-                    <label htmlFor={`${idc}-catatan`}>Catatan guru untuk saran ini (opsional)</label>
-                    <input
-                      id={`${idc}-catatan`}
-                      value={k.catatan}
-                      maxLength={300}
-                      onChange={(e) => ubahCatatan(id, e.target.value)}
-                    />
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        <h2>Tujuan dan indikator</h2>
-        <p className="hint">
-          Tiap baris wajib punya tujuan dan indikator terukur. Baris yang belum lengkap akan
-          ditolak saat menyimpan.
-        </p>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {tujuan.map((t, i) => (
-            <li key={t.kunci} className="kartu">
-              <p>
-                <label htmlFor={`tujuan-${t.kunci}`}>Tujuan {i + 1}</label>
-                <input
-                  id={`tujuan-${t.kunci}`}
-                  value={t.tujuan}
-                  onChange={(e) =>
-                    setTujuan((lama) =>
-                      lama.map((b) => (b.kunci === t.kunci ? { ...b, tujuan: e.target.value } : b)),
-                    )
-                  }
-                />
-              </p>
-              <p>
-                <label htmlFor={`indikator-${t.kunci}`}>Indikator {i + 1}</label>
-                <input
-                  id={`indikator-${t.kunci}`}
-                  value={t.indikator}
-                  onChange={(e) =>
-                    setTujuan((lama) =>
-                      lama.map((b) => (b.kunci === t.kunci ? { ...b, indikator: e.target.value } : b)),
-                    )
-                  }
-                />
-              </p>
-              <button
-                type="button"
-                className="tombol-sekunder tombol-kecil"
-                onClick={() => setTujuan((lama) => lama.filter((b) => b.kunci !== t.kunci))}
-              >
-                Hapus baris {i + 1}
-              </button>
-            </li>
-          ))}
-        </ul>
-        <p>
-          <button
-            type="button"
-            className="tombol-sekunder"
-            onClick={() => setTujuan((lama) => [...lama, buatBaris()])}
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
+          <Link
+            to={`/siswa/${siswaId}/asesmen`}
+            className="text-[var(--aksi)] hover:underline inline-flex items-center gap-1 font-medium"
           >
-            Tambah tujuan
-          </button>
-        </p>
-
-        <h2>Ringkasan PPI</h2>
-        <p>
-          <label htmlFor="ringkasan">Ringkasan singkat untuk guru, GPK, dan orang tua</label>
-          <textarea
-            id="ringkasan"
-            value={ringkasan}
-            onChange={(e) => setRingkasan(e.target.value)}
-            rows={5}
-          />
-        </p>
-
-        {galatSimpan && <p className="pesan pesan-galat" role="alert">{galatSimpan}</p>}
-        {pesanSukses && <p className="pesan pesan-berhasil" role="status">{pesanSukses}</p>}
-
-        <p className="baris">
-          <button type="submit" disabled={sibuk}>
-            {sibuk ? 'Menyimpan…' : 'Simpan sebagai versi baru'}
-          </button>
-          <span className="hint" style={{ margin: 0 }}>
-            {jumlahSetuju} dari {kelompok.length} saran disetujui. Versi lama tidak akan diubah.
-          </span>
-        </p>
-      </form>
-
-      {ppi && (
-        <p>
-          <Link className="tombol tombol-sekunder" to={`/ppi/${ppi.id}/sesi`}>
-            Catat sesi pendampingan
+            <Sparkles className="w-3.5 h-3.5 text-[var(--aksen)]" />
+            Tinjau Asesmen Hambatan Terakhir
           </Link>
-        </p>
+          {ppi && (
+            <>
+              <span className="text-[var(--garis)]">·</span>
+              <Link
+                to={`/ppi/${ppi.id}/sesi`}
+                className="text-[var(--aksi)] hover:underline inline-flex items-center gap-1 font-medium"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                Buka Log Sesi Pendampingan (F6)
+              </Link>
+            </>
+          )}
+        </div>
+      </header>
+
+      {/* Alert Status */}
+      {galatSimpan && (
+        <div className="anim-muncul rounded-sm border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">Penyimpanan Gagal</p>
+            <p>{galatSimpan}</p>
+          </div>
+        </div>
+      )}
+      {pesanSukses && (
+        <div className="anim-muncul rounded-sm border border-[var(--berhasil)] bg-emerald-50/50 p-4 text-[var(--berhasil)] text-sm flex items-center justify-between gap-4" role="status">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-[var(--berhasil)] shrink-0" />
+            <span className="font-medium">{pesanSukses}</span>
+          </div>
+          {ppi && (
+            <Button asChild size="sm" variant="outline" className="border-[var(--berhasil)] text-[var(--berhasil)] hover:bg-emerald-50 shrink-0">
+              <Link to={`/ppi/${ppi.id}/sesi`}>
+                Catat Sesi
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Link>
+            </Button>
+          )}
+        </div>
       )}
 
-      <h2>Riwayat versi</h2>
-      {versi.length === 0 ? (
-        <p className="hint">Belum ada versi tersimpan untuk siswa ini.</p>
-      ) : (
-        <div className="bisa-digulir">
-          <table>
-            <caption>Riwayat versi draf PPI — {versi.length} versi, terbaru di atas</caption>
-            <thead>
-              <tr>
-                <th scope="col">Versi</th>
-                <th scope="col">Dibuat</th>
-                <th scope="col">Ringkasan</th>
-                <th scope="col">Tindakan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {versi.map((v, i) => (
-                <tr key={v.id}>
-                  <th scope="row">
-                    Versi {v.nomor_versi}
-                    {i === 0 ? ' (terbaru)' : ''}
-                  </th>
-                  <td>{tanggal(v.dibuat_pada)}</td>
-                  <td>{v.ringkasan?.trim() ? v.ringkasan : <em>tanpa ringkasan</em>}</td>
-                  <td>
-                    <div className="baris">
-                      <button
+      {/* Layout Editor: Form Input (Kiri 8) + Versi & Riwayat (Kanan 4) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Kolom Kiri: Form PPI */}
+        <section className="anim-muncul lg:col-span-8 space-y-8">
+          <form onSubmit={simpan} noValidate className="space-y-8">
+            {/* 1. Rekomendasi Akomodasi dari Aturan */}
+            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--garis)] pb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[var(--aksen)]" />
+                    <h2 className="font-display text-xl font-bold text-[var(--tinta)]">Saran Akomodasi Aturan</h2>
+                  </div>
+                  <p className="text-xs text-[var(--tinta-lembut)] mt-1">
+                    Dihitung dari {saran.hambatan.length} hambatan teramati. Guru memegang kendali penuh untuk menerima/menolak.
+                  </p>
+                </div>
+                <Badge variant="outline" className="font-mono text-xs self-start sm:self-auto">
+                  {jumlahSetuju} Disetujui dari {kelompok.length}
+                </Badge>
+              </div>
+
+              {kelompok.length === 0 ? (
+                <p className="text-sm text-[var(--tinta-lembut)] py-4">
+                  Tidak ada aturan spesifik yang cocok untuk kombinasi hambatan saat ini. Anda tetap dapat menentukan tujuan belajar mandiri di bawah.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {kelompok.map((g) => {
+                    const a = g.akomodasi;
+                    const id = a.accommodation_id;
+                    const k = pilihan(id);
+                    const idc = `akomodasi-${id}`;
+
+                    return (
+                      <div
+                        key={id}
+                        className={`p-4 border rounded-sm transition-all space-y-3 ${
+                          k.disetujui
+                            ? 'border-[var(--garis)] bg-transparent'
+                            : 'border-red-200 bg-red-50/20 opacity-80'
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div>
+                            <h3 className="font-bold text-sm text-[var(--tinta)] flex items-center gap-2">
+                              {a.nama}
+                              <Badge
+                                variant={a.tingkat_bukti === 'kuat' ? 'default' : 'secondary'}
+                                className="font-mono text-[10px] uppercase font-normal"
+                              >
+                                {teksBukti(a.tingkat_bukti)}
+                              </Badge>
+                            </h3>
+                            <p className="text-xs text-[var(--tinta-lembut)] mt-1">
+                              Dari hambatan: <span className="font-medium text-[var(--tinta)]">{g.hambatan.join(', ')}</span>
+                              {a.sumber && ` · Sumber: ${a.sumber}`}
+                            </p>
+                          </div>
+
+                          {/* Tombol Radio Keputusan Guru */}
+                          <div className="inline-flex rounded-sm border border-[var(--garis)] bg-[var(--latar-lembut)] p-0.5 shrink-0 self-start">
+                            <button
+                              type="button"
+                              onClick={() => putuskan(id, true)}
+                              className={`flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-sm transition-colors ${
+                                k.disetujui
+                                  ? 'bg-[var(--berhasil)] text-white shadow-xs'
+                                  : 'text-[var(--tinta-lembut)] hover:text-[var(--tinta)]'
+                              }`}
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                              Setujui
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => putuskan(id, false)}
+                              className={`flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-sm transition-colors ${
+                                !k.disetujui
+                                  ? 'bg-[var(--galat)] text-white shadow-xs'
+                                  : 'text-[var(--tinta-lembut)] hover:text-[var(--tinta)]'
+                              }`}
+                            >
+                              <X className="w-3.5 h-3.5" />
+                              Tolak
+                            </button>
+                          </div>
+                        </div>
+
+                        {a.deskripsi && (
+                          <p className="text-xs text-[var(--tinta)] leading-relaxed bg-[var(--latar-lembut)]/30 p-2.5 rounded-sm border border-[var(--garis)]">
+                            {a.deskripsi}
+                          </p>
+                        )}
+
+                        {g.alasan.map((alasan, i) => (
+                          <p key={i} className="text-xs text-[var(--tinta-lembut)]">
+                            <span className="font-semibold text-[var(--tinta)]">Alasan ilmiah:</span> {alasan}
+                          </p>
+                        ))}
+
+                        <div className="text-[11px] font-mono text-[var(--tinta-lembut)]">
+                          Ditinjau oleh: {a.ditinjau_oleh} · {tanggal(a.tanggal_tinjau)}
+                        </div>
+
+                        {/* Catatan Guru Opsional */}
+                        <div className="pt-2 border-t border-[var(--garis)]">
+                          <label htmlFor={`${idc}-catatan`} className="block text-[11px] font-mono text-[var(--tinta-lembut)] mb-1">
+                            CATATAN PENYESUAIAN GURU (OPSIONAL):
+                          </label>
+                          <Input
+                            id={`${idc}-catatan`}
+                            value={k.catatan}
+                            maxLength={300}
+                            onChange={(e) => ubahCatatan(id, e.target.value)}
+                            placeholder="Catatan penerapan di kelas, modifikasi alat, atau alasan penolakan..."
+                            className="text-xs h-8"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 2. Tujuan & Indikator Terukur */}
+            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
+              <div className="flex items-center justify-between border-b border-[var(--garis)] pb-4">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-[var(--aksen)]" />
+                  <h2 className="font-display text-xl font-bold text-[var(--tinta)]">Tujuan & Indikator Capaian</h2>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTujuan((lama) => [...lama, buatBaris()])}
+                  className="h-8 text-xs font-mono"
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" />
+                  Tambah Baris
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {tujuan.map((t, i) => (
+                  <div key={t.kunci} className="p-4 border border-[var(--garis)] rounded-sm bg-[var(--latar-lembut)]/20 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-bold text-[var(--tinta)]">
+                        TARGET #{i + 1}
+                      </span>
+                      {tujuan.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setTujuan((lama) => lama.filter((b) => b.kunci !== t.kunci))}
+                          className="text-[var(--galat)] hover:underline text-xs flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Hapus Target
+                        </button>
+                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor={`tujuan-${t.kunci}`} className="block text-xs font-medium text-[var(--tinta)] mb-1">
+                        Rumusan Tujuan Pembelajaran <span className="text-[var(--aksen)]">*</span>
+                      </label>
+                      <Input
+                        id={`tujuan-${t.kunci}`}
+                        value={t.tujuan}
+                        onChange={(e) =>
+                          setTujuan((lama) =>
+                            lama.map((b) => (b.kunci === t.kunci ? { ...b, tujuan: e.target.value } : b)),
+                          )
+                        }
+                        placeholder="Contoh: Mampu membaca teks naratif pendek 3 paragraf secara mandiri..."
+                        className="text-sm bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor={`indikator-${t.kunci}`} className="block text-xs font-medium text-[var(--tinta)] mb-1">
+                        Indikator Keberhasilan Terukur <span className="text-[var(--aksen)]">*</span>
+                      </label>
+                      <Input
+                        id={`indikator-${t.kunci}`}
+                        value={t.indikator}
+                        onChange={(e) =>
+                          setTujuan((lama) =>
+                            lama.map((b) => (b.kunci === t.kunci ? { ...b, indikator: e.target.value } : b)),
+                          )
+                        }
+                        placeholder="Contoh: Akurasi pengenalan kata minimal 80% pada 3 sesi berurutan."
+                        className="text-sm bg-white"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 3. Ringkasan Eksekutif PPI */}
+            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
+              <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
+                <FileText className="w-4 h-4 text-[var(--aksen)]" />
+                <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Ringkasan Draf PPI</h2>
+              </div>
+              <p className="text-xs text-[var(--tinta-lembut)]">
+                Ikhtisar ringkas yang dapat dibaca oleh kepala sekolah, guru pendamping, dan wali murid di portal orang tua.
+              </p>
+              <Textarea
+                id="ringkasan"
+                value={ringkasan}
+                onChange={(e) => setRingkasan(e.target.value)}
+                placeholder="Tuliskan catatan konsensus tim inklusi, prioritas semester, dan kesepakatan pembagian tugas antar-guru..."
+                rows={4}
+                className="text-sm"
+              />
+            </div>
+
+            {/* Tombol Aksi Simpan */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-[var(--kartu)] border border-[var(--garis)] rounded-sm">
+              <span className="text-xs text-[var(--tinta-lembut)] font-mono">
+                * Simpan akan mempublikasikan versi baru ({versi.length ? `v${versi[0].nomor_versi + 1}` : 'v1'}) tanpa menimpa data lama.
+              </span>
+              <Button type="submit" disabled={sibuk} className="shrink-0 bg-[var(--aksi)] hover:bg-[var(--aksi-gelap)] text-white">
+                <Save className="w-4 h-4 mr-1.5" />
+                {sibuk ? 'Menyimpan Versi...' : 'Simpan Sebagai Versi Baru'}
+              </Button>
+            </div>
+          </form>
+        </section>
+
+        {/* Kolom Kanan: Riwayat Versi & Diff Inspector */}
+        <aside className="anim-muncul lg:col-span-4 space-y-6">
+          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--garis)] pb-3">
+              <div className="flex items-center gap-2">
+                <History className="w-4 h-4 text-[var(--aksen)]" />
+                <h2 className="font-display text-base font-bold text-[var(--tinta)]">Riwayat Versi PPI</h2>
+              </div>
+              <Badge variant="outline" className="font-mono text-xs">
+                {versi.length} Versi
+              </Badge>
+            </div>
+
+            {versi.length === 0 ? (
+              <p className="text-xs text-[var(--tinta-lembut)] py-4">Belum ada versi PPI yang pernah disimpan.</p>
+            ) : (
+              <div className="space-y-3">
+                {versi.map((v, i) => (
+                  <div
+                    key={v.id}
+                    className={`p-3.5 border rounded-sm text-xs space-y-2 ${
+                      i === 0 ? 'border-[var(--aksen)] bg-[var(--latar-lembut)]/30' : 'border-[var(--garis)]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-[var(--tinta)]">
+                        Versi {v.nomor_versi}
+                      </span>
+                      {i === 0 && (
+                        <Badge variant="default" className="text-[10px] font-mono uppercase bg-[var(--aksen)] text-white">
+                          Aktif
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-[var(--tinta-lembut)] font-mono">
+                      {tanggal(v.dibuat_pada)}
+                    </p>
+                    {v.ringkasan && (
+                      <p className="text-xs text-[var(--tinta)] line-clamp-2 italic">
+                        &ldquo;{v.ringkasan}&rdquo;
+                      </p>
+                    )}
+
+                    <div className="pt-2 border-t border-[var(--garis)] flex items-center gap-2">
+                      <Button
                         type="button"
-                        className="tombol-sekunder tombol-kecil"
-                        aria-expanded={versiDibuka?.id === v.id}
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-xs px-2"
                         onClick={() => {
                           setBeda(null);
                           setVersiDibuka((lama) => (lama?.id === v.id ? null : v));
                         }}
                       >
-                        {versiDibuka?.id === v.id ? `Tutup versi ${v.nomor_versi}` : `Buka versi ${v.nomor_versi}`}
-                      </button>
+                        {versiDibuka?.id === v.id ? 'Tutup' : 'Lihat Detail'}
+                      </Button>
                       {i > 0 && (
-                        <button
+                        <Button
                           type="button"
-                          className="tombol-sekunder tombol-kecil"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-xs px-2 font-mono"
                           onClick={() => bukaBeda(v)}
                         >
-                          Bandingkan dengan versi terbaru
-                        </button>
+                          <GitCompare className="w-3 h-3 mr-1" />
+                          Diff vs v{versi[0]?.nomor_versi}
+                        </Button>
                       )}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-      {versiDibuka && (
-        <section className="kartu" aria-labelledby="isi-versi">
-          <h3 id="isi-versi" style={{ marginTop: 0 }}>Isi versi {versiDibuka.nomor_versi}</h3>
-          <p className="hint">
-            Dibuat {tanggal(versiDibuka.dibuat_pada)}
-            {versiDibuka.id === versi[0]?.id ? ' — versi terbaru.' : '.'}
-          </p>
-          <p>
-            <strong>Ringkasan:</strong> {versiDibuka.ringkasan?.trim() || 'tanpa ringkasan'}
-          </p>
+          {/* Modal / Panel Perbandingan Versi (Diff) */}
+          {beda && versi[0] && (
+            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-[var(--garis)] pb-2">
+                <div className="flex items-center gap-1.5 font-bold text-xs">
+                  <Diff className="w-4 h-4 text-[var(--aksen)]" />
+                  <span>Perbandingan v{beda.tua} &rarr; v{beda.baru}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBeda(null)}
+                  className="text-xs text-[var(--tinta-lembut)] hover:text-[var(--tinta)]"
+                >
+                  Tutup
+                </button>
+              </div>
 
-          <h4>Tujuan dan indikator</h4>
-          {versiDibuka.ppi_goals.length === 0 ? (
-            <p className="hint">Versi ini tidak memuat tujuan.</p>
-          ) : (
-            <div className="bisa-digulir">
-              <table>
-                <caption>Tujuan dan indikator pada versi {versiDibuka.nomor_versi}</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Tujuan</th>
-                    <th scope="col">Indikator</th>
-                  </tr>
-                </thead>
-                <tbody>
+              {beda.hasil.tambah.length + beda.hasil.hapus.length + beda.hasil.ubah.length === 0 ? (
+                <p className="text-xs text-[var(--tinta-lembut)]">Tidak ada perbedaan indikator antara kedua versi.</p>
+              ) : (
+                <div className="space-y-3 text-xs font-mono">
+                  {beda.hasil.tambah.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-emerald-700 font-bold block text-[11px]">+ DITAMBAHKAN:</span>
+                      {beda.hasil.tambah.map((t, idx) => (
+                        <p key={idx} className="bg-emerald-50 text-emerald-800 p-1.5 rounded-sm border border-emerald-200">
+                          {t}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+
+                  {beda.hasil.hapus.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-red-700 font-bold block text-[11px]">- DIHAPUS:</span>
+                      {beda.hasil.hapus.map((t, idx) => (
+                        <p key={idx} className="bg-red-50 text-red-800 p-1.5 rounded-sm border border-red-200">
+                          {t}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+
+                  {beda.hasil.ubah.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-amber-700 font-bold block text-[11px]">~ INDIKATOR DIUBAH:</span>
+                      {beda.hasil.ubah.map((u, idx) => (
+                        <div key={idx} className="bg-amber-50 text-amber-900 p-1.5 rounded-sm border border-amber-200 space-y-1">
+                          <p className="font-bold">{u.tujuan}</p>
+                          <p className="line-through text-red-600">- {u.lama}</p>
+                          <p className="text-emerald-700">+ {u.baru}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Detail Versi Tertentu */}
+          {versiDibuka && (
+            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-5 space-y-3 text-xs">
+              <div className="flex items-center justify-between border-b border-[var(--garis)] pb-2">
+                <span className="font-bold">Detail Versi {versiDibuka.nomor_versi}</span>
+                <button
+                  type="button"
+                  onClick={() => setVersiDibuka(null)}
+                  className="text-xs text-[var(--tinta-lembut)] hover:text-[var(--tinta)]"
+                >
+                  Tutup
+                </button>
+              </div>
+              <p className="text-[11px] text-[var(--tinta-lembut)] font-mono">
+                Dibuat: {tanggal(versiDibuka.dibuat_pada)}
+              </p>
+              <div>
+                <span className="font-semibold block mb-1">Target Pembelajaran:</span>
+                <ul className="list-disc pl-4 space-y-1">
                   {versiDibuka.ppi_goals.map((g) => (
-                    <tr key={g.id}>
-                      <td>{g.tujuan}</td>
-                      <td>{g.indikator}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          <h4>Akomodasi</h4>
-          {versiDibuka.ppi_accommodations.length === 0 ? (
-            <p className="hint">Versi ini tidak memuat akomodasi.</p>
-          ) : (
-            <div className="bisa-digulir">
-              <table>
-                <caption>Akomodasi pada versi {versiDibuka.nomor_versi}</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Akomodasi</th>
-                    <th scope="col">Tingkat bukti</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Catatan guru</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {versiDibuka.ppi_accommodations.map((a) => (
-                    <tr key={a.accommodation_id}>
-                      <td>{a.accommodations?.nama ?? a.accommodation_id}</td>
-                      <td>{a.accommodations ? teksBukti(a.accommodations.tingkat_bukti) : 'tidak diketahui'}</td>
-                      <td>{a.disetujui ? 'Disetujui' : 'Ditolak'}</td>
-                      <td>{a.catatan?.trim() || '—'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      )}
-
-      {beda && versi[0] && (
-        <section className="kartu" aria-labelledby="judul-beda">
-          <h3 id="judul-beda" style={{ marginTop: 0 }}>
-            Perbandingan versi {beda.tua} dengan versi {beda.baru}
-          </h3>
-          {beda.hasil.tambah.length + beda.hasil.hapus.length + beda.hasil.ubah.length === 0 ? (
-            <p className="hint">Tujuan dan indikator tidak berubah antara kedua versi.</p>
-          ) : (
-            <>
-              <h4 style={{ marginBottom: '0.25rem' }}>Ditambah</h4>
-              {beda.hasil.tambah.length === 0 ? (
-                <p className="hint">Tidak ada tujuan yang ditambah.</p>
-              ) : (
-                <ul>
-                  {beda.hasil.tambah.map((t) => (
-                    <li key={`+${t}`}>+ {t}</li>
-                  ))}
-                </ul>
-              )}
-
-              <h4 style={{ marginBottom: '0.25rem' }}>Dihapus</h4>
-              {beda.hasil.hapus.length === 0 ? (
-                <p className="hint">Tidak ada tujuan yang dihapus.</p>
-              ) : (
-                <ul>
-                  {beda.hasil.hapus.map((t) => (
-                    <li key={`-${t}`}>- {t}</li>
-                  ))}
-                </ul>
-              )}
-
-              <h4 style={{ marginBottom: '0.25rem' }}>Diubah</h4>
-              {beda.hasil.ubah.length === 0 ? (
-                <p className="hint">Tidak ada indikator yang diubah.</p>
-              ) : (
-                <ul>
-                  {beda.hasil.ubah.map((u) => (
-                    <li key={`~${u.tujuan}`}>
-                      - {u.tujuan} — indikator: {u.lama}
-                      <br />+ {u.tujuan} — indikator: {u.baru}
+                    <li key={g.id}>
+                      <span className="font-medium">{g.tujuan}</span>
+                      <br />
+                      <span className="text-[11px] text-[var(--tinta-lembut)] font-mono">&rarr; {g.indikator}</span>
                     </li>
                   ))}
                 </ul>
-              )}
-            </>
+              </div>
+            </div>
           )}
-        </section>
-      )}
-
-      <p className="hint">
-        <Link to={`/siswa/${siswaId}/asesmen`}>Lihat atau perbarui asesmen hambatan</Link>
-        {' · '}
-        <Link to="/siswa">Daftar siswa</Link>
-      </p>
-    </>
+        </aside>
+      </div>
+    </div>
   );
 }

@@ -1,9 +1,24 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
+import {
+  FileText,
+  Plus,
+  Search,
+  ShieldAlert,
+  Sparkles,
+  Trash2,
+  UserCheck,
+  Users,
+} from 'lucide-react';
 import { catatAkses, daftarSiswa, hapusSiswa, tambahSiswa } from '../../lib/api';
 import type { Siswa } from '../../lib/types';
 import { useAuth } from '../../auth/AuthContext';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
 
 /** F2 — data siswa pseudonim. Cermin constraint `students` di supabase/schema.sql;
  *  DB tetap memvalidasi ulang, ini hanya supaya galat muncul dekat kolomnya. */
@@ -19,19 +34,20 @@ const ISIAN_KOSONG: Isian = { kode: '', inisial: '', tahun_lahir: '', kelas: '' 
 
 function periksa(f: Isian): GalatIsian {
   const g: GalatIsian = {};
-  if (!KODE.test(f.kode)) g.kode = '3-12 karakter, hanya huruf kapital, angka, dan tanda hubung. Contoh: S-001.';
-  if (!INISIAL.test(f.inisial)) g.inisial = '1-3 huruf kapital. Contoh: ARS.';
+  if (!KODE.test(f.kode)) g.kode = '3-12 karakter, huruf kapital, angka, tanda hubung (misal S-001).';
+  if (!INISIAL.test(f.inisial)) g.inisial = '1-3 huruf kapital (misal ARS).';
   const tahun = Number(f.tahun_lahir);
   if (!/^\d{4}$/.test(f.tahun_lahir) || tahun < TAHUN_MIN || tahun > TAHUN_INI) {
     g.tahun_lahir = `Empat angka antara ${TAHUN_MIN} dan ${TAHUN_INI}.`;
   }
-  if (!f.kelas.trim()) g.kelas = 'Kelas wajib diisi. Contoh: 7A.';
+  if (!f.kelas.trim()) g.kelas = 'Kelas wajib diisi (misal 7A).';
   return g;
 }
 
 export default function SiswaList() {
   const { profil } = useAuth();
   const bolehHapus = profil?.role === 'koordinator' || profil?.role === 'admin';
+  const wadahRef = useRef<HTMLDivElement>(null);
 
   const [daftar, setDaftar] = useState<Siswa[]>([]);
   const [memuat, setMemuat] = useState(true);
@@ -57,6 +73,19 @@ export default function SiswaList() {
   useEffect(() => {
     void muat();
   }, [muat]);
+
+  useGSAP(
+    () => {
+      gsap.from('.anim-muncul', {
+        opacity: 0,
+        y: 16,
+        stagger: 0.08,
+        duration: 0.6,
+        ease: 'power3.out',
+      });
+    },
+    { scope: wadahRef, dependencies: [memuat] },
+  );
 
   // Filter di sisi klien: satu sekolah cuma beberapa kelas, jadi tidak perlu bolak-balik server.
   const hasil = useMemo(() => {
@@ -121,190 +150,248 @@ export default function SiswaList() {
   };
 
   return (
-    <>
-      <h1>Data siswa</h1>
-      <p className="lede">
-        Daftar siswa sekolah Anda memakai kode dan inisial, tanpa nama lengkap dan tanpa NIK. Satu orang
-        hanya dikenali lewat kode pseudonim.
-      </p>
-
-      {galat && (
-        <p className="pesan pesan-galat" role="alert">
-          {galat}
+    <div ref={wadahRef} className="space-y-8">
+      {/* Header Editorial */}
+      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          <Badge variant="outline" className="font-mono text-xs tracking-wider uppercase">
+            F2 · Direktori Siswa
+          </Badge>
+          <span className="text-xs text-[var(--tinta-lembut)]">Privasi Terjaga Tanpa NIK</span>
+        </div>
+        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+          Data Siswa Pseudonim
+        </h1>
+        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-3xl leading-relaxed">
+          Siswa diidentifikasi secara anonim menggunakan kode alfanumerik dan inisial. Sesuai prinsip
+          minimisasi data (PRD §6 & §7), tidak ada data NIK atau nama lengkap yang disimpan di server.
         </p>
+      </header>
+
+      {/* Feedback Alert */}
+      {galat && (
+        <div className="anim-muncul rounded-md border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+          <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">Terjadi Kendala</p>
+            <p>{galat}</p>
+          </div>
+        </div>
       )}
       {berhasil && (
-        <p className="pesan pesan-berhasil" role="status">
-          {berhasil}
-        </p>
+        <div className="anim-muncul rounded-md border border-[var(--berhasil)] bg-emerald-50/50 p-4 text-[var(--berhasil)] text-sm flex items-start gap-3" role="status">
+          <UserCheck className="w-5 h-5 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">Berhasil</p>
+            <p>{berhasil}</p>
+          </div>
+        </div>
       )}
 
-      <h2>Cari siswa</h2>
-      <div className="kartu">
-        <label htmlFor="cari-siswa">Kata kunci</label>
-        <p className="hint" id="cari-siswa-hint">
-          Cocokkan kode, inisial, atau kelas. Pencarian tidak membedakan huruf besar/kecil.
-        </p>
-        <input
-          id="cari-siswa"
-          type="search"
-          value={cari}
-          aria-describedby="cari-siswa-hint"
-          onChange={(e) => setCari(e.target.value)}
-        />
-        <p className="hint" style={{ marginTop: '0.5rem' }} role="status">
-          Menampilkan {hasil.length} dari {daftar.length} siswa{cari.trim() ? ` untuk pencarian "${cari.trim()}".` : '.'}
-        </p>
+      {/* Grid Asimetris: Daftar Siswa (2 Kolom) + Tambah Siswa (1 Kolom) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Kolom Kiri: Cari & Tabel Siswa (8 Kolom) */}
+        <section className="anim-muncul lg:col-span-8 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[var(--kartu)] border border-[var(--garis)] rounded-sm">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--tinta-lembut)]" />
+              <Input
+                id="cari-siswa"
+                type="search"
+                value={cari}
+                onChange={(e) => setCari(e.target.value)}
+                placeholder="Cari kode, inisial, atau kelas..."
+                className="pl-9 h-10 border-[var(--garis)] text-sm bg-transparent"
+                aria-label="Cari siswa"
+              />
+            </div>
+            <div className="font-mono text-xs text-[var(--tinta-lembut)] shrink-0 self-center">
+              Menampilkan <span className="font-bold text-[var(--tinta)]">{hasil.length}</span> dari {daftar.length} siswa
+            </div>
+          </div>
+
+          {memuat ? (
+            <div className="p-12 text-center border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
+              <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-[var(--aksen)] border-t-transparent" />
+              <p className="mt-3 text-sm text-[var(--tinta-lembut)] font-mono">Memuat direktori siswa...</p>
+            </div>
+          ) : daftar.length === 0 ? (
+            <div className="p-8 text-center border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
+              <Users className="w-10 h-10 mx-auto text-[var(--tinta-lembut)] opacity-40 mb-3" />
+              <p className="font-medium text-[var(--tinta)]">Belum ada siswa di sekolah ini</p>
+              <p className="text-sm text-[var(--tinta-lembut)] mt-1 max-w-md mx-auto">
+                Tambahkan siswa pertama menggunakan formulir pseudonim di samping untuk mulai menyusun asesmen dan PPI.
+              </p>
+            </div>
+          ) : hasil.length === 0 ? (
+            <div className="p-8 text-center border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
+              <p className="text-sm text-[var(--tinta-lembut)]">
+                Tidak ada siswa yang cocok dengan kata kunci &ldquo;{cari.trim()}&rdquo;.
+              </p>
+              <Button variant="outline" size="sm" onClick={() => setCari('')} className="mt-3">
+                Reset Pencarian
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="bg-[var(--latar-lembut)] border-b border-[var(--garis)] font-mono text-xs uppercase text-[var(--tinta-lembut)]">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">Kode</th>
+                    <th className="px-4 py-3 font-semibold">Inisial</th>
+                    <th className="px-4 py-3 font-semibold">Kelas</th>
+                    <th className="px-4 py-3 font-semibold">Tahun Lahir</th>
+                    <th className="px-4 py-3 font-semibold text-right">Tindakan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--garis)]">
+                  {hasil.map((s) => (
+                    <tr key={s.id} className="hover:bg-[var(--latar-lembut)]/40 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-[var(--tinta)]">
+                        {s.kode}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-[var(--tinta)]">
+                        {s.inisial}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {s.kelas}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs text-[var(--tinta-lembut)]">
+                        {s.tahun_lahir}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+                            <Link to={`/siswa/${s.id}/asesmen`} onClick={() => catatBuka(s.id)}>
+                              <Sparkles className="w-3.5 h-3.5 mr-1 text-[var(--aksen)]" />
+                              Asesmen
+                            </Link>
+                          </Button>
+                          <Button asChild size="sm" variant="default" className="h-8 text-xs">
+                            <Link to={`/siswa/${s.id}/ppi`} onClick={() => catatBuka(s.id)}>
+                              <FileText className="w-3.5 h-3.5 mr-1" />
+                              Draf PPI
+                            </Link>
+                          </Button>
+                          {bolehHapus && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-[var(--galat)] hover:bg-red-50"
+                              title={`Hapus data siswa ${s.kode}`}
+                              onClick={() => void hapus(s)}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span className="sr-only">Hapus {s.kode}</span>
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* Kolom Kanan: Tambah Siswa Form (4 Kolom) */}
+        <section className="anim-muncul lg:col-span-4">
+          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 sticky top-24">
+            <div className="flex items-center gap-2 mb-4 border-b border-[var(--garis)] pb-3">
+              <Plus className="w-4 h-4 text-[var(--aksen)]" />
+              <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Tambah Siswa</h2>
+            </div>
+            <p className="text-xs text-[var(--tinta-lembut)] mb-4">
+              Gunakan kode pseudonim acak untuk melindungi privasi peserta didik (sesuai UU PDP & PRD §2).
+            </p>
+
+            <form onSubmit={(e) => void kirim(e)} noValidate className="space-y-4">
+              <div>
+                <label htmlFor="kode-siswa" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                  KODE SISWA <span className="text-[var(--aksen)]">*</span>
+                </label>
+                <Input
+                  id="kode-siswa"
+                  value={isian.kode}
+                  onChange={(e) => ubah('kode', e.target.value.toUpperCase())}
+                  placeholder="Contoh: S-001"
+                  className="font-mono uppercase text-sm"
+                  aria-invalid={galatIsian.kode ? true : undefined}
+                />
+                {galatIsian.kode && (
+                  <p className="text-xs text-[var(--galat)] mt-1">{galatIsian.kode}</p>
+                )}
+                <span className="text-[11px] text-[var(--tinta-lembut)]">3-12 karakter huruf/angka/tanda hubung.</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="inisial-siswa" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                    INISIAL <span className="text-[var(--aksen)]">*</span>
+                  </label>
+                  <Input
+                    id="inisial-siswa"
+                    value={isian.inisial}
+                    onChange={(e) => ubah('inisial', e.target.value.toUpperCase())}
+                    placeholder="ARS"
+                    className="font-mono uppercase text-sm"
+                    maxLength={3}
+                    aria-invalid={galatIsian.inisial ? true : undefined}
+                  />
+                  {galatIsian.inisial && (
+                    <p className="text-xs text-[var(--galat)] mt-1">{galatIsian.inisial}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label htmlFor="kelas-siswa" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                    KELAS <span className="text-[var(--aksen)]">*</span>
+                  </label>
+                  <Input
+                    id="kelas-siswa"
+                    value={isian.kelas}
+                    onChange={(e) => ubah('kelas', e.target.value)}
+                    placeholder="7A"
+                    className="text-sm"
+                    aria-invalid={galatIsian.kelas ? true : undefined}
+                  />
+                  {galatIsian.kelas && (
+                    <p className="text-xs text-[var(--galat)] mt-1">{galatIsian.kelas}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="tahun-siswa" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                  TAHUN LAHIR <span className="text-[var(--aksen)]">*</span>
+                </label>
+                <Input
+                  id="tahun-siswa"
+                  inputMode="numeric"
+                  value={isian.tahun_lahir}
+                  onChange={(e) => ubah('tahun_lahir', e.target.value.replace(/\D/g, '').slice(0, 4))}
+                  placeholder="2012"
+                  className="font-mono text-sm"
+                  aria-invalid={galatIsian.tahun_lahir ? true : undefined}
+                />
+                {galatIsian.tahun_lahir && (
+                  <p className="text-xs text-[var(--galat)] mt-1">{galatIsian.tahun_lahir}</p>
+                )}
+                <span className="text-[11px] text-[var(--tinta-lembut)]">Rentang {TAHUN_MIN}&ndash;{TAHUN_INI}.</span>
+              </div>
+
+              <div className="pt-2">
+                <Button type="submit" disabled={sedangKirim} className="w-full">
+                  {sedangKirim ? 'Menyimpan...' : 'Simpan Data Siswa'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </section>
       </div>
-
-      {memuat ? (
-        <p>Memuat daftar siswa...</p>
-      ) : daftar.length === 0 ? (
-        <p className="pesan pesan-peringatan">
-          Belum ada siswa di sekolah ini. Tambahkan siswa pertama lewat formulir di bawah memakai kode
-          pseudonim, bukan nama asli.
-        </p>
-      ) : hasil.length === 0 ? (
-        <p className="pesan pesan-peringatan">
-          Tidak ada siswa yang cocok dengan kata kunci "{cari.trim()}". Hapus kata kunci untuk melihat
-          semua siswa.
-        </p>
-      ) : (
-        <div className="bisa-digulir">
-          <table>
-            <caption>Daftar siswa sekolah Anda beserta tautan tindak lanjut</caption>
-            <thead>
-              <tr>
-                <th scope="col">Kode</th>
-                <th scope="col">Inisial</th>
-                <th scope="col">Kelas</th>
-                <th scope="col">Tahun lahir</th>
-                <th scope="col">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {hasil.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.kode}</td>
-                  <td>{s.inisial}</td>
-                  <td>{s.kelas}</td>
-                  <td>{s.tahun_lahir}</td>
-                  <td>
-                    <div className="baris">
-                      <Link
-                        className="tombol tombol-sekunder tombol-kecil"
-                        to={`/siswa/${s.id}/asesmen`}
-                        onClick={() => catatBuka(s.id)}
-                      >
-                        Isi asesmen
-                      </Link>
-                      <Link
-                        className="tombol tombol-sekunder tombol-kecil"
-                        to={`/siswa/${s.id}/ppi`}
-                        onClick={() => catatBuka(s.id)}
-                      >
-                        Draf PPI
-                      </Link>
-                      {bolehHapus && (
-                        <button type="button" className="tombol-bahaya tombol-kecil" onClick={() => void hapus(s)}>
-                          Hapus data siswa {s.kode}
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <h2>Tambah siswa</h2>
-      <form className="kartu" onSubmit={(e) => void kirim(e)} noValidate>
-        <div className="baris" style={{ alignItems: 'flex-start' }}>
-          <div style={{ flex: '1 1 12rem' }}>
-            <label htmlFor="kode-siswa">Kode siswa</label>
-            <p className="hint" id="kode-siswa-hint">
-              Pseudonim, 3-12 karakter: huruf kapital, angka, tanda hubung.
-            </p>
-            <input
-              id="kode-siswa"
-              value={isian.kode}
-              aria-describedby="kode-siswa-hint"
-              aria-invalid={galatIsian.kode ? true : undefined}
-              onChange={(e) => ubah('kode', e.target.value.toUpperCase())}
-            />
-            {galatIsian.kode && (
-              <p className="pesan pesan-galat" role="alert">
-                {galatIsian.kode}
-              </p>
-            )}
-          </div>
-
-          <div style={{ flex: '1 1 8rem' }}>
-            <label htmlFor="inisial-siswa">Inisial</label>
-            <p className="hint" id="inisial-siswa-hint">
-              1-3 huruf kapital.
-            </p>
-            <input
-              id="inisial-siswa"
-              value={isian.inisial}
-              aria-describedby="inisial-siswa-hint"
-              aria-invalid={galatIsian.inisial ? true : undefined}
-              onChange={(e) => ubah('inisial', e.target.value.toUpperCase())}
-            />
-            {galatIsian.inisial && (
-              <p className="pesan pesan-galat" role="alert">
-                {galatIsian.inisial}
-              </p>
-            )}
-          </div>
-
-          <div style={{ flex: '1 1 8rem' }}>
-            <label htmlFor="tahun-siswa">Tahun lahir</label>
-            <p className="hint" id="tahun-siswa-hint">
-              {TAHUN_MIN}&ndash;{TAHUN_INI}.
-            </p>
-            <input
-              id="tahun-siswa"
-              inputMode="numeric"
-              value={isian.tahun_lahir}
-              aria-describedby="tahun-siswa-hint"
-              aria-invalid={galatIsian.tahun_lahir ? true : undefined}
-              onChange={(e) => ubah('tahun_lahir', e.target.value.replace(/\D/g, '').slice(0, 4))}
-            />
-            {galatIsian.tahun_lahir && (
-              <p className="pesan pesan-galat" role="alert">
-                {galatIsian.tahun_lahir}
-              </p>
-            )}
-          </div>
-
-          <div style={{ flex: '1 1 6rem' }}>
-            <label htmlFor="kelas-siswa">Kelas</label>
-            <input
-              id="kelas-siswa"
-              value={isian.kelas}
-              aria-invalid={galatIsian.kelas ? true : undefined}
-              onChange={(e) => ubah('kelas', e.target.value)}
-            />
-            {galatIsian.kelas && (
-              <p className="pesan pesan-galat" role="alert">
-                {galatIsian.kelas}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="baris" style={{ marginTop: '0.75rem' }}>
-          <button type="submit" disabled={sedangKirim}>
-            {sedangKirim ? 'Menyimpan...' : 'Simpan siswa'}
-          </button>
-          <span className="hint" style={{ margin: 0 }}>
-            Data siswa hanya boleh berisi pseudonim. Jangan tulis nama lengkap.
-          </span>
-        </div>
-      </form>
-    </>
+    </div>
   );
 }

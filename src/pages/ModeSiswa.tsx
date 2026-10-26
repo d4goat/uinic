@@ -1,8 +1,24 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
+import {
+  AlertCircle,
+  BookOpen,
+  Check,
+  ListTodo,
+  Play,
+  Plus,
+  RotateCcw,
+  Square,
+  Trash2,
+} from 'lucide-react';
 import { daftarMateri, daftarVarian } from '../lib/api';
-import type { Materi, VarianMateri } from '../lib/types';
+import type { Materi } from '../lib/types';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 
 /*
  * F11 — Mode siswa (autisme; PRD §S8): jadwal visual berikon, satu langkah per baris,
@@ -12,9 +28,6 @@ import type { Materi, VarianMateri } from '../lib/types';
 
 const IKON = ['▶', '★', '●', '◆', '■', '▲', '✔', '♫'];
 const KUNCI_AWALAN = 'ppi-link:mode-siswa:';
-const PESAN_TANPA_SUARA =
-  'Peramban ini belum menyediakan suara Bahasa Indonesia; gunakan mode teks besar dan kalimat pendek.';
-const GAYA_BESAR = { padding: '0.9rem 1.1rem', fontSize: '1.05rem' } as const;
 
 type Laju = 0.7 | 1 | 1.3;
 type DukunganSuara = 'memeriksa' | 'ada' | 'tidak';
@@ -36,7 +49,6 @@ const idBaru = () =>
 const bagiParagraf = (teks: string): string[] =>
   teks.split(/\n+/).map((s) => s.trim()).filter(Boolean);
 
-/** Satu kalimat = satu langkah. */
 const bagiLangkah = (teks: string): string[] =>
   teks
     .split(/(?<=[.!?])\s+|\n+/)
@@ -82,7 +94,6 @@ const adaSuaraId = () =>
     .getVoices()
     .some((v) => v.lang?.toLowerCase().replace('_', '-').startsWith('id'));
 
-// ponytail: hook disalin dari MateriAksesibel; jadikan src/hooks bila muncul pemakai ketiga.
 function useDukunganSuara(): DukunganSuara {
   const [dukungan, setDukungan] = useState<DukunganSuara>(() => {
     if (typeof SpeechSynthesisUtterance === 'undefined' || !window.speechSynthesis) return 'tidak';
@@ -110,16 +121,17 @@ function useDukunganSuara(): DukunganSuara {
 
 export default function ModeSiswa() {
   const { id = '' } = useParams<{ id: string }>();
+  const wadahRef = useRef<HTMLDivElement>(null);
 
   const [materi, setMateri] = useState<Materi | null>(null);
-  const [varian, setVarian] = useState<VarianMateri[]>([]);
   const [langkah, setLangkah] = useState<Langkah[]>([]);
   const [teksSumber, setTeksSumber] = useState('');
   const [teksBaru, setTeksBaru] = useState('');
   const [panelMateri, setPanelMateri] = useState(false);
-  const [laju, setLaju] = useState<Laju>(1);
+  const [laju] = useState<Laju>(1);
   const [galat, setGalat] = useState('');
   const [siap, setSiap] = useState(false);
+  const [sedangBicara, setSedangBicara] = useState(false);
 
   const dukungan = useDukunganSuara();
   const bisaBacakan = dukungan === 'ada';
@@ -135,7 +147,6 @@ export default function ModeSiswa() {
         if (!m) return;
         const v = await daftarVarian(m.id);
         if (!hidup) return;
-        setVarian(v);
         const isi = v.find((x) => x.jenis === 'kalimat_pendek' && x.teks)?.teks ?? m.teks_sumber;
         setTeksSumber(isi);
         setLangkah(bacaTersimpan(m.id) ?? buatLangkah(isi));
@@ -151,18 +162,31 @@ export default function ModeSiswa() {
     };
   }, [id]);
 
-  // Simpan di peramban supaya centang tidak hilang saat halaman dimuat ulang.
   useEffect(() => {
     if (!siap || !materi) return;
     try {
       localStorage.setItem(KUNCI_AWALAN + materi.id, JSON.stringify(langkah));
     } catch {
-      /* localStorage bisa diblokir: daftar tetap jalan untuk sesi ini. */
+      //
     }
   }, [langkah, siap, materi]);
 
+  useGSAP(
+    () => {
+      gsap.from('.anim-muncul', {
+        opacity: 0,
+        y: 16,
+        stagger: 0.08,
+        duration: 0.6,
+        ease: 'power3.out',
+      });
+    },
+    { scope: wadahRef, dependencies: [siap] },
+  );
+
   const teksBacaan = useMemo(() => langkah.map((l) => l.teks).join('. '), [langkah]);
   const jumlahSelesai = langkah.filter((l) => l.selesai).length;
+  const persenSelesai = langkah.length > 0 ? Math.round((jumlahSelesai / langkah.length) * 100) : 0;
 
   const alihSelesai = (idLangkah: string) =>
     setLangkah((lama) =>
@@ -189,176 +213,243 @@ export default function ModeSiswa() {
 
   const bacakan = () => {
     try {
+      window.speechSynthesis?.cancel();
       const u = new SpeechSynthesisUtterance(teksBacaan);
       u.lang = 'id-ID';
       u.rate = laju;
-      window.speechSynthesis.cancel();
+      u.onend = () => setSedangBicara(false);
+      u.onerror = () => setSedangBicara(false);
+      setSedangBicara(true);
       window.speechSynthesis.speak(u);
     } catch (e) {
       setGalat(pesanGalat(e));
+      setSedangBicara(false);
     }
   };
 
+  const hentikan = () => {
+    window.speechSynthesis?.cancel();
+    setSedangBicara(false);
+  };
+
   return (
-    <div className="wadah">
-      <h1>Mode siswa</h1>
-      <p className="lede">
-        Jadwal visual untuk dikerjakan bersama di perangkat kelas: satu langkah per baris, ikon
-        besar, dan tombol besar untuk menandai selesai.
-      </p>
-      <p className="hint">
-        Tidak diperlukan akun anak. Tidak ada nama atau data siswa yang diminta, dikirim, atau
-        disimpan di layar ini; daftar langkah hanya tersimpan di peramban perangkat kelas.
-      </p>
+    <div ref={wadahRef} className="space-y-8 max-w-4xl mx-auto">
+      {/* Header Mode Siswa */}
+      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+            F11 · Jadwal Visual Siswa
+          </Badge>
+          <span className="text-xs text-[var(--tinta-lembut)]">Ramah Autisme & Tanpa Akun Anak</span>
+        </div>
 
-      {galat && (
-        <p className="pesan pesan-galat" role="alert">
-          {galat}
-        </p>
-      )}
-      {siap && !materi && <p className="pesan pesan-peringatan">Materi tidak ditemukan.</p>}
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+              {materi ? materi.judul : 'Mode Siswa'}
+            </h1>
+            <p className="mt-2 text-base text-[var(--tinta-lembut)] leading-relaxed">
+              Panduan belajar langkah-demi-langkah dengan tombol visual besar untuk digunakan bersama guru di kelas.
+            </p>
+          </div>
 
-      {materi && (
-        <>
-          <h2 style={{ marginTop: '0.5rem' }}>{materi.judul}</h2>
-
-          <div className="baris">
-            <button
-              type="button"
-              style={GAYA_BESAR}
-              aria-expanded={panelMateri}
-              aria-controls="panel-materi"
-              onClick={() => setPanelMateri((lama) => !lama)}
-            >
-              {panelMateri ? 'Tutup materi' : 'Materi'}
-            </button>
-            <button type="button" style={GAYA_BESAR} onClick={ulangiDariAwal}>
-              Ulangi dari awal
-            </button>
-            <button
-              type="button"
-              className="tombol-sekunder"
-              style={GAYA_BESAR}
-              onClick={aturUlang}
-            >
-              Atur ulang langkah
-            </button>
-            <span className="lencana">
+          {/* Bar Kemajuan Visual */}
+          <div className="bg-[var(--kartu)] border border-[var(--garis)] p-4 rounded-sm shrink-0 min-w-[200px]">
+            <div className="flex items-center justify-between text-xs font-mono mb-1.5">
+              <span className="text-[var(--tinta-lembut)]">KEMAJUAN</span>
+              <span className="font-bold text-[var(--tinta)]">{persenSelesai}%</span>
+            </div>
+            <div className="w-full bg-[var(--latar-lembut)] h-2 rounded-full overflow-hidden">
+              <div
+                className="bg-[var(--aksen)] h-full transition-all duration-300"
+                style={{ width: `${persenSelesai}%` }}
+              />
+            </div>
+            <span className="text-[11px] font-mono text-[var(--tinta-lembut)] block mt-1">
               {jumlahSelesai} dari {langkah.length} langkah selesai
             </span>
           </div>
+        </div>
 
-          {panelMateri && (
-            <section id="panel-materi" className="kartu" aria-labelledby="judul-bacaan">
-              <h3 id="judul-bacaan" style={{ marginTop: 0 }}>
-                Bacaan materi
-              </h3>
-              <div className="baris">
-                <label htmlFor="laju-suara-siswa" style={{ margin: 0 }}>
-                  Laju bacaan
-                </label>
-                <select
-                  id="laju-suara-siswa"
-                  value={laju}
-                  onChange={(e) => setLaju(Number(e.target.value) as Laju)}
-                  style={{ maxWidth: '10rem' }}
-                >
-                  <option value={0.7}>Lambat (0,7x)</option>
-                  <option value={1}>Sedang (1x)</option>
-                  <option value={1.3}>Cepat (1,3x)</option>
-                </select>
-                <button
-                  type="button"
-                  style={GAYA_BESAR}
-                  onClick={bacakan}
-                  disabled={!bisaBacakan || langkah.length === 0}
-                >
-                  Bacakan
-                </button>
-                <button
-                  type="button"
-                  className="tombol-sekunder"
-                  style={GAYA_BESAR}
-                  onClick={() => window.speechSynthesis.cancel()}
-                  disabled={!bisaBacakan}
-                >
-                  Berhenti
-                </button>
-              </div>
-              {dukungan === 'tidak' && (
-                <p className="pesan pesan-peringatan" role="status">
-                  {PESAN_TANPA_SUARA}
-                </p>
-              )}
-              {dukungan === 'memeriksa' && (
-                <p className="hint">Memeriksa ketersediaan suara peramban...</p>
-              )}
-              <div className="materi-teks" style={{ fontSize: '1.35rem' }}>
-                {bagiParagraf(teksSumber).map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
-              </div>
-              {varian.length > 0 && (
-                <p className="hint">
-                  Tersedia {varian.length} varian aksesibel tersimpan untuk materi ini.
-                </p>
-              )}
-            </section>
-          )}
+        {/* Toolbar Cepat */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs font-mono"
+            onClick={() => setPanelMateri((p) => !p)}
+          >
+            <BookOpen className="w-3.5 h-3.5 mr-1" />
+            {panelMateri ? 'Tutup Materi Bacaan' : 'Buka Materi Bacaan'}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs font-mono"
+            onClick={ulangiDariAwal}
+          >
+            <RotateCcw className="w-3.5 h-3.5 mr-1" />
+            Ulangi Dari Awal
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-xs font-mono text-[var(--tinta-lembut)]"
+            onClick={aturUlang}
+          >
+            Atur Ulang Langkah Bawaan
+          </Button>
+        </div>
+      </header>
 
-          <h2>Jadwal hari ini</h2>
-          {langkah.length === 0 ? (
-            <p className="hint">Belum ada langkah. Tambahkan satu langkah di bawah.</p>
-          ) : (
-            <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {langkah.map((l, i) => (
-                <li key={l.id} className="langkah" data-selesai={l.selesai}>
-                  <span className="langkah-ikon" aria-hidden="true">
+      {galat && (
+        <div className="anim-muncul rounded-sm border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">Terjadi Kendala</p>
+            <p>{galat}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Drawer Panel Materi Bacaan */}
+      {panelMateri && (
+        <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-[var(--garis)] pb-3">
+            <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Naskah Sumber</h2>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={bacakan}
+                disabled={!bisaBacakan || langkah.length === 0 || sedangBicara}
+                className="h-8 text-xs font-mono"
+              >
+                <Play className="w-3.5 h-3.5 mr-1" />
+                {sedangBicara ? 'Membaca...' : 'Bacakan'}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={hentikan}
+                disabled={!bisaBacakan || !sedangBicara}
+                className="h-8 text-xs font-mono"
+              >
+                <Square className="w-3.5 h-3.5 mr-1" />
+                Berhenti
+              </Button>
+            </div>
+          </div>
+
+          <div className="text-base text-[var(--tinta)] leading-relaxed space-y-3 font-sans">
+            {bagiParagraf(teksSumber).map((p, idx) => (
+              <p key={idx}>{p}</p>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Daftar Langkah Visual Besar */}
+      <section className="anim-muncul space-y-4">
+        <h2 className="font-display text-xl font-bold text-[var(--tinta)] flex items-center gap-2">
+          <ListTodo className="w-5 h-5 text-[var(--aksen)]" />
+          <span>Langkah Tugas Hari Ini</span>
+        </h2>
+
+        {langkah.length === 0 ? (
+          <div className="p-8 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm text-center text-sm text-[var(--tinta-lembut)]">
+            Belum ada langkah visual. Tambahkan langkah pertama di formulir bawah.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {langkah.map((l, i) => (
+              <div
+                key={l.id}
+                className={`p-4 border rounded-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                  l.selesai
+                    ? 'border-emerald-300 bg-emerald-50/40 opacity-70'
+                    : 'border-[var(--garis)] bg-[var(--kartu)] hover:border-[var(--garis-kuat)] shadow-xs'
+                }`}
+              >
+                <div className="flex items-center gap-4">
+                  {/* Ikon Simbol Besar */}
+                  <span className={`w-11 h-11 shrink-0 rounded-sm flex items-center justify-center font-bold text-lg select-none ${
+                    l.selesai ? 'bg-emerald-600 text-white' : 'bg-[var(--latar-lembut)] text-[var(--tinta)] border border-[var(--garis)]'
+                  }`}>
                     {l.ikon}
                   </span>
-                  <span className="langkah-nomor">Langkah {i + 1}</span>
-                  <span className="pilihan-teks" style={{ flex: 1 }}>
-                    {l.teks}
-                  </span>
-                  <span className="lencana">{l.selesai ? 'selesai' : 'belum'}</span>
-                  <button
-                    type="button"
-                    style={GAYA_BESAR}
-                    aria-pressed={l.selesai}
-                    aria-label={`Langkah ${i + 1}: tandai ${l.selesai ? 'belum selesai' : 'selesai'}`}
-                    onClick={() => alihSelesai(l.id)}
-                  >
-                    {l.selesai ? 'Batalkan selesai' : 'Selesai'}
-                  </button>
-                  <button
-                    type="button"
-                    className="tombol-sekunder tombol-kecil"
-                    aria-label={`Hapus langkah ${i + 1}`}
-                    onClick={() => hapusLangkah(l.id)}
-                  >
-                    Hapus
-                  </button>
-                </li>
-              ))}
-            </ol>
-          )}
 
-          <form className="kartu" onSubmit={tambahLangkah}>
-            <label htmlFor="langkah-baru">Tambah satu langkah untuk siswa</label>
-            <input
-              id="langkah-baru"
-              value={teksBaru}
-              onChange={(e) => setTeksBaru(e.target.value)}
-              placeholder="Contoh: taruh tas di loker"
-            />
-            <div className="baris">
-              <button type="submit" style={GAYA_BESAR}>
-                Tambah langkah
-              </button>
-            </div>
-          </form>
-        </>
-      )}
+                  <div>
+                    <span className="text-[11px] font-mono text-[var(--tinta-lembut)] block uppercase">
+                      Langkah #{i + 1}
+                    </span>
+                    <p className={`text-base font-semibold leading-relaxed ${
+                      l.selesai ? 'line-through text-emerald-900' : 'text-[var(--tinta)]'
+                    }`}>
+                      {l.teks}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  <Button
+                    size="lg"
+                    variant={l.selesai ? 'outline' : 'default'}
+                    onClick={() => alihSelesai(l.id)}
+                    className={`h-11 px-5 text-sm font-bold tracking-wide ${
+                      l.selesai
+                        ? 'border-emerald-400 text-emerald-800 hover:bg-emerald-100'
+                        : 'bg-[var(--aksen)] hover:bg-[var(--aksen)]/90 text-white shadow-xs'
+                    }`}
+                  >
+                    {l.selesai ? (
+                      <>
+                        <RotateCcw className="w-4 h-4 mr-1.5" />
+                        Batal Selesai
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4 mr-1.5" />
+                        Tandai Selesai
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => hapusLangkah(l.id)}
+                    className="h-11 w-11 text-[var(--tinta-lembut)] hover:text-[var(--galat)]"
+                    title={`Hapus langkah ${i + 1}`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Formulir Tambah Langkah Cepat */}
+      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
+        <h3 className="font-display text-base font-bold text-[var(--tinta)] flex items-center gap-1.5">
+          <Plus className="w-4 h-4 text-[var(--aksen)]" />
+          <span>Tambah Satu Langkah Visual Baru</span>
+        </h3>
+
+        <form onSubmit={tambahLangkah} className="flex flex-col sm:flex-row gap-3">
+          <Input
+            id="langkah-baru"
+            value={teksBaru}
+            onChange={(e) => setTeksBaru(e.target.value)}
+            placeholder="Contoh: Taruh tas di loker lalu duduk di kursi masing-masing..."
+            className="text-sm h-11"
+          />
+          <Button type="submit" className="h-11 px-6 shrink-0">
+            Tambah Langkah
+          </Button>
+        </form>
+      </section>
     </div>
   );
 }

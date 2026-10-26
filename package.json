@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "check:sql": "node scripts/check-sql.mjs",
+    "cek:kontras": "node scripts/cek-kontras.mjs",
     "check": "npm run check:sql && tsc -b --pretty false && eslint .",
     "db": "node scripts/db-run.mjs",
     "seed": "node scripts/seed-demo.mjs",
@@ -17,10 +18,24 @@
     "cek:akun": "node scripts/cek-akun.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@gsap/react": "^2.1.2",
     "@supabase/supabase-js": "^2.118.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "class-variance-authority": "^0.7.1",
+    "cn": "^0.5.0",
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.27",
+    "lucide-react": "^1.61.0",
+    "radix-ui": "^1.8.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.4"
+    "react-router-dom": "^7.18.4",
+    "shadcn": "^4.22.1",
+    "tailwindcss": "^4.3.3",
+    "tw-animate-css": "^1.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

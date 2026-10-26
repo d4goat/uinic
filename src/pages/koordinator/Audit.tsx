@@ -1,26 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
+import {
+  AlertCircle,
+  Database,
+  Key,
+  RefreshCw,
+} from 'lucide-react';
 import { daftarAudit } from '../../lib/api';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
 
 type BarisAudit = Awaited<ReturnType<typeof daftarAudit>>[number];
 
 const waktu = (iso: string) =>
   new Date(iso).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'medium' });
 
-/** Nama aksi di basis data -> istilah yang dimengerti operator. */
-const LABEL_AKSI: Record<string, string> = {
-  select: 'baca data',
-  insert: 'tambah data',
-  update: 'ubah data',
-  delete: 'hapus data',
-};
-
 const labelAksi = (aksi: string) => {
-  if (LABEL_AKSI[aksi]) return `${LABEL_AKSI[aksi]} (${aksi})`;
-  if (aksi.startsWith('rpc:')) return `aksi aplikasi (${aksi})`;
+  if (aksi === 'select') return 'Baca Data (select)';
+  if (aksi === 'insert') return 'Tambah Data (insert)';
+  if (aksi === 'update') return 'Ubah Data (update)';
+  if (aksi === 'delete') return 'Hapus Data (delete)';
+  if (aksi.startsWith('rpc:')) return `Aplikasi (${aksi})`;
   return aksi;
 };
 
 export default function Audit() {
+  const wadahRef = useRef<HTMLDivElement>(null);
   const [baris, setBaris] = useState<BarisAudit[]>([]);
   const [memuat, setMemuat] = useState(true);
   const [galat, setGalat] = useState<string | null>(null);
@@ -38,79 +44,149 @@ export default function Audit() {
   }
 
   useEffect(() => {
-    muat();
+    void muat();
   }, []);
 
-  return (
-    <div className="wadah wadah-lebar">
-      <h1>Jejak audit</h1>
-      <p className="lede">
-        Catatan ini dibuat otomatis oleh basis data, bukan oleh halaman ini. Setiap perubahan data siswa
-        (insert, update, delete) dicatat langsung oleh trigger pada tabelnya, sedangkan pembacaan data sensitif
-        dicatat secara eksplisit oleh aplikasi dengan aksi “select” atau “rpc:...”.
-      </p>
-      <p className="hint">
-        Kolom “pengguna” berisi id (uuid) akun yang melakukan aksi. Siapa orang di balik id itu tidak bisa
-        ditebak dari halaman ini — hanya admin yang dapat mencocokkannya dengan nama pada tabel{' '}
-        <code>profiles</code>. Baris dengan pengguna kosong berarti akses lewat token transfer, tanpa akun
-        masuk.
-      </p>
+  useGSAP(
+    () => {
+      gsap.from('.anim-muncul', {
+        opacity: 0,
+        y: 16,
+        stagger: 0.08,
+        duration: 0.6,
+        ease: 'power3.out',
+      });
+    },
+    { scope: wadahRef, dependencies: [memuat] },
+  );
 
-      <div className="baris renggang">
-        <h2>50 catatan terbaru</h2>
-        <button type="button" className="tombol-sekunder tombol-kecil" onClick={muat} disabled={memuat}>
-          {memuat ? 'Memuat…' : 'Muat ulang'}
-        </button>
-      </div>
+  return (
+    <div ref={wadahRef} className="space-y-8">
+      {/* Header Editorial */}
+      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+        <div className="flex items-center justify-between gap-4 mb-2">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+              F12 · Rekam Jejak Audit
+            </Badge>
+            <span className="text-xs text-[var(--tinta-lembut)]">Trigger Postgres DB & Immutable Log</span>
+          </div>
+
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs font-mono"
+            onClick={() => void muat()}
+            disabled={memuat}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${memuat ? 'animate-spin' : ''}`} />
+            {memuat ? 'Memuat...' : 'Segarkan Log'}
+          </Button>
+        </div>
+
+        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+          Jejak Audit Sistem
+        </h1>
+        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-3xl leading-relaxed">
+          Seluruh mutasi data sensitif (tambah, ubah, hapus) dicatat secara otomatis oleh trigger basis data
+          PostgreSQL pada tabel <code>audit_logs</code>. Pembacaan data sensitif dicatat eksplisit oleh aplikasi untuk akuntabilitas hukum.
+        </p>
+      </header>
 
       {galat && (
-        <p className="pesan pesan-galat" role="alert">
-          {galat}
-        </p>
-      )}
-
-      {!galat && baris.length === 0 && !memuat && (
-        <p className="hint" role="status">
-          Belum ada catatan audit.
-        </p>
-      )}
-
-      {baris.length > 0 && (
-        <div className="bisa-digulir">
-          <table>
-            <caption>Catatan audit PPI-Link, 50 baris terbaru, terbaru lebih dulu</caption>
-            <thead>
-              <tr>
-                <th scope="col">Waktu</th>
-                <th scope="col">Aksi</th>
-                <th scope="col">Objek</th>
-                <th scope="col">Objek id</th>
-                <th scope="col">Pengguna</th>
-              </tr>
-            </thead>
-            <tbody>
-              {baris.map((b) => (
-                <tr key={b.id}>
-                  <td>{waktu(b.waktu)}</td>
-                  <td>{labelAksi(b.aksi)}</td>
-                  <td>{b.objek}</td>
-                  <td>{b.objek_id ?? '—'}</td>
-                  <td>
-                    {b.user_id ?? (
-                      <span className="lencana">akses lewat token</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="anim-muncul rounded-sm border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">Kendala Memuat Audit</p>
+            <p>{galat}</p>
+          </div>
         </div>
       )}
 
-      <p className="hint">
-        Halaman ini hanya menampilkan 50 catatan terbaru. Catatan lama tetap tersimpan di tabel audit_logs dan
-        bisa diminta ke admin.
-      </p>
+      {/* Tabel Audit Modern */}
+      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm overflow-hidden">
+        <div className="p-4 border-b border-[var(--garis)] bg-[var(--latar-lembut)]/40 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Database className="w-4 h-4 text-[var(--aksen)]" />
+            <span className="text-xs font-mono font-bold uppercase text-[var(--tinta)]">50 Entri Audit Terkini</span>
+          </div>
+          <span className="text-[11px] font-mono text-[var(--tinta-lembut)]">
+            Total termuat: <span className="font-bold text-[var(--tinta)]">{baris.length}</span> log
+          </span>
+        </div>
+
+        {memuat ? (
+          <div className="p-12 text-center">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-[var(--aksen)] border-t-transparent" />
+            <p className="mt-3 text-xs text-[var(--tinta-lembut)] font-mono">Mengambil catatan audit dari database...</p>
+          </div>
+        ) : baris.length === 0 ? (
+          <div className="p-8 text-center text-xs text-[var(--tinta-lembut)]">Belum ada aktivitas tercatat pada tabel audit.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-[var(--latar-lembut)] border-b border-[var(--garis)] font-mono uppercase text-[11px] text-[var(--tinta-lembut)]">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Waktu Stempel</th>
+                  <th className="px-4 py-3 font-semibold">Aksi</th>
+                  <th className="px-4 py-3 font-semibold">Tabel / Objek</th>
+                  <th className="px-4 py-3 font-semibold">Objek ID</th>
+                  <th className="px-4 py-3 font-semibold">Identitas Pengguna</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--garis)] font-mono">
+                {baris.map((b) => {
+                  const aksi = b.aksi;
+                  const isInsert = aksi === 'insert';
+                  const isDelete = aksi === 'delete';
+                  const isUpdate = aksi === 'update';
+
+                  return (
+                    <tr key={b.id} className="hover:bg-[var(--latar-lembut)]/40 transition-colors">
+                      <td className="px-4 py-3 text-[var(--tinta-lembut)] shrink-0 whitespace-nowrap">
+                        {waktu(b.waktu)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded-xs text-[10px] font-bold uppercase ${
+                            isInsert
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : isDelete
+                                ? 'bg-red-100 text-red-800'
+                                : isUpdate
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : 'bg-blue-100 text-blue-800'
+                          }`}
+                        >
+                          {labelAksi(aksi)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-bold text-[var(--tinta)]">
+                        {b.objek}
+                      </td>
+                      <td className="px-4 py-3 text-[var(--tinta-lembut)] max-w-[140px] truncate" title={b.objek_id ?? undefined}>
+                        {b.objek_id ?? '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        {b.user_id ? (
+                          <span className="text-[var(--tinta-lembut)] truncate block max-w-[180px]" title={b.user_id}>
+                            {b.user_id}
+                          </span>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] uppercase font-mono border-amber-300 text-amber-800 bg-amber-50">
+                            <Key className="w-3 h-3 mr-1" />
+                            Token Transfer
+                          </Badge>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

@@ -1,15 +1,39 @@
 // F6: catat sesi pendampingan terhadap tujuan PPI.
-// Tahan offline (alasan [S6]): sesi yang gagal terkirim dititipkan ke antrean
+// Tahan offline: sesi yang gagal terkirim dititipkan ke antrean
 // perangkat (lib/offline.ts) dan dikirim ulang otomatis; client_uuid membuat
 // pengiriman ulang idempoten di sisi server.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { useGSAP } from '@gsap/react';
+import { gsap } from 'gsap';
 import {
-  catatanAsesmen, catatAkses, catatSesi, daftarSesi, rekapCapaian, versiPpi,
+  AlertCircle,
+  ArrowLeft,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  CloudOff,
+  History,
+  Lock,
+  RefreshCw,
+  Save,
+  Wifi,
+  WifiOff,
+} from 'lucide-react';
+import {
+  catatanAsesmen,
+  catatAkses,
+  catatSesi,
+  daftarSesi,
+  rekapCapaian,
+  versiPpi,
 } from '../../lib/api';
 import { antre, bacaAntrean, kirimAntrean } from '../../lib/offline';
 import type { Capaian, Sesi, SesiAntrean } from '../../lib/types';
+import { Badge } from '../../components/ui/badge';
+import { Button } from '../../components/ui/button';
+import { Textarea } from '../../components/ui/textarea';
 
 type Tujuan = { id: string; tujuan: string; indikator: string };
 type Pesan = { jenis: 'berhasil' | 'peringatan' | 'galat'; teks: string };
@@ -19,9 +43,6 @@ const HARI_INI = () => new Date().toISOString().slice(0, 10);
 const formatTanggal = (t: string) =>
   new Date(`${t}T00:00:00`).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
-// ponytail: daftar tujuan disimpan di localStorage supaya sesi tetap bisa
-// dicatat luring; bila kosong, goal_id dikirim null (schema mengizinkan).
-// Ganti ke IndexedDB hanya bila nanti butuh seluruh versi PPI secara luring.
 const kunciTujuan = (ppiId: string) => `ppi-link.tujuan.${ppiId}`;
 function bacaTujuanTersimpan(ppiId: string): Tujuan[] {
   try {
@@ -33,9 +54,8 @@ function bacaTujuanTersimpan(ppiId: string): Tujuan[] {
 
 export default function SesiLog() {
   const { id: ppiId = '' } = useParams();
-  // Halaman ini dibuka dari draf PPI; bila siswa tidak dioper lewat state,
-  // tautan kembali jatuh ke daftar siswa.
   const studentId = (useLocation().state as { studentId?: string } | null)?.studentId ?? null;
+  const wadahRef = useRef<HTMLDivElement>(null);
 
   const [tujuan, setTujuan] = useState<Tujuan[]>([]);
   const [sesi, setSesi] = useState<Sesi[]>([]);
@@ -51,12 +71,10 @@ export default function SesiLog() {
   const [menyimpan, setMenyimpan] = useState(false);
   const [mengirim, setMengirim] = useState(false);
 
-  // Tiap bagian dimuat terpisah: satu panggilan yang gagal (luring) tidak
-  // boleh mematikan halaman.
   const muat = useCallback(async () => {
     try {
       const versi = await versiPpi(ppiId);
-      const aktif = versi[0]; // urut nomor_versi menurun -> terbaru = versi aktif
+      const aktif = versi[0];
       const daftar = aktif?.ppi_goals ?? [];
       setTujuan(daftar);
       if (daftar.length) localStorage.setItem(kunciTujuan(ppiId), JSON.stringify(daftar));
@@ -67,8 +85,6 @@ export default function SesiLog() {
     try {
       const baris = await daftarSesi(ppiId);
       setSesi(baris);
-      // Catatan tersimpan terenkripsi (pgp_sym_encrypt); dekripsi lewat fn_dec.
-      // Gagal dekripsi hanya mengosongkan satu catatan, bukan seluruh halaman.
       for (const s of baris) {
         if (!s.catatan_enc) continue;
         const gagal = () =>
@@ -80,7 +96,7 @@ export default function SesiLog() {
           .catch(gagal);
       }
     } catch {
-      // luring / gagal baca: riwayat dibiarkan kosong
+      // luring
     }
 
     try {
@@ -88,7 +104,7 @@ export default function SesiLog() {
       for (const b of await rekapCapaian(ppiId)) hitung[b.status_capaian] += 1;
       setRekap(hitung);
     } catch {
-      // luring: biarkan angka sebelumnya
+      // luring
     }
 
     setAntrean(bacaAntrean());
@@ -97,7 +113,6 @@ export default function SesiLog() {
 
   useEffect(() => {
     if (!ppiId) return;
-    // F12: pembukaan halaman ini ikut tercatat; gagalnya tidak menghalangi.
     void catatAkses('sessions', ppiId, { aksi: 'buka' }).catch(() => {});
     void (async () => {
       await muat();
@@ -115,10 +130,23 @@ export default function SesiLog() {
     };
   }, []);
 
+  useGSAP(
+    () => {
+      gsap.from('.anim-muncul', {
+        opacity: 0,
+        y: 16,
+        stagger: 0.08,
+        duration: 0.6,
+        ease: 'power3.out',
+      });
+    },
+    { scope: wadahRef, dependencies: [memuat] },
+  );
+
   async function simpan(e: FormEvent) {
     e.preventDefault();
     const isi: SesiAntrean = {
-      client_uuid: crypto.randomUUID(), // kunci idempotensi
+      client_uuid: crypto.randomUUID(),
       ppi_id: ppiId,
       goal_id: goalId || null,
       tanggal,
@@ -128,19 +156,18 @@ export default function SesiLog() {
     setMenyimpan(true);
     try {
       await catatSesi(isi);
-      setPesan({ jenis: 'berhasil', teks: 'Sesi tersimpan. Catatan disimpan terenkripsi di basis data.' });
+      setPesan({ jenis: 'berhasil', teks: 'Sesi tersimpan. Catatan sensitif diamankan dengan pgcrypto.' });
       setGoalId('');
       setCatatan('');
       await muat();
     } catch {
-      // Gagal kirim bukan galat keras: sesi dititipkan ke antrean perangkat.
       antre(isi);
       setAntrean(bacaAntrean());
       setGoalId('');
       setCatatan('');
       setPesan({
         jenis: 'peringatan',
-        teks: 'Koneksi ke server gagal. Sesi tersimpan di perangkat ini dan akan terkirim otomatis saat jaringan kembali.',
+        teks: 'Koneksi terputus. Sesi disimpan di antrean lokal perangkat dan otomatis disinkronkan saat online.',
       });
     } finally {
       setMenyimpan(false);
@@ -154,11 +181,11 @@ export default function SesiLog() {
       setAntrean(bacaAntrean());
       setPesan({
         jenis: 'berhasil',
-        teks: `Antrean diproses: ${hasil.terkirim} sesi terkirim, ${hasil.sisa} masih menunggu.`,
+        teks: `Sinkronisasi selesai: ${hasil.terkirim} sesi terkirim, ${hasil.sisa} menunggu.`,
       });
       if (hasil.terkirim) await muat();
     } catch {
-      setPesan({ jenis: 'galat', teks: 'Antrean gagal dikirim. Coba lagi setelah jaringan stabil.' });
+      setPesan({ jenis: 'galat', teks: 'Antrean gagal dikirim. Periksa koneksi internet Anda.' });
     } finally {
       setMengirim(false);
     }
@@ -167,182 +194,286 @@ export default function SesiLog() {
   const jumlahSesi = rekap.belum + rekap.sebagian + rekap.tercapai;
 
   return (
-    <>
-      <h1>Log sesi pendampingan</h1>
-      <p className="lede">
-        Catat capaian tiap sesi terhadap tujuan PPI. Sesi yang gagal terkirim tetap tersimpan di
-        perangkat dan dikirim ulang otomatis tanpa tercatat dua kali.
-      </p>
+    <div ref={wadahRef} className="space-y-8">
+      {/* Header Editorial */}
+      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs -ml-2 text-[var(--tinta-lembut)]">
+              <Link to={studentId ? `/siswa/${studentId}/ppi` : '/siswa'}>
+                <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+                Kembali ke Draf PPI
+              </Link>
+            </Button>
+            <span className="text-xs text-[var(--garis)]">/</span>
+            <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+              F6 · Log Sesi & Offline Sync
+            </Badge>
+          </div>
 
-      <div className="baris renggang">
-        <Link to={studentId ? `/siswa/${studentId}/ppi` : '/siswa'}>Kembali ke draf PPI</Link>
-        <span className={`lencana ${daring ? 'lencana-kuat' : 'lencana-lemah'}`}>
-          Status jaringan: {daring ? 'tersambung' : 'terputus'}
-        </span>
-      </div>
+          {/* Indikator Status Jaringan */}
+          <div className="flex items-center gap-2 text-xs font-mono">
+            {daring ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-emerald-300 bg-emerald-50 text-emerald-800">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <Wifi className="w-3.5 h-3.5" />
+                ONLINE
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-amber-300 bg-amber-50 text-amber-800">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <WifiOff className="w-3.5 h-3.5" />
+                LURING (OFFLINE)
+              </span>
+            )}
+          </div>
+        </div>
 
-      {pesan && (
-        <p className={`pesan pesan-${pesan.jenis}`} role={pesan.jenis === 'galat' ? 'alert' : 'status'}>
-          {pesan.teks}
+        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+          Log Sesi Pendampingan
+        </h1>
+        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-2xl leading-relaxed">
+          Catat capaian tiap sesi terhadap target indikator PPI. Pengisian tahan kondisi luring: data tersimpan di penyimpanan
+          lokal dan tersinkronisasi idempoten saat terhubung kembali.
         </p>
+
+        {/* Ringkasan Statistik Capaian */}
+        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="p-3.5 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm font-mono">
+            <span className="text-xs text-[var(--tinta-lembut)] block">TOTAL SESI</span>
+            <span className="text-2xl font-bold text-[var(--tinta)]">{jumlahSesi}</span>
+          </div>
+          <div className="p-3.5 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm font-mono">
+            <span className="text-xs text-emerald-700 block">TERCAPAI</span>
+            <span className="text-2xl font-bold text-emerald-800">{rekap.tercapai}</span>
+          </div>
+          <div className="p-3.5 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm font-mono">
+            <span className="text-xs text-amber-700 block">SEBAGIAN</span>
+            <span className="text-2xl font-bold text-amber-800">{rekap.sebagian}</span>
+          </div>
+          <div className="p-3.5 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm font-mono">
+            <span className="text-xs text-red-700 block">BELUM</span>
+            <span className="text-2xl font-bold text-red-800">{rekap.belum}</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Alert Umpan Balik */}
+      {pesan && (
+        <div
+          className={`anim-muncul rounded-sm border p-4 text-sm flex items-start gap-3 ${
+            pesan.jenis === 'berhasil'
+              ? 'border-[var(--berhasil)] bg-emerald-50/50 text-[var(--berhasil)]'
+              : pesan.jenis === 'peringatan'
+                ? 'border-[var(--peringatan)] bg-amber-50/50 text-[var(--peringatan)]'
+                : 'border-[var(--galat)] bg-red-50/50 text-[var(--galat)]'
+          }`}
+          role={pesan.jenis === 'galat' ? 'alert' : 'status'}
+        >
+          {pesan.jenis === 'berhasil' ? (
+            <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
+          ) : (
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          )}
+          <div>
+            <p className="font-semibold">{pesan.jenis === 'berhasil' ? 'Berhasil' : 'Pemberitahuan'}</p>
+            <p>{pesan.teks}</p>
+          </div>
+        </div>
       )}
 
-      <form className="kartu" onSubmit={(e) => void simpan(e)}>
-        <h2 style={{ marginTop: 0 }}>Sesi baru</h2>
+      {/* Grid Asimetris: Formulir Sesi (8 Kolom) + Antrean & Riwayat (4 Kolom) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Kolom Kiri: Form Sesi Baru */}
+        <section className="anim-muncul lg:col-span-7 space-y-6">
+          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
+            <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-4">
+              <Calendar className="w-4 h-4 text-[var(--aksen)]" />
+              <h2 className="font-display text-xl font-bold text-[var(--tinta)]">Catat Sesi Baru</h2>
+            </div>
 
-        <div>
-          <label htmlFor="sesi-tujuan">Tujuan / indikator</label>
-          <p className="hint" id="sesi-tujuan-hint" style={{ margin: '0 0 0.25rem' }}>
-            Dipilih dari tujuan versi PPI aktif, bukan teks bebas.
-          </p>
-          <select
-            id="sesi-tujuan"
-            value={goalId}
-            onChange={(e) => setGoalId(e.target.value)}
-            aria-describedby="sesi-tujuan-hint"
-          >
-            <option value="">Tanpa tujuan tertentu</option>
-            {tujuan.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.tujuan} — {t.indikator}
-              </option>
-            ))}
-          </select>
-          {tujuan.length === 0 && (
-            <p className="pesan pesan-peringatan" role="status">
-              Daftar tujuan belum termuat (kemungkinan luring). Sesi tetap dapat dicatat tanpa
-              tujuan lalu dilengkapi setelah tersambung.
-            </p>
-          )}
-        </div>
+            <form onSubmit={(e) => void simpan(e)} className="space-y-5">
+              <div>
+                <label htmlFor="sesi-tujuan" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                  TARGET PPI / INDIKATOR
+                </label>
+                <select
+                  id="sesi-tujuan"
+                  value={goalId}
+                  onChange={(e) => setGoalId(e.target.value)}
+                  className="w-full text-sm rounded-sm border border-[var(--garis)] bg-[var(--kartu)] p-2.5 focus:border-[var(--aksen)] focus:ring-1 focus:ring-[var(--aksen)] outline-hidden"
+                >
+                  <option value="">Tanpa tujuan spesifik (Pengamatan Umum)</option>
+                  {tujuan.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.tujuan} &rarr; {t.indikator}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-[11px] text-[var(--tinta-lembut)] block mt-1">
+                  Diambil dari tujuan PPI versi aktif untuk menjaga kesinambungan evaluasi.
+                </span>
+              </div>
 
-        <div className="baris">
-          <div>
-            <label htmlFor="sesi-tanggal">Tanggal sesi</label>
-            <input
-              id="sesi-tanggal"
-              type="date"
-              value={tanggal}
-              onChange={(e) => setTanggal(e.target.value)}
-              required
-            />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="sesi-tanggal" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                    TANGGAL PELAKSANAAN <span className="text-[var(--aksen)]">*</span>
+                  </label>
+                  <input
+                    id="sesi-tanggal"
+                    type="date"
+                    value={tanggal}
+                    onChange={(e) => setTanggal(e.target.value)}
+                    required
+                    className="w-full text-sm rounded-sm border border-[var(--garis)] bg-[var(--kartu)] p-2.5 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                    STATUS CAPAIAN <span className="text-[var(--aksen)]">*</span>
+                  </label>
+                  <div className="grid grid-cols-3 gap-1.5 p-1 border border-[var(--garis)] rounded-sm bg-[var(--latar-lembut)]">
+                    {(['belum', 'sebagian', 'tercapai'] as Capaian[]).map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setStatus(c)}
+                        className={`text-xs py-1.5 font-medium rounded-sm transition-colors ${
+                          status === c
+                            ? c === 'tercapai'
+                              ? 'bg-emerald-700 text-white shadow-xs'
+                              : c === 'sebagian'
+                                ? 'bg-amber-700 text-white shadow-xs'
+                                : 'bg-red-700 text-white shadow-xs'
+                            : 'text-[var(--tinta-lembut)] hover:text-[var(--tinta)]'
+                        }`}
+                      >
+                        {LABEL[c]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="sesi-catatan" className="text-xs font-mono font-medium text-[var(--tinta)] flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-[var(--aksen)]" />
+                    CATATAN PERILAKU / EVALUASI (TERENKRIPSI)
+                  </label>
+                  <span className="text-[11px] font-mono text-[var(--tinta-lembut)]">Maks. 500 karakter</span>
+                </div>
+                <Textarea
+                  id="sesi-catatan"
+                  value={catatan}
+                  onChange={(e) => setCatatan(e.target.value)}
+                  maxLength={500}
+                  placeholder="Deskripsikan respon siswa, tingkat kemandirian, dan hambatan yang muncul selama latihan..."
+                  rows={4}
+                  className="text-sm"
+                />
+              </div>
+
+              <div className="pt-2">
+                <Button type="submit" disabled={menyimpan || !ppiId} className="w-full sm:w-auto">
+                  <Save className="w-4 h-4 mr-1.5" />
+                  {menyimpan ? 'Menyimpan Sesi...' : 'Simpan Catatan Sesi'}
+                </Button>
+              </div>
+            </form>
           </div>
-          <div>
-            <label htmlFor="sesi-status">Status capaian</label>
-            <select id="sesi-status" value={status} onChange={(e) => setStatus(e.target.value as Capaian)}>
-              <option value="belum">Belum</option>
-              <option value="sebagian">Sebagian</option>
-              <option value="tercapai">Tercapai</option>
-            </select>
+        </section>
+
+        {/* Kolom Kanan: Antrean Offline & Riwayat Sesi */}
+        <aside className="anim-muncul lg:col-span-5 space-y-6">
+          {/* Antrean Offline Card */}
+          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--garis)] pb-3">
+              <div className="flex items-center gap-2">
+                <CloudOff className="w-4 h-4 text-[var(--aksen)]" />
+                <h2 className="font-display text-base font-bold text-[var(--tinta)]">Antrean Offline Lokal</h2>
+              </div>
+              <Badge variant={antrean.length > 0 ? 'default' : 'outline'} className="font-mono text-xs">
+                {antrean.length} Menunggu
+              </Badge>
+            </div>
+
+            {antrean.length === 0 ? (
+              <p className="text-xs text-[var(--tinta-lembut)] py-2">
+                Semua sesi telah tersinkronisasi bersih dengan server.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-[var(--tinta-lembut)]">
+                  Data berikut tersimpan aman di browser Anda dan siap dikirimkan saat jaringan kembali:
+                </p>
+                <div className="space-y-2">
+                  {antrean.map((s) => (
+                    <div key={s.client_uuid} className="p-3 border border-[var(--garis)] rounded-sm text-xs bg-[var(--latar-lembut)]/30 space-y-1">
+                      <div className="flex items-center justify-between font-mono text-[11px]">
+                        <span>{formatTanggal(s.tanggal)}</span>
+                        <Badge variant="secondary" className="text-[10px] uppercase">
+                          {LABEL[s.status_capaian]}
+                        </Badge>
+                      </div>
+                      {s.catatan && <p className="text-[var(--tinta)] italic truncate">&ldquo;{s.catatan}&rdquo;</p>}
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void kirim()}
+                  disabled={mengirim || !daring}
+                  className="w-full text-xs font-mono"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${mengirim ? 'animate-spin' : ''}`} />
+                  {mengirim ? 'Mengirim Antrean...' : 'Sinkronkan Sekarang'}
+                </Button>
+              </div>
+            )}
           </div>
-        </div>
 
-        <div>
-          <label htmlFor="sesi-catatan">Catatan singkat</label>
-          <p className="hint" id="sesi-catatan-hint" style={{ margin: '0 0 0.25rem' }}>
-            Disimpan terenkripsi; cantumkan perilaku yang teramati, bukan penilaian pribadi.
-          </p>
-          <textarea
-            id="sesi-catatan"
-            value={catatan}
-            onChange={(e) => setCatatan(e.target.value)}
-            aria-describedby="sesi-catatan-hint"
-            maxLength={500}
-          />
-        </div>
+          {/* Riwayat Sesi Terkini */}
+          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
+            <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
+              <History className="w-4 h-4 text-[var(--aksen)]" />
+              <h2 className="font-display text-base font-bold text-[var(--tinta)]">Riwayat Sesi Terkini</h2>
+            </div>
 
-        <button type="submit" disabled={menyimpan || !ppiId}>
-          {menyimpan ? 'Menyimpan...' : 'Simpan sesi'}
-        </button>
-      </form>
-
-      <section className="kartu" aria-labelledby="judul-antrean">
-        <div className="baris renggang">
-          <h2 id="judul-antrean" style={{ margin: 0 }}>
-            Antrean offline: {antrean.length} sesi menunggu
-          </h2>
-          <button
-            type="button"
-            className="tombol-sekunder"
-            onClick={() => void kirim()}
-            disabled={mengirim || antrean.length === 0 || !daring}
-          >
-            {mengirim ? 'Mengirim...' : 'Kirim sekarang'}
-          </button>
-        </div>
-        {!daring && (
-          <p className="hint">Perangkat sedang luring; antrean terkirim otomatis saat jaringan kembali.</p>
-        )}
-        {antrean.length === 0 ? (
-          <p className="hint">Tidak ada sesi yang menunggu terkirim.</p>
-        ) : (
-          <div className="bisa-digulir">
-            <table>
-              <caption>Sesi yang menunggu terkirim di perangkat ini</caption>
-              <thead>
-                <tr>
-                  <th scope="col">Tanggal</th>
-                  <th scope="col">Capaian</th>
-                  <th scope="col">Catatan</th>
-                </tr>
-              </thead>
-              <tbody>
-                {antrean.map((s) => (
-                  <tr key={s.client_uuid}>
-                    <td>{formatTanggal(s.tanggal)}</td>
-                    <td>{LABEL[s.status_capaian]}</td>
-                    <td>{s.catatan || '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
-
-      <p className="hint">
-        Rekap capaian:{' '}
-        {memuat && jumlahSesi === 0
-          ? 'memuat...'
-          : jumlahSesi === 0
-            ? 'belum ada sesi tercatat.'
-            : `${jumlahSesi} sesi: ${rekap.belum} belum, ${rekap.sebagian} sebagian, ${rekap.tercapai} tercapai.`}
-      </p>
-
-      <section className="kartu" aria-labelledby="judul-riwayat">
-        <h2 id="judul-riwayat" style={{ marginTop: 0 }}>
-          Riwayat sesi
-        </h2>
-        {sesi.length === 0 ? (
-          <p className="hint">
-            {memuat ? 'Memuat riwayat...' : 'Belum ada sesi tercatat untuk PPI ini.'}
-          </p>
-        ) : (
-          <div className="bisa-digulir">
-            <table>
-              <caption>Riwayat sesi pendampingan, terbaru lebih dulu</caption>
-              <thead>
-                <tr>
-                  <th scope="col">Tanggal</th>
-                  <th scope="col">Capaian</th>
-                  <th scope="col">Catatan</th>
-                </tr>
-              </thead>
-              <tbody>
+            {sesi.length === 0 ? (
+              <p className="text-xs text-[var(--tinta-lembut)] py-3">Belum ada riwayat sesi yang tercatat di server.</p>
+            ) : (
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
                 {sesi.map((s) => (
-                  <tr key={s.id}>
-                    <td>{formatTanggal(s.tanggal)}</td>
-                    <td>
-                      <span className="lencana lencana-capaian">{LABEL[s.status_capaian]}</span>
-                    </td>
-                    <td>{s.catatan ?? (s.catatan_enc ? 'Memuat catatan...' : '—')}</td>
-                  </tr>
+                  <div key={s.id} className="p-3 border border-[var(--garis)] rounded-sm text-xs space-y-1.5 bg-transparent">
+                    <div className="flex items-center justify-between font-mono">
+                      <span className="text-[11px] text-[var(--tinta-lembut)] flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatTanggal(s.tanggal)}
+                      </span>
+                      <Badge
+                        variant={s.status_capaian === 'tercapai' ? 'default' : 'secondary'}
+                        className={`text-[10px] font-mono ${
+                          s.status_capaian === 'tercapai' ? 'bg-emerald-700 text-white' : ''
+                        }`}
+                      >
+                        {LABEL[s.status_capaian]}
+                      </Badge>
+                    </div>
+                    <p className="text-[var(--tinta)] leading-relaxed">
+                      {s.catatan ?? (s.catatan_enc ? 'Memuat catatan terenkripsi...' : 'Tanpa catatan tambahan.')}
+                    </p>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            )}
           </div>
-        )}
-      </section>
-    </>
+        </aside>
+      </div>
+    </div>
   );
 }

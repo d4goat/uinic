@@ -27,9 +27,12 @@ export default defineConfig([
     },
   },
   {
-    // Modul auth memang mengekspor Provider/hook/guard bersama komponen.
-    // Fast refresh hanya relevan saat menyunting, bukan saat build.
-    files: ['src/auth/**/*.tsx', 'src/lib/**/*.ts'],
-    rules: { 'react-refresh/only-export-components': 'off' },
-  },
+      // Modul auth memang mengekspor Provider/hook/guard bersama komponen.
+      // Komponen shadcn (src/components/ui) dibuat generator dan mengekspor
+      // varian cva di samping komponennya; menyuntingnya berarti ditimpa oleh
+      // `npx shadcn add` berikutnya.
+      // Fast refresh hanya relevan saat menyunting, bukan saat build.
+      files: ['src/auth/**/*.tsx', 'src/lib/**/*.ts', 'src/components/ui/**/*.tsx'],
+      rules: { 'react-refresh/only-export-components': 'off' },
+    },
 ])

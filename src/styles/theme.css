@@ -1,164 +1,772 @@
-/* Token desain PPI-Link.
-   Aturan yang dipegang seluruh halaman:
-   - Dua warna teks saja: --tinta (utama) dan --tinta-lembut (sekunder). Keduanya
-     >= 4,5:1 di atas --latar (WCAG 2.1 AA, PRD §7).
-   - Tanpa font dari jaringan: perangkat sekolah sering offline dan proyektor
-     memuat font lokal lebih cepat.
-   - Fokus keyboard selalu terlihat; tidak ada outline yang dihapus.
-   - Semua ukuran dalam rem supaya zoom peramban bekerja. */
+/* Sistem desain PPI-Link — Tailwind CSS v4 (konfigurasi CSS-first lewat @theme).
+ *
+ * Arah: editorial Swiss. Kisi asimetris, garis rambut 1px yang dibiarkan terbuka,
+ * ruang negatif lega, tipografi kontras tinggi.
+ *
+ * Aturan yang dipegang seluruh halaman (jangan dilanggar tanpa alasan tertulis):
+ * 1. SKALA JARAK: hanya 4/8/12/16/24/32/48/64/96 px (kisi 4px Tailwind).
+ *    Jangan menulis nilai jarak di luar daftar itu.
+ * 2. DUA WARNA TEKS: --color-tinta dan --color-tinta-lembut. Keduanya >= 4,5:1 di
+ *    atas --color-latar dan --color-latar-lembut (WCAG 2.1 AA, PRD §7).
+ *    Dijaga oleh `npm run cek:kontras` — bukan oleh ingatan.
+ * 3. TANPA FONT DARI JARINGAN: seluruh font dibundel dari node_modules
+ *    (@fontsource-variable/*). Perangkat sekolah sering luring, dan CSP di
+ *    index.html hanya mengizinkan font dari asal yang sama (font-src 'self').
+ * 4. FOKUS KEYBOARD SELALU TERLIHAT; tidak ada outline yang dihapus.
+ * 5. SEMUA UKURAN DALAM rem supaya zoom peramban bekerja. Mode teks besar
+ *    menaikkan font-size akar, bukan menambal satu per satu.
+ * 6. Gerak hanya di dalam gsap.matchMedia('(prefers-reduced-motion: no-preference)')
+ *    atau dijaga media query yang sama di bagian bawah berkas ini.
+ *    Lihat src/components/SmoothScrollProvider.tsx.
+ */
 
-:root {
-  --tinta: #16202c;          /* 15,6:1 di atas --latar */
-  --tinta-lembut: #4a5a6a;   /* 7,4:1  di atas --latar */
-  --latar: #ffffff;
-  --latar-lembut: #f4f6f8;
-  --garis: #cfd7de;
-  --aksi: #14508f;           /* putih di atas ini 8,0:1 */
-  --aksi-gelap: #0e3a68;
-  --peringatan: #8a3b00;
-  --berhasil: #1d5c33;
-  --galat: #a11b1b;
-  --radius: 0.5rem;
-  --jarak: 1rem;
-  --lebar-baca: 60ch;        /* batas lebar teks agar mudah dibaca */
-  font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  font-size: 100%;
-  color-scheme: light;
+@import 'tailwindcss';
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------------------------------------------------- token ---
+ * Palet mentah + peran semantiknya. Namespace @theme milik Tailwind v4:
+ * --color-* -> utilitas bg-/text-/border-, --font-* -> font-display/sans/mono.
+ * --font-sans menimpa font bawaan dokumen (preflight memakai --default-font-family). */
+@theme {
+  /* Kertas & tinta. Kartu sedikit lebih terang dari latar supaya kedalaman
+     dibangun dari nada, bukan dari bayangan. */
+  --color-latar: #f7f6f2;        /* Warm Alabaster */
+  --color-latar-lembut: #efede6;
+  --color-kartu: #ffffff;
+  --color-tinta: #111111;        /* Obsidian Ink — 17,5:1 di atas latar */
+  --color-tinta-lembut: #57534a; /*  7,1:1 di atas latar */
+  --color-garis: #dad5c9;        /* garis rambut struktural (pemisah, bukan batas kontrol) */
+  --color-garis-kuat: #8a8578;   /* batas kontrol: 3,4:1 — WCAG 1.4.11 */
+
+  /* Satu aksen berdaya tinggi: vermilion oksida. Dipakai untuk tanda merek,
+     penanda bagian, garis aktif, dan bidang tombol utama. */
+  --color-aksen: #b8340f;        /* 5,5:1 di atas latar; putih di atasnya 5,9:1 */
+  --color-aksi: #123c69;         /* tautan & tombol; putih di atasnya 11,2:1 */
+  --color-aksi-gelap: #0f2c4f;   /* isian arah saat hover */
+
+  /* Status. Semuanya >= 4,5:1 di atas latar dan latar-lembut, dan selalu
+     disertai label teks (warna tidak pernah jadi satu-satunya pembeda). */
+  --color-berhasil: #175c31;
+  --color-peringatan: #8a3b00;
+  --color-galat: #8c1d1d;
+
+  /* Pasangan tipografi: grotesk rapat untuk tajuk, humanis netral untuk badan
+     bacaan, monospace untuk metadata/tag/penghitung/stempel waktu. */
+  --font-display: 'Archivo Variable', Archivo, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Inter Variable', Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
 }
 
-/* Mode siswa & materi: preferensi guru disimpan di <html data-mode="...">. */
+/* Nama pendek lama tetap hidup: halaman dan skrip lain memakai var(--garis),
+   var(--aksi), dst. Alias satu arah (pendek -> token), jadi sumber kebenaran
+   tetap @theme — dan mode kontras di bawah cukup menimpa --color-*. */
+:root {
+  --latar: var(--color-latar);
+  --latar-lembut: var(--color-latar-lembut);
+  --kartu: var(--color-kartu);
+  --tinta: var(--color-tinta);
+  --tinta-lembut: var(--color-tinta-lembut);
+  --garis: var(--color-garis);
+  --garis-kuat: var(--color-garis-kuat);
+  --aksi: var(--color-aksi);
+  --aksi-gelap: var(--color-aksi-gelap);
+  --aksen: var(--color-aksen);
+  --berhasil: var(--color-berhasil);
+  --peringatan: var(--color-peringatan);
+  --galat: var(--color-galat);
+  --radius: 2px;                 /* siku mikro — bukan pil, bukan 8px bawaan */
+  --lebar-baca: 60ch;            /* batas lebar teks badan */
+  --lebar-panggung: 82rem;       /* batas lebar kisi lebar */
+  color-scheme: light;
+
+  /* --- jembatan shadcn ------------------------------------------------
+     Komponen shadcn di src/components/ui memakai nama semantik ini. Semuanya
+     ditunjuk ke token di atas, jadi shadcn ikut palet PPI-Link — bukan
+     membawa tampilan netral bawaannya sendiri. Nilainya ikut berubah di mode
+     kontras tinggi karena alias ini menunjuk --color-*, bukan menyalin. */
+  --background: var(--color-latar);
+  --foreground: var(--color-tinta);
+  --card: var(--color-kartu);
+  --card-foreground: var(--color-tinta);
+  --popover: var(--color-kartu);
+  --popover-foreground: var(--color-tinta);
+  --primary: var(--color-aksi);
+  --primary-foreground: #ffffff;        /* putih di atas --aksi = 11,2:1 */
+  --secondary: var(--color-latar-lembut);
+  --secondary-foreground: var(--color-tinta);
+  --muted: var(--color-latar-lembut);
+  --muted-foreground: var(--color-tinta-lembut);
+  --accent: var(--color-latar-lembut);
+  --accent-foreground: var(--color-tinta);
+  --destructive: var(--color-galat);
+  --border: var(--color-garis);
+  --input: var(--color-garis-kuat);
+  --ring: var(--color-aksi);
+  --chart-1: var(--color-aksi);
+  --chart-2: var(--color-aksen);
+  --chart-3: var(--color-berhasil);
+  --chart-4: var(--color-peringatan);
+  --chart-5: var(--color-galat);
+  --sidebar: var(--color-latar-lembut);
+  --sidebar-foreground: var(--color-tinta);
+  --sidebar-primary: var(--color-aksi);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--color-latar);
+  --sidebar-accent-foreground: var(--color-tinta);
+  --sidebar-border: var(--color-garis);
+  --sidebar-ring: var(--color-aksi);
+}
+
+/* Mode siswa & materi: preferensi guru disimpan di <html data-mode="...">.
+   Menimpa --color-* supaya utilitas Tailwind DAN alias di atas ikut berubah. */
 html[data-mode='teks-besar'] { font-size: 137.5%; }
 html[data-mode='kontras-tinggi'] {
-  --tinta: #000000;
-  --tinta-lembut: #1a1a1a;
-  --latar: #ffffff;
-  --latar-lembut: #ffffff;
-  --garis: #000000;
+  --color-latar: #ffffff;
+  --color-latar-lembut: #ffffff;
+  --color-kartu: #ffffff;
+  --color-tinta: #000000;
+  --color-tinta-lembut: #1a1a1a;
+  --color-garis: #000000;
+  --color-garis-kuat: #000000;
+  --color-aksi: #0b2f5c;
+  --color-aksen: #8f2708;
 }
-html[data-mode='teks-besar'] .materi-teks { line-height: 2; letter-spacing: 0.02em; }
-html[data-mode='teks-besar'] .materi-teks p { margin-block: 1.2em; }
+/* Tekstur dan kursor buatan mati di mode kontras tinggi: nada tambahan hanya
+   mengganggu pembaca yang memilih kontras maksimum. */
+html[data-mode='kontras-tinggi'] .butir,
+html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
 
-* { box-sizing: border-box; }
+/* -------------------------------------------------------------------- dasar --- */
+@layer base {
+  * { min-width: 0;
+    @apply border-border outline-ring/50; }        /* kisi asimetris tidak boleh meluber */
 
-body {
-  margin: 0;
-  background: var(--latar);
-  color: var(--tinta);
-  line-height: 1.55;
+  body {
+    background: var(--latar);
+    color: var(--tinta);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.55;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    @apply bg-background text-foreground;
+  }
+
+  a { color: var(--aksi); text-underline-offset: 0.18em; }
+  a:hover { color: var(--aksi-gelap); }
+
+  :focus-visible {
+    outline: 3px solid var(--aksi);
+    outline-offset: 2px;
+    border-radius: var(--radius);
+  }
+
+  ::selection { background: var(--aksen); color: #fff; }
+
+  /* Preflight Tailwind menghapus margin dan gaya daftar; kembalikan untuk isi
+     bacaan. Daftar yang memang tidak berbutir menimpanya sendiri (inline). */
+  p { margin: 0 0 0.75rem; }
+  p:last-child { margin-bottom: 0; }
+  ul, ol { margin: 0 0 0.75rem; padding-left: 1.35rem; list-style: revert; }
+  li { margin-bottom: 0.25rem; }
+  blockquote { margin: 0 0 1.5rem; padding-left: 1.25rem; border-left: 3px solid var(--aksen); }
+  hr { border: 0; border-top: 1px solid var(--garis); margin: 2rem 0; }
+  code, kbd, samp { font-family: var(--font-mono); font-size: 0.9em; }
+  img, svg, video { max-width: 100%; height: auto; }
+
+  /* Ikon Lucide selalu 1,5px — garis rambut yang sama dengan kisi. */
+  svg.lucide { stroke-width: 1.5; flex: none; }
+  html {
+    @apply font-sans;
+  }
 }
 
-a { color: var(--aksi); }
-a:hover { color: var(--aksi-gelap); }
+/* ----------------------------------------------------------------- komponen --- */
+@layer components {
+  /* --- tipografi editorial ---
+     Tajuk: grotesk, tracking rapat, leading nyaris menempel. */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--tinta);
+    text-wrap: balance;
+  }
+  h1 {
+    font-size: clamp(1.75rem, 3.4vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    margin: 0 0 1rem;
+    max-width: 34ch;
+  }
+  h2 {
+    font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 3rem 0 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--garis);   /* garis rambut struktural dibiarkan terbuka */
+  }
+  h3 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 1.5rem 0 0.5rem;
+  }
+  h4 { font-size: 0.9375rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
+  /* Di dalam kartu, tajuk pertama tidak perlu garis pemisah lagi. */
+  .kartu > h2:first-child, .kartu > h3:first-child, .kartu > h4:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
 
-:focus-visible {
-  outline: 3px solid var(--aksi);
-  outline-offset: 2px;
-  border-radius: 2px;
+  p, li { max-width: var(--lebar-baca); }
+  .lede {
+    font-size: clamp(1.0625rem, 1.35vw, 1.25rem);
+    line-height: 1.5;
+    color: var(--tinta-lembut);
+    margin: 0 0 2rem;
+    max-width: 52ch;
+  }
+  /* Metadata, tag, penghitung, stempel waktu — selalu monospace. */
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tinta-lembut);
+  }
+  .hint { color: var(--tinta-lembut); font-size: 0.875rem; line-height: 1.45; margin: 0 0 0.5rem; }
+
+  /* --- kisi & panggung --- */
+  .wadah { max-width: var(--lebar-baca); margin-inline: auto; padding: 2.5rem 1.25rem 6rem; }
+  .wadah-lebar { max-width: var(--lebar-panggung); }
+  .baris { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+  .renggang { justify-content: space-between; }
+  .kisi-swiss {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1px;                                /* satu garis rambut di antara sel */
+    background: var(--garis);
+    border: 1px solid var(--garis);
+    margin-bottom: 2rem;
+  }
+  .kisi-swiss > * { background: var(--latar); padding: 1.5rem; margin: 0; max-width: none; }
+
+  /* Tautan lompat: satu-satunya jalan pintas keyboard yang terlihat di layar. */
+  .lompati-ke-konten {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 80;
+    background: var(--aksi);
+    color: #fff;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    text-decoration: none;
+  }
+  .lompati-ke-konten:focus { left: 0.5rem; top: 0.5rem; color: #fff; }
+
+  /* --- bilah --- */
+  .bilah {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--garis);
+    background: var(--latar);
+  }
+  .bilah-merek {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.125rem;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  /* Titik aksen merek. */
+  .bilah-merek::after {
+    content: '';
+    width: 0.4rem;
+    height: 0.4rem;
+    background: var(--aksen);
+    align-self: center;
+  }
+  .bilah nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+  .bilah nav a {
+    position: relative;
+    text-decoration: none;
+    color: var(--tinta-lembut);
+    padding: 0.25rem 0;
+    font-size: 0.9375rem;
+    transition: color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bilah nav a:hover { color: var(--tinta); }
+  /* Penanda halaman aktif: garis yang terisi dari kiri. */
+  .bilah nav a::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--aksen);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bilah nav a:hover::after { transform: scaleX(1); }
+  .bilah nav a[aria-current='page'] { color: var(--tinta); font-weight: 600; }
+  .bilah nav a[aria-current='page']::after { transform: scaleX(1); background: var(--tinta); }
+  .bilah-akhir { margin-left: auto; display: flex; gap: 1rem; align-items: center; }
+
+  /* --- kartu --- */
+  .kartu {
+    border: 1px solid var(--garis);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: var(--kartu);
+  }
+  .kartu > :last-child { margin-bottom: 0; }
+  /* Kartu yang seluruhnya sebuah tautan: isian arah tipis saat hover. */
+  .kartu-tautan {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background-image: linear-gradient(var(--latar-lembut), var(--latar-lembut));
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
+    background-position: 0 0;
+    transition: background-size 0.45s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+  }
+  .kartu-tautan:hover,
+  .kartu-tautan:focus-visible { background-size: 100% 100%; border-color: var(--garis-kuat); color: inherit; }
+
+  /* --- bentuk --- */
+  label { display: block; font-weight: 600; font-size: 0.9375rem; margin-bottom: 0.25rem; }
+  input, select, textarea {
+    font: inherit;
+    font-size: 0.9375rem;
+    color: var(--tinta);
+    background: var(--kartu);
+    border: 1px solid var(--garis-kuat);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.625rem;
+    width: 100%;
+    max-width: 28rem;
+    transition: border-color 0.2s ease;
+  }
+  input:hover, select:hover, textarea:hover { border-color: var(--tinta-lembut); }
+  textarea { max-width: 100%; min-height: 5.5rem; line-height: 1.55; }
+  input[type='checkbox'], input[type='radio'] {
+    width: 1.15rem;
+    height: 1.15rem;
+    min-width: 1.15rem;
+    accent-color: var(--aksi);   /* kontrol asli platform, bukan kotak buatan */
+  }
+  label.pilihan { display: flex; gap: 0.75rem; align-items: flex-start; font-weight: 400; font-size: 1rem; }
+  label.pilihan input { margin-top: 0.2rem; }
+  .pilihan-teks { display: block; }
+  .pilihan-teks strong { display: block; font-weight: 600; }
+  label.inline { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 400; margin: 0; }
+
+  /* Ukuran sentuh (PRD §4, P0): di perangkat sentuh setiap sasaran minimal
+     44x44 px. Padding bawaan hanya ~41 px di ponsel. */
+  @media (pointer: coarse) {
+    button, .tombol, input, select, textarea, label.pilihan { min-height: 2.75rem; }
+  }
+
+  button, .tombol {
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--radius);
+    padding: 0.5rem 0.875rem;
+    border: 1px solid var(--aksi);
+    color: #fff;
+    background-color: var(--aksi);
+    background-image: linear-gradient(var(--aksi-gelap), var(--aksi-gelap));
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
+    background-position: 0 0;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+  }
+  button:hover, .tombol:hover { background-size: 100% 100%; border-color: var(--aksi-gelap); color: #fff; }
+  button[disabled] { opacity: 0.55; cursor: progress; }
+  .tombol-sekunder {
+    background-color: transparent;
+    background-image: linear-gradient(var(--latar-lembut), var(--latar-lembut));
+    color: var(--aksi);
+    border-color: var(--garis-kuat);
+  }
+  .tombol-sekunder:hover { color: var(--aksi-gelap); border-color: var(--aksi); }
+  .tombol-bahaya {
+    background-color: transparent;
+    background-image: linear-gradient(#fdf3f3, #fdf3f3);
+    color: var(--galat);
+    border-color: var(--galat);
+  }
+  .tombol-bahaya:hover { color: #fff; background-image: linear-gradient(var(--galat), var(--galat)); border-color: var(--galat); }
+  .tombol-kecil { padding: 0.3rem 0.625rem; font-size: 0.8125rem; }
+
+  /* Tautan teks dengan garis bawah yang terisi dari kiri saat hover. */
+  .tautan-arah {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    padding-bottom: 1px;
+    background-image: linear-gradient(var(--aksen), var(--aksen));
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    transition: background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .tautan-arah:hover, .tautan-arah:focus-visible { background-size: 100% 1px; }
+
+  /* --- tabel --- */
+  table { border-collapse: collapse; width: 100%; }
+  caption {
+    text-align: left;
+    padding-bottom: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-lembut);
+  }
+  th, td { text-align: left; padding: 0.625rem 0.75rem; border-bottom: 1px solid var(--garis); vertical-align: top; }
+  th {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-lembut);
+    border-bottom-color: var(--garis-kuat);
+  }
+  tbody tr { transition: background-color 0.2s ease; }
+  tbody tr:hover { background-color: var(--latar-lembut); }
+  .bisa-digulir { overflow-x: auto; }
+
+  /* --- tag --- */
+  .lencana {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.1rem 0.4rem;
+    border: 1px solid var(--garis-kuat);
+    border-radius: var(--radius);
+    color: var(--tinta-lembut);
+    white-space: nowrap;
+  }
+  .lencana-kuat { border-color: var(--berhasil); color: var(--berhasil); }
+  .lencana-sedang { border-color: var(--aksi); color: var(--aksi); }
+  .lencana-lemah { border-color: var(--peringatan); color: var(--peringatan); }
+  .lencana-capaian { border-color: var(--tinta-lembut); }
+
+  /* --- pesan status ---
+     Label monospace di atas pesan: jenis pesan tidak pernah ditandai warna saja. */
+  .pesan {
+    border: 1px solid var(--garis);
+    border-left: 3px solid var(--aksi);
+    background: var(--latar-lembut);
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    max-width: var(--lebar-baca);
+  }
+  .pesan::before {
+    content: 'INFO';
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    color: var(--aksi);
+    margin-bottom: 0.25rem;
+  }
+  .pesan-galat { border-left-color: var(--galat); }
+  .pesan-galat::before { content: 'GALAT'; color: var(--galat); }
+  .pesan-berhasil { border-left-color: var(--berhasil); }
+  .pesan-berhasil::before { content: 'BERHASIL'; color: var(--berhasil); }
+  .pesan-peringatan { border-left-color: var(--peringatan); }
+  .pesan-peringatan::before { content: 'PERHATIAN'; color: var(--peringatan); }
+
+  /* --- mode siswa (F11) --- */
+  .langkah {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid var(--garis-kuat);
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
+    font-size: 1.15rem;
+    max-width: none;
+  }
+  .langkah[data-selesai='true'] { border-color: var(--berhasil); background: var(--kartu); }
+  .langkah-ikon { font-size: 1.9rem; line-height: 1; width: 2.4rem; text-align: center; }
+  .langkah-nomor {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--tinta-lembut);
+  }
+
+  /* --- bahan bacaan (F10) --- */
+  .materi-teks { font-size: 1.1875rem; line-height: 1.7; }
+  .materi-teks p { margin-block: 0.9em; }
+  .materi-teks p, .materi-teks li { max-width: 46ch; }
+  .pecah-kalimat p, .pecah-kalimat li { max-width: 42ch; }
+  html[data-mode='teks-besar'] .materi-teks { line-height: 2; letter-spacing: 0.02em; }
+  html[data-mode='teks-besar'] .materi-teks p { margin-block: 1.2em; }
+
+  /* --- lapisan sentuh khas: butir film + kursor aksen --- */
+  .butir {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.035;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Kursor bawaan selalu tetap terlihat; ini cincin pendamping, bukan pengganti. */
+  .kursor-aksen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: -0.75rem 0 0 -0.75rem;
+    border: 1px solid var(--aksen);
+    border-radius: 999px;
+    pointer-events: none;
+    z-index: 70;
+    opacity: 0;
+    transition: opacity 0.25s ease, width 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      height 0.25s cubic-bezier(0.22, 1, 0.36, 1), margin 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .kursor-aksen[data-aktif='true'] { opacity: 1; }
+  .kursor-aksen[data-tumbuh='true'] {
+    width: 3rem;
+    height: 3rem;
+    margin: -1.5rem 0 0 -1.5rem;
+    background: color-mix(in srgb, var(--aksen) 12%, transparent);
+  }
+
+  /* --- hero (Beranda) ---
+     Kisi asimetris: tajuk tujuh kolom, kolom metadata empat kolom dirapatkan ke
+     kanan dengan garis rambut vertikal. */
+  .hero { padding: 3rem 0 1.5rem; border-bottom: 1px solid var(--garis); margin-bottom: 2rem; }
+  .hero-kisi { display: grid; gap: 1.5rem; grid-template-columns: 1fr; }
+  @media (min-width: 60rem) {
+    .hero-kisi { grid-template-columns: 7fr 4fr; gap: 2rem; }
+    .hero-rail { border-left: 1px solid var(--garis); padding-left: 2rem; }
+  }
+  .judul-hero {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6.2vw, 5rem);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 0.92;
+    margin: 0 0 1.5rem;
+    max-width: 20ch;
+  }
+  .hero-meta { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
+  .hero-meta li { display: grid; gap: 0.1rem; margin: 0; max-width: none; }
+  .hero-meta strong { font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 500; }
+
+  /* Alur PPI: garis waktu bernomor, satu langkah per baris. */
+  .alur { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--garis); }
+  .alur li {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--garis);
+    margin: 0;
+    max-width: none;
+  }
+  .alur-nomor { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--aksen); padding-top: 0.2rem; }
+  .alur h3 { margin: 0 0 0.25rem; }
+
+  /* Bilah kemajuan gulir: garis rambut 2px yang terisi sesuai posisi baca. */
+  .kemajuan {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    height: 2px;
+    transform-origin: left;
+    transform: scaleX(0);
+    background: var(--aksen);
+    z-index: 65;
+    pointer-events: none;
+  }
 }
 
-/* Hanya untuk pembaca layar. */
-.sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+/* ------------------------------------------------------------------ utilitas --- */
+@layer utilities {
+  /* Wadah baris tersembunyi untuk tajuk yang dibuka berjenjang (RevealText). */
+  .tudung-baris { display: block; overflow: hidden; }
+  .tudung-baris > span { display: block; }
 }
 
-.lompati-ke-konten {
-  position: absolute; left: -9999px; top: 0; background: var(--aksi); color: #fff;
-  padding: 0.6rem 1rem; z-index: 20;
+/* --------------------------------------------------------- gerak & cetak ----- */
+/* Semua transisi dekoratif mati bila pengguna memintanya. Struktur tetap utuh:
+   tidak ada elemen yang disembunyikan karena animasinya tidak dijalankan. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .kursor-aksen { display: none; }
 }
-.lompati-ke-konten:focus { left: 0.5rem; top: 0.5rem; }
 
-/* ------------------------------------------------------------------ tata letak */
-.bilah { display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center;
-  padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--garis); background: var(--latar-lembut); }
-.bilah-merek { font-weight: 700; letter-spacing: 0.01em; }
-.bilah nav { display: flex; gap: 1rem; flex-wrap: wrap; }
-.bilah nav a { text-decoration: none; padding: 0.25rem 0; border-bottom: 2px solid transparent; }
-.bilah nav a[aria-current='page'] { border-bottom-color: var(--aksi); font-weight: 600; }
-.bilah-akhir { margin-left: auto; display: flex; gap: 0.75rem; align-items: center; }
+/* ------------------------------------------- bagian interaktif landing -------
+   Ilustrasi "Anatomi satu saran akomodasi" (src/components/AnatomiSaran.tsx).
+   Dua pemilik transform yang berbeda dan tidak boleh ditukar:
+   .lapisan-bungkus memakai transform CSS untuk pembukaan berjenjang,
+   .lapisan dipegang GSAP untuk paralaks penunjuk — kalau tertukar, keduanya
+   saling menimpa dan gerak jadi bergetar. */
+@layer components {
+  .panggung {
+    display: grid;
+    gap: 1px;                       /* garis rambut antar lapis, bukan border per kartu */
+    background: var(--garis);
+    border: 1px solid var(--garis);
+  }
+  .lapisan-bungkus {
+    background: var(--kartu);
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .lapisan-bungkus[data-tampil='false'] { opacity: 0; transform: translateY(1.5rem); }
+  /* Kartu di dalam panggung: siku tajam, karena garisnya datang dari kisi. */
+  .lapisan { border-radius: 0; }
 
-.wadah { max-width: var(--lebar-baca); margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
-.wadah-lebar { max-width: 78rem; }
-
-h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
-h2 { font-size: 1.15rem; margin: 1.75rem 0 0.5rem; }
-h3 { font-size: 1rem; margin: 1.25rem 0 0.35rem; }
-p, li { max-width: var(--lebar-baca); }
-.lede { color: var(--tinta-lembut); margin-top: 0; }
-
-/* -------------------------------------------------------------------- kartu */
-.kartu { border: 1px solid var(--garis); border-radius: var(--radius);
-  padding: 1rem; margin-bottom: 1rem; background: var(--latar); }
-.kartu > :last-child { margin-bottom: 0; }
-
-.baris { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
-.renggang { justify-content: space-between; }
-
-/* ------------------------------------------------------------------- form --- */
-label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
-.hint { color: var(--tinta-lembut); font-size: 0.9rem; margin: 0 0 0.5rem; }
-input, select, textarea {
-  font: inherit; color: var(--tinta); background: var(--latar);
-  border: 1px solid var(--garis); border-radius: 0.375rem; padding: 0.5rem 0.6rem;
-  width: 100%; max-width: 28rem;
+  /* Satu baris langkah = satu tombol: tetikus, sentuh, dan papan tuts. */
+  .langkah-pilih {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    width: 100%;
+    padding: 1.25rem 0.25rem;
+    border: 0;
+    border-top: 1px solid var(--garis);
+    border-radius: 0;
+    text-align: left;
+    color: inherit;
+    background-color: transparent;
+    background-image: none;
+    cursor: pointer;
+  }
+  .langkah-pilih:last-child { border-bottom: 1px solid var(--garis); }
+  .langkah-pilih:hover,
+  .langkah-pilih:focus-visible,
+  .langkah-pilih[aria-current='step'] {
+    background-image: linear-gradient(var(--latar-lembut), var(--latar-lembut));
+    background-size: 100% 100%;
+  }
 }
-textarea { max-width: 100%; min-height: 5rem; }
-input[type='checkbox'], input[type='radio'] { width: 1.15rem; height: 1.15rem; min-width: 1.15rem; }
-label.pilihan { display: flex; gap: 0.6rem; align-items: flex-start; font-weight: 400; }
-label.pilihan input { margin-top: 0.25rem; }
-.pilihan-teks { display: block; }
-.pilihan-teks strong { display: block; }
 
-button, .tombol {
-  font: inherit; cursor: pointer; border-radius: 0.375rem; padding: 0.5rem 0.9rem;
-  border: 1px solid var(--aksi); background: var(--aksi); color: #fff;
-  text-decoration: none; display: inline-block;
-}
-button:hover, .tombol:hover { background: var(--aksi-gelap); border-color: var(--aksi-gelap); color: #fff; }
-button[disabled] { opacity: 0.6; cursor: progress; }
-.tombol-sekunder { background: var(--latar); color: var(--aksi); border-color: var(--garis); }
-.tombol-sekunder:hover { background: var(--latar-lembut); color: var(--aksi-gelap); }
-.tombol-bahaya { border-color: var(--galat); background: var(--latar); color: var(--galat); }
-.tombol-bahaya:hover { background: #fdf0f0; color: var(--galat); }
-
-label.inline { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 400; margin: 0; }
-.tombol-kecil { padding: 0.3rem 0.6rem; font-size: 0.9rem; }
-
-/* ------------------------------------------------------------------ tabel --- */
-table { border-collapse: collapse; width: 100%; }
-caption { text-align: left; color: var(--tinta-lembut); padding-bottom: 0.4rem; }
-th, td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--garis); vertical-align: top; }
-th { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--tinta-lembut); }
-.bisa-digulir { overflow-x: auto; }
-
-/* ------------------------------------------------------------------ label --- */
-.lencana { display: inline-block; font-size: 0.8rem; padding: 0.1rem 0.45rem;
-  border: 1px solid var(--garis); border-radius: 999px; color: var(--tinta-lembut); white-space: nowrap; }
-.lencana-kuat { border-color: var(--berhasil); color: var(--berhasil); }
-.lencana-sedang { border-color: var(--aksi); color: var(--aksi); }
-.lencana-lemah { border-color: var(--peringatan); color: var(--peringatan); }
-.lencana-capaian { border-color: var(--tinta-lembut); }
-
-.pesan { border-left: 4px solid var(--aksi); background: var(--latar-lembut);
-  padding: 0.6rem 0.8rem; margin: 0.75rem 0; }
-.pesan-galat { border-left-color: var(--galat); color: var(--galat); }
-.pesan-berhasil { border-left-color: var(--berhasil); color: var(--berhasil); }
-.pesan-peringatan { border-left-color: var(--peringatan); color: var(--peringatan); }
-
-/* ------------------------------------------------------ mode siswa (F11) ---- */
-.langkah { display: flex; gap: 0.9rem; align-items: center; padding: 0.85rem;
-  border: 2px solid var(--garis); border-radius: var(--radius); margin-bottom: 0.6rem;
-  font-size: 1.15rem; }
-.langkah[data-selesai='true'] { border-color: var(--berhasil); }
-.langkah-ikon { font-size: 1.9rem; line-height: 1; width: 2.4rem; text-align: center; }
-.langkah-nomor { color: var(--tinta-lembut); font-size: 0.9rem; }
-
-.materi-teks { font-size: 1.15rem; }
-.materi-teks p { margin-block: 0.8em; }
-.pecah-kalimat p { max-width: 42ch; }
-
-/* --------------------------------------------------------------- cetak ------ */
 @media print {
-  .bilah, button, .tombol { display: none !important; }
-  .wadah { max-width: none; }
+  .bilah, button, .tombol, .butir, .kursor-aksen, .kemajuan { display: none !important; }
+  .wadah, .wadah-lebar { max-width: none; }
+  body { background: #fff; }
+}
+@theme inline {
+  /* Tipografi tetap pasangan PPI-Link (Archivo untuk tajuk, Inter untuk badan);
+     font Geist bawaan preset tidak dipakai. --font-sans sudah didefinisikan di
+     blok @theme di atas, jadi tidak diulang di sini. */
+  --font-heading: var(--font-display);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+/* Varian gelap bawaan CLI shadcn: tidak dipakai produk ini (terang + mode
+   kontras tinggi, PRD §7), tapi dibiarkan utuh supaya `shadcn add` berikutnya
+   tidak perlu menulis ulang blok ini. */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 }
