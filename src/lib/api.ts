@@ -22,8 +22,15 @@ const rpc = <T>(fn: string, args: Record<string, unknown>) =>
   u<T>(supabase.rpc(fn, args) as unknown as PromiseLike<unknown>);
 
 // ------------------------------------------------------------ identitas -----
-export const ambilProfil = async (): Promise<Profil | null> =>
-  u<Profil | null>(supabase.from('profiles').select('*').maybeSingle());
+/**
+ * Profil pengguna yang sedang masuk. WAJIB memfilter dengan id: RLS hanya
+ * menyaring baris, tidak menjamin tepat satu baris tersisa — policy
+ * `profiles_self_read` sengaja membiarkan admin melihat semua profil, sehingga
+ * tanpa filter `.maybeSingle()` menerima 5 baris dan gagal dengan
+ * "JSON object requested, multiple (or no) rows returned" (PGRST116).
+ */
+export const ambilProfil = async (id: string): Promise<Profil | null> =>
+  u<Profil | null>(supabase.from('profiles').select('*').eq('id', id).maybeSingle());
 
 export const daftarSekolah = (): Promise<Sekolah[]> =>
   u<Sekolah[]>(supabase.from('schools').select('*').order('nama'));

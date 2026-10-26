@@ -46,13 +46,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfil(null);
         return;
       }
+      const id = hasil.data.session.user.id;
 
-      const p = await ambilProfil();
+      const p = await ambilProfil(id);
       if (!p) {
         // Percobaan kedua: JWT kadang belum terpasang di permintaan pertama
         // sesaat setelah sign-in, dan RLS menyaring semua baris -> terbaca null.
         await new Promise((r) => setTimeout(r, 700));
-        const ulang = await ambilProfil();
+        const ulang = await ambilProfil(id);
         if (ulang) {
           setProfil(ulang);
           return;
