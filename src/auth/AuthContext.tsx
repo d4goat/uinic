@@ -49,8 +49,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const p = await ambilProfil();
       if (!p) {
-        // Sesi sah tetapi tidak ada baris profil (mis. akun dibuat di luar seed).
-        setGalat('Sesi aktif, tetapi profil pengguna tidak ditemukan. Jalankan `npm run seed` atau hubungi admin sekolah.');
+        // Percobaan kedua: JWT kadang belum terpasang di permintaan pertama
+        // sesaat setelah sign-in, dan RLS menyaring semua baris -> terbaca null.
+        await new Promise((r) => setTimeout(r, 700));
+        const ulang = await ambilProfil();
+        if (ulang) {
+          setProfil(ulang);
+          return;
+        }
+        // Sesi sah tetapi tidak ada baris profil yang bisa dibaca.
+        setGalat(
+          'Sesi aktif, tetapi profil pengguna tidak dapat dibaca (RLS menolak barisnya). ' +
+          'Jalankan `npm run seed`, lalu masuk ulang.',
+        );
         setProfil(null);
         return;
       }

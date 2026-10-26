@@ -8,7 +8,7 @@ import RevealText from '../components/RevealText';
 import Magnetik from '../components/Magnetik';
 
 export default function Login() {
-  const { profil, siap, segarkan } = useAuth();
+  const { profil, siap, galat: galatAuth, segarkan } = useAuth();
   const [email, setEmail] = useState('');
   const [sandi, setSandi] = useState('');
   const [galat, setGalat] = useState<string | null>(null);
@@ -75,9 +75,13 @@ export default function Login() {
           <div className="hero-rail">
             <h2 className="meta mt-0 border-t-0 pt-0">Kredensial</h2>
 
-            {(galat || galatSesi) && (
+            {(galat || galatSesi || galatAuth) && (
                           <p className="pesan pesan-galat" role="alert">
-                            {galat ?? `Pemeriksaan sesi sebelumnya gagal: ${galatSesi}`}
+                            {/* Kegagalan setelah login (mis. profil tidak terbaca) HARUS terlihat:
+                                sebelumnya pesannya hanya tersimpan di konteks dan layar tampak diam. */}
+                            {galat ?? (galatAuth
+                              ? `Masuk berhasil, tetapi profil tidak dapat dimuat: ${galatAuth}`
+                              : `Pemeriksaan sesi sebelumnya gagal: ${galatSesi}`)}
                           </p>
                         )}
 
