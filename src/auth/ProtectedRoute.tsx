@@ -1,18 +1,18 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import GalatSesi from '../components/GalatSesi';
 import type { Role } from '../lib/types';
 
 /** Rute peran: [F1] pengguna tanpa peran yang sesuai tidak pernah sampai ke halaman. */
 export function Berjaga({ peran, children }: { peran: Role[]; children: ReactNode }) {
-  const { profil, siap, galat, segarkan } = useAuth();
+  const { profil, siap, galat } = useAuth();
   const lokasi = useLocation();
 
-  // Kegagalan pemeriksaan sesi harus terlihat, bukan berputar selamanya.
   if (!siap) return <main className="wadah"><p className="hint">Memuat…</p></main>;
-  if (galat) return <GalatSesi galat={galat} segarkan={segarkan} />;
-  if (!profil) return <Navigate to="/login" state={{ dari: lokasi.pathname }} replace />;
+  // Belum masuk ATAU sesi tidak dapat diperiksa -> halaman masuk, bukan layar tunggu.
+  if (galat || !profil) {
+    return <Navigate to="/login" replace state={{ dari: lokasi.pathname, galat: galat ?? undefined }} />;
+  }
   if (!peran.includes(profil.role)) {
     return (
       <main className="wadah">

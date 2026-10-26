@@ -15,13 +15,13 @@ import ModeSiswa from './pages/ModeSiswa';
 import ApiDocs from './pages/ApiDocs';
 import { Berjaga, koordinator, penyusun, staf, wali } from './auth/ProtectedRoute';
 import { useAuth } from './auth/AuthContext';
-import GalatSesi from './components/GalatSesi';
 
 function GerbangUtama() {
-  const { profil, siap, galat, segarkan } = useAuth();
+  const { profil, siap, galat } = useAuth();
   if (!siap) return <main className="wadah"><p className="hint">Memuat…</p></main>;
-  if (galat) return <GalatSesi galat={galat} segarkan={segarkan} />;
-  if (!profil) return <Landing />;
+  // Belum masuk, atau sesi tidak dapat diperiksa -> langsung ke halaman masuk.
+  // Halaman pemasaran tetap ada di /landing (tautan disediakan di halaman masuk).
+  if (galat || !profil) return <Navigate to="/login" replace state={galat ? { galat } : undefined} />;
   return (
     <AppShell>
       <Beranda />
@@ -34,6 +34,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<GerbangUtama />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/landing" element={<Landing />} />
       <Route element={<AppShell />}>
         <Route path="/siswa" element={<Berjaga peran={staf}><SiswaList /></Berjaga>} />
         <Route path="/siswa/:id/asesmen" element={<Berjaga peran={penyusun}><Asesmen /></Berjaga>} />

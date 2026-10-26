@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import { ShieldCheck } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { login } from '../lib/api';
@@ -14,25 +14,37 @@ export default function Login() {
   const [galat, setGalat] = useState<string | null>(null);
   const [sibuk, setSibuk] = useState(false);
   const lokasi = useLocation();
-  const dari = (lokasi.state as { dari?: string } | null)?.dari ?? '/';
+    const keadaan = lokasi.state as { dari?: string; galat?: string } | null;
+    const dari = keadaan?.dari ?? '/';
+    const galatSesi = keadaan?.galat ?? null;
 
-  if (siap && profil) return <Navigate to={dari} replace />;
+    if (siap && profil) return <Navigate to={dari} replace />;
 
-  async function kirim(e: FormEvent) {
-    e.preventDefault();
-    setSibuk(true);
-    setGalat(null);
-    try {
-      await login(email.trim(), sandi);
-      await segarkan();
-    } catch (err) {
-      // Pesan seragam: jangan bocorkan apakah email terdaftar (PRD §7 keamanan).
-      setGalat('Email atau kata sandi tidak cocok.');
-      void err;
-    } finally {
-      setSibuk(false);
+    async function kirim(e: FormEvent) {
+      e.preventDefault();
+      setSibuk(true);
+      setGalat(null);
+      try {
+        // Batas waktu: tanpa ini, koneksi yang menggantung membuat tombol bertulis
+        // "Memeriksa..." selamanya dan pengguna tidak tahu harus berbuat apa.
+        await Promise.race([
+          login(email.trim(), sandi),
+          new Promise<never>((_, tolak) =>
+            setTimeout(() => tolak(new Error('login lewat batas waktu 10 detik')), 10_000),
+          ),
+        ]);
+        await segarkan();
+      } catch (err) {
+        // Pesan seragam: jangan bocorkan apakah email terdaftar (PRD §7 keamanan).
+        setGalat(
+          err instanceof Error && /batas waktu/i.test(err.message)
+            ? 'Server tidak merespons dalam 10 detik. Periksa koneksi internet lalu coba lagi.'
+            : 'Email atau kata sandi tidak cocok.',
+        );
+      } finally {
+        setSibuk(false);
+      }
     }
-  }
 
   return (
     <main className="wadah wadah-lebar">
@@ -63,11 +75,11 @@ export default function Login() {
           <div className="hero-rail">
             <h2 className="meta mt-0 border-t-0 pt-0">Kredensial</h2>
 
-            {galat && (
-              <p className="pesan pesan-galat" role="alert">
-                {galat}
-              </p>
-            )}
+            {(galat || galatSesi) && (
+                          <p className="pesan pesan-galat" role="alert">
+                            {galat ?? `Pemeriksaan sesi sebelumnya gagal: ${galatSesi}`}
+                          </p>
+                        )}
 
             <form onSubmit={kirim} className="kartu" noValidate>
               <p className="mb-4">
@@ -114,6 +126,8 @@ export default function Login() {
 
       <p className="hint">
         PPI-Link bukan alat diagnosis dan tidak menggantikan asesmen psikolog, terapis, atau GPK.
+        {' '}<Link to="/landing">Kenali PPI-Link lebih dulu</Link> — apa yang dikerjakan, bukti
+        pendukungnya, dan siapa yang meninjau aturan akomodasinya.
       </p>
     </main>
   );
