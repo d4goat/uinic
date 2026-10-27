@@ -1,4 +1,4 @@
-// F6: catat sesi pendampingan terhadap tujuan PPI.
+﻿// F6: catat sesi pendampingan terhadap tujuan PPI.
 // Tahan offline: sesi yang gagal terkirim dititipkan ke antrean
 // perangkat (lib/offline.ts) dan dikirim ulang otomatis; client_uuid membuat
 // pengiriman ulang idempoten di sisi server.
@@ -196,10 +196,10 @@ export default function SesiLog() {
   return (
     <div ref={wadahRef} className="space-y-8">
       {/* Header Editorial */}
-      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+      <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center justify-between gap-4 mb-3">
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs -ml-2 text-[var(--tinta-lembut)]">
+            <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs -ml-2 text-tinta-lembut">
               <Link to={studentId ? `/siswa/${studentId}/ppi` : '/siswa'}>
                 <ArrowLeft className="w-3.5 h-3.5 mr-1" />
                 Kembali ke Draf PPI
@@ -229,29 +229,29 @@ export default function SesiLog() {
           </div>
         </div>
 
-        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-tinta sm:text-4xl">
           Log Sesi Pendampingan
         </h1>
-        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-2xl leading-relaxed">
+        <p className="mt-2 text-base text-tinta-lembut max-w-2xl leading-relaxed">
           Catat capaian tiap sesi terhadap target indikator PPI. Pengisian tahan kondisi luring: data tersimpan di penyimpanan
           lokal dan tersinkronisasi idempoten saat terhubung kembali.
         </p>
 
         {/* Ringkasan Statistik Capaian */}
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-3.5 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm font-mono">
-            <span className="text-xs text-[var(--tinta-lembut)] block">TOTAL SESI</span>
-            <span className="text-2xl font-bold text-[var(--tinta)]">{jumlahSesi}</span>
+          <div className="p-3.5 border border-garis bg-kartu rounded-sm font-mono">
+            <span className="text-xs text-tinta-lembut block">TOTAL SESI</span>
+            <span className="text-2xl font-bold text-tinta">{jumlahSesi}</span>
           </div>
-          <div className="p-3.5 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm font-mono">
+          <div className="p-3.5 border border-garis bg-kartu rounded-sm font-mono">
             <span className="text-xs text-emerald-700 block">TERCAPAI</span>
             <span className="text-2xl font-bold text-emerald-800">{rekap.tercapai}</span>
           </div>
-          <div className="p-3.5 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm font-mono">
+          <div className="p-3.5 border border-garis bg-kartu rounded-sm font-mono">
             <span className="text-xs text-amber-700 block">SEBAGIAN</span>
             <span className="text-2xl font-bold text-amber-800">{rekap.sebagian}</span>
           </div>
-          <div className="p-3.5 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm font-mono">
+          <div className="p-3.5 border border-garis bg-kartu rounded-sm font-mono">
             <span className="text-xs text-red-700 block">BELUM</span>
             <span className="text-2xl font-bold text-red-800">{rekap.belum}</span>
           </div>
@@ -263,10 +263,10 @@ export default function SesiLog() {
         <div
           className={`anim-muncul rounded-sm border p-4 text-sm flex items-start gap-3 ${
             pesan.jenis === 'berhasil'
-              ? 'border-[var(--berhasil)] bg-emerald-50/50 text-[var(--berhasil)]'
+              ? 'border-berhasil bg-emerald-50/50 text-berhasil'
               : pesan.jenis === 'peringatan'
                 ? 'border-[var(--peringatan)] bg-amber-50/50 text-[var(--peringatan)]'
-                : 'border-[var(--galat)] bg-red-50/50 text-[var(--galat)]'
+                : 'border-galat bg-red-50/50 text-galat'
           }`}
           role={pesan.jenis === 'galat' ? 'alert' : 'status'}
         >
@@ -286,22 +286,22 @@ export default function SesiLog() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Kolom Kiri: Form Sesi Baru */}
         <section className="anim-muncul lg:col-span-7 space-y-6">
-          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
-            <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-4">
-              <Calendar className="w-4 h-4 text-[var(--aksen)]" />
-              <h2 className="font-display text-xl font-bold text-[var(--tinta)]">Catat Sesi Baru</h2>
+          <div className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
+            <div className="flex items-center gap-2 border-b border-garis pb-4">
+              <Calendar className="w-4 h-4 text-aksen" />
+              <h2 className="font-display text-xl font-bold text-tinta">Catat Sesi Baru</h2>
             </div>
 
             <form onSubmit={(e) => void simpan(e)} className="space-y-5">
               <div>
-                <label htmlFor="sesi-tujuan" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                <label htmlFor="sesi-tujuan" className="block text-xs font-mono font-medium text-tinta mb-1">
                   TARGET PPI / INDIKATOR
                 </label>
                 <select
                   id="sesi-tujuan"
                   value={goalId}
                   onChange={(e) => setGoalId(e.target.value)}
-                  className="w-full text-sm rounded-sm border border-[var(--garis)] bg-[var(--kartu)] p-2.5 focus:border-[var(--aksen)] focus:ring-1 focus:ring-[var(--aksen)] outline-hidden"
+                  className="w-full text-sm rounded-sm border border-garis bg-kartu p-2.5 focus:border-aksen focus:ring-1 focus:ring-[var(--aksen)] outline-hidden"
                 >
                   <option value="">Tanpa tujuan spesifik (Pengamatan Umum)</option>
                   {tujuan.map((t) => (
@@ -310,15 +310,15 @@ export default function SesiLog() {
                     </option>
                   ))}
                 </select>
-                <span className="text-[11px] text-[var(--tinta-lembut)] block mt-1">
+                <span className="text-[11px] text-tinta-lembut block mt-1">
                   Diambil dari tujuan PPI versi aktif untuk menjaga kesinambungan evaluasi.
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="sesi-tanggal" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
-                    TANGGAL PELAKSANAAN <span className="text-[var(--aksen)]">*</span>
+                  <label htmlFor="sesi-tanggal" className="block text-xs font-mono font-medium text-tinta mb-1">
+                    TANGGAL PELAKSANAAN <span className="text-aksen">*</span>
                   </label>
                   <input
                     id="sesi-tanggal"
@@ -326,15 +326,15 @@ export default function SesiLog() {
                     value={tanggal}
                     onChange={(e) => setTanggal(e.target.value)}
                     required
-                    className="w-full text-sm rounded-sm border border-[var(--garis)] bg-[var(--kartu)] p-2.5 font-mono"
+                    className="w-full text-sm rounded-sm border border-garis bg-kartu p-2.5 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
-                    STATUS CAPAIAN <span className="text-[var(--aksen)]">*</span>
+                  <label className="block text-xs font-mono font-medium text-tinta mb-1">
+                    STATUS CAPAIAN <span className="text-aksen">*</span>
                   </label>
-                  <div className="grid grid-cols-3 gap-1.5 p-1 border border-[var(--garis)] rounded-sm bg-[var(--latar-lembut)]">
+                  <div className="grid grid-cols-3 gap-1.5 p-1 border border-garis rounded-sm bg-latar-lembut">
                     {(['belum', 'sebagian', 'tercapai'] as Capaian[]).map((c) => (
                       <button
                         key={c}
@@ -347,7 +347,7 @@ export default function SesiLog() {
                               : c === 'sebagian'
                                 ? 'bg-amber-700 text-white shadow-xs'
                                 : 'bg-red-700 text-white shadow-xs'
-                            : 'text-[var(--tinta-lembut)] hover:text-[var(--tinta)]'
+                            : 'text-tinta-lembut hover:text-tinta'
                         }`}
                       >
                         {LABEL[c]}
@@ -359,11 +359,11 @@ export default function SesiLog() {
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label htmlFor="sesi-catatan" className="text-xs font-mono font-medium text-[var(--tinta)] flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5 text-[var(--aksen)]" />
+                  <label htmlFor="sesi-catatan" className="text-xs font-mono font-medium text-tinta flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-aksen" />
                     CATATAN PERILAKU / EVALUASI (TERENKRIPSI)
                   </label>
-                  <span className="text-[11px] font-mono text-[var(--tinta-lembut)]">Maks. 500 karakter</span>
+                  <span className="text-[11px] font-mono text-tinta-lembut">Maks. 500 karakter</span>
                 </div>
                 <Textarea
                   id="sesi-catatan"
@@ -389,11 +389,11 @@ export default function SesiLog() {
         {/* Kolom Kanan: Antrean Offline & Riwayat Sesi */}
         <aside className="anim-muncul lg:col-span-5 space-y-6">
           {/* Antrean Offline Card */}
-          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-[var(--garis)] pb-3">
+          <div className="border border-garis bg-kartu rounded-sm p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-garis pb-3">
               <div className="flex items-center gap-2">
-                <CloudOff className="w-4 h-4 text-[var(--aksen)]" />
-                <h2 className="font-display text-base font-bold text-[var(--tinta)]">Antrean Offline Lokal</h2>
+                <CloudOff className="w-4 h-4 text-aksen" />
+                <h2 className="font-display text-base font-bold text-tinta">Antrean Offline Lokal</h2>
               </div>
               <Badge variant={antrean.length > 0 ? 'default' : 'outline'} className="font-mono text-xs">
                 {antrean.length} Menunggu
@@ -401,24 +401,24 @@ export default function SesiLog() {
             </div>
 
             {antrean.length === 0 ? (
-              <p className="text-xs text-[var(--tinta-lembut)] py-2">
+              <p className="text-xs text-tinta-lembut py-2">
                 Semua sesi telah tersinkronisasi bersih dengan server.
               </p>
             ) : (
               <div className="space-y-3">
-                <p className="text-xs text-[var(--tinta-lembut)]">
+                <p className="text-xs text-tinta-lembut">
                   Data berikut tersimpan aman di browser Anda dan siap dikirimkan saat jaringan kembali:
                 </p>
                 <div className="space-y-2">
                   {antrean.map((s) => (
-                    <div key={s.client_uuid} className="p-3 border border-[var(--garis)] rounded-sm text-xs bg-[var(--latar-lembut)]/30 space-y-1">
+                    <div key={s.client_uuid} className="p-3 border border-garis rounded-sm text-xs bg-latar-lembut/30 space-y-1">
                       <div className="flex items-center justify-between font-mono text-[11px]">
                         <span>{formatTanggal(s.tanggal)}</span>
                         <Badge variant="secondary" className="text-[10px] uppercase">
                           {LABEL[s.status_capaian]}
                         </Badge>
                       </div>
-                      {s.catatan && <p className="text-[var(--tinta)] italic truncate">&ldquo;{s.catatan}&rdquo;</p>}
+                      {s.catatan && <p className="text-tinta italic truncate">&ldquo;{s.catatan}&rdquo;</p>}
                     </div>
                   ))}
                 </div>
@@ -438,20 +438,20 @@ export default function SesiLog() {
           </div>
 
           {/* Riwayat Sesi Terkini */}
-          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-            <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
-              <History className="w-4 h-4 text-[var(--aksen)]" />
-              <h2 className="font-display text-base font-bold text-[var(--tinta)]">Riwayat Sesi Terkini</h2>
+          <div className="border border-garis bg-kartu rounded-sm p-6 space-y-4">
+            <div className="flex items-center gap-2 border-b border-garis pb-3">
+              <History className="w-4 h-4 text-aksen" />
+              <h2 className="font-display text-base font-bold text-tinta">Riwayat Sesi Terkini</h2>
             </div>
 
             {sesi.length === 0 ? (
-              <p className="text-xs text-[var(--tinta-lembut)] py-3">Belum ada riwayat sesi yang tercatat di server.</p>
+              <p className="text-xs text-tinta-lembut py-3">Belum ada riwayat sesi yang tercatat di server.</p>
             ) : (
               <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
                 {sesi.map((s) => (
-                  <div key={s.id} className="p-3 border border-[var(--garis)] rounded-sm text-xs space-y-1.5 bg-transparent">
+                  <div key={s.id} className="p-3 border border-garis rounded-sm text-xs space-y-1.5 bg-transparent">
                     <div className="flex items-center justify-between font-mono">
-                      <span className="text-[11px] text-[var(--tinta-lembut)] flex items-center gap-1">
+                      <span className="text-[11px] text-tinta-lembut flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {formatTanggal(s.tanggal)}
                       </span>
@@ -464,7 +464,7 @@ export default function SesiLog() {
                         {LABEL[s.status_capaian]}
                       </Badge>
                     </div>
-                    <p className="text-[var(--tinta)] leading-relaxed">
+                    <p className="text-tinta leading-relaxed">
                       {s.catatan ?? (s.catatan_enc ? 'Memuat catatan terenkripsi...' : 'Tanpa catatan tambahan.')}
                     </p>
                   </div>
@@ -477,3 +477,4 @@ export default function SesiLog() {
     </div>
   );
 }
+

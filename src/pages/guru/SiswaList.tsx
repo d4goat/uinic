@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useGSAP } from '@gsap/react';
@@ -152,17 +152,17 @@ export default function SiswaList() {
   return (
     <div ref={wadahRef} className="space-y-8">
       {/* Header Editorial */}
-      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+      <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex flex-wrap items-center gap-2 mb-2">
           <Badge variant="outline" className="font-mono text-xs tracking-wider uppercase">
             F2 · Direktori Siswa
           </Badge>
-          <span className="text-xs text-[var(--tinta-lembut)]">Privasi Terjaga Tanpa NIK</span>
+          <span className="text-xs text-tinta-lembut">Privasi Terjaga Tanpa NIK</span>
         </div>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-tinta sm:text-4xl">
           Data Siswa Pseudonim
         </h1>
-        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-3xl leading-relaxed">
+        <p className="mt-2 text-base text-tinta-lembut max-w-3xl leading-relaxed">
           Siswa diidentifikasi secara anonim menggunakan kode alfanumerik dan inisial. Sesuai prinsip
           minimisasi data (PRD §6 & §7), tidak ada data NIK atau nama lengkap yang disimpan di server.
         </p>
@@ -170,7 +170,7 @@ export default function SiswaList() {
 
       {/* Feedback Alert */}
       {galat && (
-        <div className="anim-muncul rounded-md border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+        <div className="anim-muncul rounded-md border border-galat bg-red-50/50 p-4 text-galat text-sm flex items-start gap-3" role="alert">
           <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">Terjadi Kendala</p>
@@ -179,7 +179,7 @@ export default function SiswaList() {
         </div>
       )}
       {berhasil && (
-        <div className="anim-muncul rounded-md border border-[var(--berhasil)] bg-emerald-50/50 p-4 text-[var(--berhasil)] text-sm flex items-start gap-3" role="status">
+        <div className="anim-muncul rounded-md border border-berhasil bg-emerald-50/50 p-4 text-berhasil text-sm flex items-start gap-3" role="status">
           <UserCheck className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">Berhasil</p>
@@ -192,40 +192,40 @@ export default function SiswaList() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Kolom Kiri: Cari & Tabel Siswa (8 Kolom) */}
         <section className="anim-muncul lg:col-span-8 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-[var(--kartu)] border border-[var(--garis)] rounded-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-kartu border border-garis rounded-sm">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--tinta-lembut)]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-tinta-lembut" />
               <Input
                 id="cari-siswa"
                 type="search"
                 value={cari}
                 onChange={(e) => setCari(e.target.value)}
                 placeholder="Cari kode, inisial, atau kelas..."
-                className="pl-9 h-10 border-[var(--garis)] text-sm bg-transparent"
+                className="pl-9 h-10 border-garis text-sm bg-transparent"
                 aria-label="Cari siswa"
               />
             </div>
-            <div className="font-mono text-xs text-[var(--tinta-lembut)] shrink-0 self-center">
-              Menampilkan <span className="font-bold text-[var(--tinta)]">{hasil.length}</span> dari {daftar.length} siswa
+            <div className="font-mono text-xs text-tinta-lembut shrink-0 self-center">
+              Menampilkan <span className="font-bold text-tinta">{hasil.length}</span> dari {daftar.length} siswa
             </div>
           </div>
 
           {memuat ? (
-            <div className="p-12 text-center border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
-              <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-[var(--aksen)] border-t-transparent" />
-              <p className="mt-3 text-sm text-[var(--tinta-lembut)] font-mono">Memuat direktori siswa...</p>
+            <div className="p-12 text-center border border-garis bg-kartu rounded-sm">
+              <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-aksen border-t-transparent" />
+              <p className="mt-3 text-sm text-tinta-lembut font-mono">Memuat direktori siswa...</p>
             </div>
           ) : daftar.length === 0 ? (
-            <div className="p-8 text-center border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
-              <Users className="w-10 h-10 mx-auto text-[var(--tinta-lembut)] opacity-40 mb-3" />
-              <p className="font-medium text-[var(--tinta)]">Belum ada siswa di sekolah ini</p>
-              <p className="text-sm text-[var(--tinta-lembut)] mt-1 max-w-md mx-auto">
+            <div className="p-8 text-center border border-garis bg-kartu rounded-sm">
+              <Users className="w-10 h-10 mx-auto text-tinta-lembut opacity-40 mb-3" />
+              <p className="font-medium text-tinta">Belum ada siswa di sekolah ini</p>
+              <p className="text-sm text-tinta-lembut mt-1 max-w-md mx-auto">
                 Tambahkan siswa pertama menggunakan formulir pseudonim di samping untuk mulai menyusun asesmen dan PPI.
               </p>
             </div>
           ) : hasil.length === 0 ? (
-            <div className="p-8 text-center border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
-              <p className="text-sm text-[var(--tinta-lembut)]">
+            <div className="p-8 text-center border border-garis bg-kartu rounded-sm">
+              <p className="text-sm text-tinta-lembut">
                 Tidak ada siswa yang cocok dengan kata kunci &ldquo;{cari.trim()}&rdquo;.
               </p>
               <Button variant="outline" size="sm" onClick={() => setCari('')} className="mt-3">
@@ -233,9 +233,9 @@ export default function SiswaList() {
               </Button>
             </div>
           ) : (
-            <div className="overflow-x-auto border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
+            <div className="overflow-x-auto border border-garis bg-kartu rounded-sm">
               <table className="w-full text-left text-sm border-collapse">
-                <thead className="bg-[var(--latar-lembut)] border-b border-[var(--garis)] font-mono text-xs uppercase text-[var(--tinta-lembut)]">
+                <thead className="bg-latar-lembut border-b border-garis font-mono text-xs uppercase text-tinta-lembut">
                   <tr>
                     <th className="px-4 py-3 font-semibold">Kode</th>
                     <th className="px-4 py-3 font-semibold">Inisial</th>
@@ -246,11 +246,11 @@ export default function SiswaList() {
                 </thead>
                 <tbody className="divide-y divide-[var(--garis)]">
                   {hasil.map((s) => (
-                    <tr key={s.id} className="hover:bg-[var(--latar-lembut)]/40 transition-colors">
-                      <td className="px-4 py-3 font-mono font-bold text-[var(--tinta)]">
+                    <tr key={s.id} className="hover:bg-latar-lembut/40 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-tinta">
                         {s.kode}
                       </td>
-                      <td className="px-4 py-3 font-medium text-[var(--tinta)]">
+                      <td className="px-4 py-3 font-medium text-tinta">
                         {s.inisial}
                       </td>
                       <td className="px-4 py-3">
@@ -258,14 +258,14 @@ export default function SiswaList() {
                           {s.kelas}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs text-[var(--tinta-lembut)]">
+                      <td className="px-4 py-3 font-mono text-xs text-tinta-lembut">
                         {s.tahun_lahir}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <Button asChild size="sm" variant="outline" className="h-8 text-xs">
                             <Link to={`/siswa/${s.id}/asesmen`} onClick={() => catatBuka(s.id)}>
-                              <Sparkles className="w-3.5 h-3.5 mr-1 text-[var(--aksen)]" />
+                              <Sparkles className="w-3.5 h-3.5 mr-1 text-aksen" />
                               Asesmen
                             </Link>
                           </Button>
@@ -279,7 +279,7 @@ export default function SiswaList() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-8 w-8 p-0 text-[var(--galat)] hover:bg-red-50"
+                              className="h-8 w-8 p-0 text-galat hover:bg-red-50"
                               title={`Hapus data siswa ${s.kode}`}
                               onClick={() => void hapus(s)}
                             >
@@ -299,19 +299,19 @@ export default function SiswaList() {
 
         {/* Kolom Kanan: Tambah Siswa Form (4 Kolom) */}
         <section className="anim-muncul lg:col-span-4">
-          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 sticky top-24">
-            <div className="flex items-center gap-2 mb-4 border-b border-[var(--garis)] pb-3">
-              <Plus className="w-4 h-4 text-[var(--aksen)]" />
-              <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Tambah Siswa</h2>
+          <div className="border border-garis bg-kartu rounded-sm p-6 sticky top-24">
+            <div className="flex items-center gap-2 mb-4 border-b border-garis pb-3">
+              <Plus className="w-4 h-4 text-aksen" />
+              <h2 className="font-display text-lg font-bold text-tinta">Tambah Siswa</h2>
             </div>
-            <p className="text-xs text-[var(--tinta-lembut)] mb-4">
+            <p className="text-xs text-tinta-lembut mb-4">
               Gunakan kode pseudonim acak untuk melindungi privasi peserta didik (sesuai UU PDP & PRD §2).
             </p>
 
             <form onSubmit={(e) => void kirim(e)} noValidate className="space-y-4">
               <div>
-                <label htmlFor="kode-siswa" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
-                  KODE SISWA <span className="text-[var(--aksen)]">*</span>
+                <label htmlFor="kode-siswa" className="block text-xs font-mono font-medium text-tinta mb-1">
+                  KODE SISWA <span className="text-aksen">*</span>
                 </label>
                 <Input
                   id="kode-siswa"
@@ -322,15 +322,15 @@ export default function SiswaList() {
                   aria-invalid={galatIsian.kode ? true : undefined}
                 />
                 {galatIsian.kode && (
-                  <p className="text-xs text-[var(--galat)] mt-1">{galatIsian.kode}</p>
+                  <p className="text-xs text-galat mt-1">{galatIsian.kode}</p>
                 )}
-                <span className="text-[11px] text-[var(--tinta-lembut)]">3-12 karakter huruf/angka/tanda hubung.</span>
+                <span className="text-[11px] text-tinta-lembut">3-12 karakter huruf/angka/tanda hubung.</span>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="inisial-siswa" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
-                    INISIAL <span className="text-[var(--aksen)]">*</span>
+                  <label htmlFor="inisial-siswa" className="block text-xs font-mono font-medium text-tinta mb-1">
+                    INISIAL <span className="text-aksen">*</span>
                   </label>
                   <Input
                     id="inisial-siswa"
@@ -342,13 +342,13 @@ export default function SiswaList() {
                     aria-invalid={galatIsian.inisial ? true : undefined}
                   />
                   {galatIsian.inisial && (
-                    <p className="text-xs text-[var(--galat)] mt-1">{galatIsian.inisial}</p>
+                    <p className="text-xs text-galat mt-1">{galatIsian.inisial}</p>
                   )}
                 </div>
 
                 <div>
-                  <label htmlFor="kelas-siswa" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
-                    KELAS <span className="text-[var(--aksen)]">*</span>
+                  <label htmlFor="kelas-siswa" className="block text-xs font-mono font-medium text-tinta mb-1">
+                    KELAS <span className="text-aksen">*</span>
                   </label>
                   <Input
                     id="kelas-siswa"
@@ -359,14 +359,14 @@ export default function SiswaList() {
                     aria-invalid={galatIsian.kelas ? true : undefined}
                   />
                   {galatIsian.kelas && (
-                    <p className="text-xs text-[var(--galat)] mt-1">{galatIsian.kelas}</p>
+                    <p className="text-xs text-galat mt-1">{galatIsian.kelas}</p>
                   )}
                 </div>
               </div>
 
               <div>
-                <label htmlFor="tahun-siswa" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
-                  TAHUN LAHIR <span className="text-[var(--aksen)]">*</span>
+                <label htmlFor="tahun-siswa" className="block text-xs font-mono font-medium text-tinta mb-1">
+                  TAHUN LAHIR <span className="text-aksen">*</span>
                 </label>
                 <Input
                   id="tahun-siswa"
@@ -378,9 +378,9 @@ export default function SiswaList() {
                   aria-invalid={galatIsian.tahun_lahir ? true : undefined}
                 />
                 {galatIsian.tahun_lahir && (
-                  <p className="text-xs text-[var(--galat)] mt-1">{galatIsian.tahun_lahir}</p>
+                  <p className="text-xs text-galat mt-1">{galatIsian.tahun_lahir}</p>
                 )}
-                <span className="text-[11px] text-[var(--tinta-lembut)]">Rentang {TAHUN_MIN}&ndash;{TAHUN_INI}.</span>
+                <span className="text-[11px] text-tinta-lembut">Rentang {TAHUN_MIN}&ndash;{TAHUN_INI}.</span>
               </div>
 
               <div className="pt-2">
@@ -395,3 +395,4 @@ export default function SiswaList() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
@@ -230,25 +230,25 @@ export default function MateriAksesibel() {
   return (
     <div ref={wadahRef} className="space-y-8">
       {/* Header Editorial */}
-      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+      <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center gap-2 mb-2">
           <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
             F10 · Materi Aksesibel
           </Badge>
-          <span className="text-xs text-[var(--tinta-lembut)]">Mendukung Disleksia & Kesulitan Membaca</span>
+          <span className="text-xs text-tinta-lembut">Mendukung Disleksia & Kesulitan Membaca</span>
         </div>
 
-        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-tinta sm:text-4xl">
           Penyaji Materi Aksesibel
         </h1>
-        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-3xl leading-relaxed">
+        <p className="mt-2 text-base text-tinta-lembut max-w-3xl leading-relaxed">
           Teks pembelajaran dipecah menjadi kalimat ringkas dan dapat dibacakan otomatis (Text-to-Speech)
           untuk menurunkan beban kognitif membaca bagi siswa berkebutuhan khusus.
         </p>
       </header>
 
       {galat && (
-        <div className="anim-muncul rounded-sm border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+        <div className="anim-muncul rounded-sm border border-galat bg-red-50/50 p-4 text-galat text-sm flex items-start gap-3" role="alert">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">Terjadi Kendala</p>
@@ -257,8 +257,8 @@ export default function MateriAksesibel() {
         </div>
       )}
       {pesan && (
-        <div className="anim-muncul rounded-sm border border-[var(--berhasil)] bg-emerald-50/50 p-4 text-[var(--berhasil)] text-sm flex items-center gap-3" role="status">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-[var(--berhasil)]" />
+        <div className="anim-muncul rounded-sm border border-berhasil bg-emerald-50/50 p-4 text-berhasil text-sm flex items-center gap-3" role="status">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-berhasil" />
           <span className="font-medium">{pesan}</span>
         </div>
       )}
@@ -266,18 +266,18 @@ export default function MateriAksesibel() {
       {/* Grid Asimetris: Daftar Materi (4 Kolom) + Pembaca Materi (8 Kolom) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Kolom Kiri: Koleksi Materi */}
-        <section className="anim-muncul lg:col-span-4 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-          <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
-            <BookOpen className="w-4 h-4 text-[var(--aksen)]" />
-            <h2 className="font-display text-base font-bold text-[var(--tinta)]">Pustaka Materi</h2>
+        <section className="anim-muncul lg:col-span-4 border border-garis bg-kartu rounded-sm p-6 space-y-4">
+          <div className="flex items-center gap-2 border-b border-garis pb-3">
+            <BookOpen className="w-4 h-4 text-aksen" />
+            <h2 className="font-display text-base font-bold text-tinta">Pustaka Materi</h2>
           </div>
 
           {memuat ? (
-            <div className="p-8 text-center font-mono text-xs text-[var(--tinta-lembut)]">
+            <div className="p-8 text-center font-mono text-xs text-tinta-lembut">
               Memuat pustaka materi...
             </div>
           ) : materi.length === 0 ? (
-            <p className="text-xs text-[var(--tinta-lembut)] py-4">Belum ada materi tersimpan di sekolah ini.</p>
+            <p className="text-xs text-tinta-lembut py-4">Belum ada materi tersimpan di sekolah ini.</p>
           ) : (
             <div className="space-y-1.5">
               {materi.map((m) => (
@@ -287,8 +287,8 @@ export default function MateriAksesibel() {
                   onClick={() => void bukaMateri(m)}
                   className={`w-full text-left p-3 rounded-sm text-xs font-medium transition-all flex items-center justify-between border ${
                     terpilih?.id === m.id
-                      ? 'border-[var(--aksen)] bg-[var(--aksen)]/5 font-bold text-[var(--aksen)]'
-                      : 'border-[var(--garis)] hover:border-[var(--garis-kuat)] text-[var(--tinta)]'
+                      ? 'border-aksen bg-[var(--aksen)]/5 font-bold text-aksen'
+                      : 'border-garis hover:border-garis-kuat text-tinta'
                   }`}
                 >
                   <span className="truncate pr-2">{m.judul}</span>
@@ -301,18 +301,18 @@ export default function MateriAksesibel() {
 
         {/* Kolom Kanan: Pembaca & Kontrol Aksesibilitas */}
         <section className="anim-muncul lg:col-span-8 space-y-6">
-          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
+          <div className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
             {/* Toolbar Kontrol Tampilan & Suara */}
-            <div className="p-4 bg-[var(--latar-lembut)]/40 border border-[var(--garis)] rounded-sm space-y-4">
+            <div className="p-4 bg-latar-lembut/40 border border-garis rounded-sm space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 {/* Mode Tampilan */}
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-mono font-medium text-[var(--tinta-lembut)] mr-1">TAMPILAN:</span>
+                  <span className="text-xs font-mono font-medium text-tinta-lembut mr-1">TAMPILAN:</span>
                   <button
                     type="button"
                     onClick={() => setMode('')}
                     className={`px-2.5 py-1 text-xs rounded-sm border font-medium transition-colors ${
-                      mode === '' ? 'bg-[var(--tinta)] text-white border-[var(--tinta)]' : 'border-[var(--garis)] text-[var(--tinta-lembut)]'
+                      mode === '' ? 'bg-tinta text-white border-[var(--tinta)]' : 'border-garis text-tinta-lembut'
                     }`}
                   >
                     Standar
@@ -321,7 +321,7 @@ export default function MateriAksesibel() {
                     type="button"
                     onClick={() => setMode('teks-besar')}
                     className={`px-2.5 py-1 text-xs rounded-sm border font-medium transition-colors ${
-                      mode === 'teks-besar' ? 'bg-[var(--tinta)] text-white border-[var(--tinta)]' : 'border-[var(--garis)] text-[var(--tinta-lembut)]'
+                      mode === 'teks-besar' ? 'bg-tinta text-white border-[var(--tinta)]' : 'border-garis text-tinta-lembut'
                     }`}
                   >
                     Teks Besar
@@ -330,7 +330,7 @@ export default function MateriAksesibel() {
                     type="button"
                     onClick={() => setMode('kontras-tinggi')}
                     className={`px-2.5 py-1 text-xs rounded-sm border font-medium transition-colors ${
-                      mode === 'kontras-tinggi' ? 'bg-[var(--tinta)] text-white border-[var(--tinta)]' : 'border-[var(--garis)] text-[var(--tinta-lembut)]'
+                      mode === 'kontras-tinggi' ? 'bg-tinta text-white border-[var(--tinta)]' : 'border-garis text-tinta-lembut'
                     }`}
                   >
                     Kontras Tinggi
@@ -342,7 +342,7 @@ export default function MateriAksesibel() {
                   type="button"
                   onClick={() => setPendek((p) => !p)}
                   className={`px-3 py-1 text-xs font-mono rounded-sm border transition-colors flex items-center gap-1.5 ${
-                    pendek ? 'border-[var(--aksen)] bg-[var(--aksen)] text-white' : 'border-[var(--garis)] text-[var(--tinta-lembut)]'
+                    pendek ? 'border-aksen bg-[var(--aksen)] text-white' : 'border-garis text-tinta-lembut'
                   }`}
                 >
                   <ListOrdered className="w-3.5 h-3.5" />
@@ -351,20 +351,20 @@ export default function MateriAksesibel() {
               </div>
 
               {/* Bar Pemutar Suara TTS */}
-              <div className="pt-3 border-t border-[var(--garis)] flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="pt-3 border-t border-garis flex flex-wrap items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-3">
-                  <span className="font-mono font-medium text-[var(--tinta-lembut)] flex items-center gap-1">
+                  <span className="font-mono font-medium text-tinta-lembut flex items-center gap-1">
                     <Volume2 className="w-3.5 h-3.5" />
                     KECEPATAN SUARA:
                   </span>
-                  <div className="inline-flex rounded-sm border border-[var(--garis)] bg-white p-0.5">
+                  <div className="inline-flex rounded-sm border border-garis bg-white p-0.5">
                     {[0.7, 1, 1.3].map((r) => (
                       <button
                         key={r}
                         type="button"
                         onClick={() => setLaju(r as Laju)}
                         className={`px-2 py-0.5 font-mono text-xs rounded-sm ${
-                          laju === r ? 'bg-[var(--aksi)] text-white font-bold' : 'text-[var(--tinta-lembut)]'
+                          laju === r ? 'bg-aksi text-white font-bold' : 'text-tinta-lembut'
                         }`}
                       >
                         {r}x
@@ -378,7 +378,7 @@ export default function MateriAksesibel() {
                     size="sm"
                     onClick={bacakan}
                     disabled={!bisaBacakan || !terpilih || sedangBicara}
-                    className="h-8 text-xs font-mono bg-[var(--aksi)] text-white hover:bg-[var(--aksi-gelap)]"
+                    className="h-8 text-xs font-mono bg-aksi text-white hover:bg-aksi-gelap"
                   >
                     <Play className="w-3.5 h-3.5 mr-1" />
                     {sedangBicara ? 'Sedang Membaca...' : 'Bacakan Teks'}
@@ -404,25 +404,25 @@ export default function MateriAksesibel() {
             {/* Konten Teks Terbaca */}
             {terpilih ? (
               <div className="space-y-4">
-                <h2 className="font-display text-2xl font-bold tracking-tight text-[var(--tinta)]">
+                <h2 className="font-display text-2xl font-bold tracking-tight text-tinta">
                   {terpilih.judul}
                 </h2>
 
                 {pendek ? (
                   <div className="space-y-3">
-                    <span className="text-xs font-mono text-[var(--aksen)] block font-bold">
+                    <span className="text-xs font-mono text-aksen block font-bold">
                       STRUKTUR KALIMAT PENDEK BERURUTAN:
                     </span>
                     <ol className="space-y-2.5 list-decimal pl-5">
                       {kalimat.map((k, idx) => (
-                        <li key={idx} className="p-2.5 rounded-sm bg-[var(--latar-lembut)]/30 border border-[var(--garis)] text-base text-[var(--tinta)] leading-relaxed">
+                        <li key={idx} className="p-2.5 rounded-sm bg-latar-lembut/30 border border-garis text-base text-tinta leading-relaxed">
                           {k}
                         </li>
                       ))}
                     </ol>
                   </div>
                 ) : (
-                  <div className="space-y-4 text-base text-[var(--tinta)] leading-relaxed font-sans">
+                  <div className="space-y-4 text-base text-tinta leading-relaxed font-sans">
                     {paragraf.map((p, idx) => (
                       <p key={idx}>{p}</p>
                     ))}
@@ -430,7 +430,7 @@ export default function MateriAksesibel() {
                 )}
 
                 {varian.length > 0 && (
-                  <div className="pt-4 border-t border-[var(--garis)] text-xs text-[var(--tinta-lembut)] font-mono flex items-center gap-2">
+                  <div className="pt-4 border-t border-garis text-xs text-tinta-lembut font-mono flex items-center gap-2">
                     <span>Varian tersimpan:</span>
                     {varian.map((v) => (
                       <Badge key={v.id} variant="secondary" className="font-mono text-[10px]">
@@ -441,7 +441,7 @@ export default function MateriAksesibel() {
                 )}
               </div>
             ) : (
-              <p className="text-sm text-[var(--tinta-lembut)] py-12 text-center">
+              <p className="text-sm text-tinta-lembut py-12 text-center">
                 Pilih salah satu materi di pustaka kiri untuk mulai membaca.
               </p>
             )}
@@ -449,19 +449,19 @@ export default function MateriAksesibel() {
 
           {/* Form Tambah Bahan Baru */}
           {profil && (
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-              <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
-                <FilePlus className="w-4 h-4 text-[var(--aksen)]" />
-                <h2 className="font-display text-base font-bold text-[var(--tinta)]">Unggah Bahan Bacaan Baru</h2>
+            <div className="border border-garis bg-kartu rounded-sm p-6 space-y-4">
+              <div className="flex items-center gap-2 border-b border-garis pb-3">
+                <FilePlus className="w-4 h-4 text-aksen" />
+                <h2 className="font-display text-base font-bold text-tinta">Unggah Bahan Bacaan Baru</h2>
               </div>
-              <p className="text-xs text-[var(--tinta-lembut)]">
+              <p className="text-xs text-tinta-lembut">
                 Teks asli akan otomatis dipecah dan disimpan dalam varian teks besar dan kalimat pendek secara otomatis.
               </p>
 
               <form onSubmit={(e) => void simpanBahan(e)} className="space-y-4">
                 <div>
-                  <label htmlFor="judul-baru" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
-                    JUDUL BACAAN <span className="text-[var(--aksen)]">*</span>
+                  <label htmlFor="judul-baru" className="block text-xs font-mono font-medium text-tinta mb-1">
+                    JUDUL BACAAN <span className="text-aksen">*</span>
                   </label>
                   <Input
                     id="judul-baru"
@@ -474,8 +474,8 @@ export default function MateriAksesibel() {
                 </div>
 
                 <div>
-                  <label htmlFor="teks-baru" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
-                    TEKS SUMBER LENGKAP <span className="text-[var(--aksen)]">*</span>
+                  <label htmlFor="teks-baru" className="block text-xs font-mono font-medium text-tinta mb-1">
+                    TEKS SUMBER LENGKAP <span className="text-aksen">*</span>
                   </label>
                   <Textarea
                     id="teks-baru"
@@ -499,3 +499,4 @@ export default function MateriAksesibel() {
     </div>
   );
 }
+

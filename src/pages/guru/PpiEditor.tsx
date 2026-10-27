@@ -1,4 +1,4 @@
-/**
+﻿/**
  * F4 + F5 — Inti PPI-Link: Rekomendasi Akomodasi & Draf PPI Berversi.
  * Setiap saran akomodasi wajib tampil bersama alasan, tingkat bukti, dan peninjau
  * dari tabel aturan; guru menyetujui atau menolak. Setiap simpan menambah versi
@@ -281,21 +281,21 @@ export default function PpiEditor() {
 
   if (memuat) {
     return (
-      <div className="p-16 text-center border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[var(--aksen)] border-t-transparent" />
-        <p className="mt-3 text-sm text-[var(--tinta-lembut)] font-mono">Memuat saran akomodasi & draf PPI...</p>
+      <div className="p-16 text-center border border-garis bg-kartu rounded-sm">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-aksen border-t-transparent" />
+        <p className="mt-3 text-sm text-tinta-lembut font-mono">Memuat saran akomodasi & draf PPI...</p>
       </div>
     );
   }
 
   if (galat) {
     return (
-      <div className="p-6 border border-[var(--galat)] bg-red-50/50 rounded-sm space-y-4">
-        <div className="flex items-center gap-2 text-[var(--galat)] font-bold">
+      <div className="p-6 border border-galat bg-red-50/50 rounded-sm space-y-4">
+        <div className="flex items-center gap-2 text-galat font-bold">
           <AlertCircle className="w-5 h-5" />
           <span>Gagal Memuat Draf PPI</span>
         </div>
-        <p className="text-sm text-[var(--galat)]">{galat}</p>
+        <p className="text-sm text-galat">{galat}</p>
         <Button asChild variant="outline" size="sm">
           <Link to="/siswa">Kembali ke Daftar Siswa</Link>
         </Button>
@@ -305,8 +305,8 @@ export default function PpiEditor() {
 
   if (!saran || !saran.student) {
     return (
-      <div className="p-6 border border-[var(--galat)] bg-red-50/50 rounded-sm space-y-4">
-        <p className="text-sm text-[var(--galat)]">Data siswa tidak ditemukan di database.</p>
+      <div className="p-6 border border-galat bg-red-50/50 rounded-sm space-y-4">
+        <p className="text-sm text-galat">Data siswa tidak ditemukan di database.</p>
         <Button asChild variant="outline" size="sm">
           <Link to="/siswa">Kembali ke Daftar Siswa</Link>
         </Button>
@@ -319,17 +319,17 @@ export default function PpiEditor() {
   if (!saran.assessment) {
     return (
       <div className="space-y-6">
-        <header className="border-b border-[var(--garis)] pb-4">
-          <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs -ml-2 text-[var(--tinta-lembut)] mb-2">
+        <header className="border-b border-garis pb-4">
+          <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs -ml-2 text-tinta-lembut mb-2">
             <Link to="/siswa">
               <ArrowLeft className="w-3.5 h-3.5 mr-1" />
               Daftar Siswa
             </Link>
           </Button>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)]">
+          <h1 className="font-display text-3xl font-bold tracking-tight text-tinta">
             Draf PPI: {siswa.kode} ({siswa.inisial})
           </h1>
-          <p className="text-sm text-[var(--tinta-lembut)] mt-1">Kelas {siswa.kelas}, tahun lahir {siswa.tahun_lahir}.</p>
+          <p className="text-sm text-tinta-lembut mt-1">Kelas {siswa.kelas}, tahun lahir {siswa.tahun_lahir}.</p>
         </header>
 
         <div className="p-8 border border-[var(--peringatan)] bg-amber-50/40 rounded-sm space-y-4">
@@ -337,7 +337,7 @@ export default function PpiEditor() {
             <Info className="w-5 h-5" />
             <span>Asesmen Belum Ditemukan</span>
           </div>
-          <p className="text-sm text-[var(--tinta-lembut)] leading-relaxed max-w-2xl">
+          <p className="text-sm text-tinta-lembut leading-relaxed max-w-2xl">
             Saran akomodasi PPI dikalkulasi langsung dari profil hambatan yang dicatat pada asesmen guru. Siswa ini belum
             memiliki catatan asesmen, sehingga draf PPI belum dapat disusun secara terarah.
           </p>
@@ -358,9 +358,9 @@ export default function PpiEditor() {
   return (
     <div ref={wadahRef} className="space-y-8">
       {/* Header Editorial */}
-      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+      <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center gap-2 mb-3">
-          <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs -ml-2 text-[var(--tinta-lembut)]">
+          <Button asChild variant="ghost" size="sm" className="h-7 px-2 text-xs -ml-2 text-tinta-lembut">
             <Link to="/siswa">
               <ArrowLeft className="w-3.5 h-3.5 mr-1" />
               Daftar Siswa
@@ -379,28 +379,28 @@ export default function PpiEditor() {
 
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+            <h1 className="font-display text-3xl font-bold tracking-tight text-tinta sm:text-4xl">
               Program Pembelajaran Individual
             </h1>
-            <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-2xl leading-relaxed">
+            <p className="mt-2 text-base text-tinta-lembut max-w-2xl leading-relaxed">
               Saran akomodasi diturunkan transparan dari aturan berbasis bukti. Setiap perubahan tersimpan sebagai versi baru
               tanpa menghilangkan riwayat sebelumnya.
             </p>
           </div>
 
-          <div className="bg-[var(--kartu)] border border-[var(--garis)] p-3 rounded-sm shrink-0 font-mono text-right">
-            <span className="text-[11px] text-[var(--tinta-lembut)] block">SUBJEK SISWA</span>
-            <span className="text-lg font-bold text-[var(--tinta)]">{siswa.kode} ({siswa.inisial})</span>
-            <span className="text-xs text-[var(--tinta-lembut)] block">Kelas {siswa.kelas} · Asesmen: {tanggal(saran.assessment.tanggal)}</span>
+          <div className="bg-kartu border border-garis p-3 rounded-sm shrink-0 font-mono text-right">
+            <span className="text-[11px] text-tinta-lembut block">SUBJEK SISWA</span>
+            <span className="text-lg font-bold text-tinta">{siswa.kode} ({siswa.inisial})</span>
+            <span className="text-xs text-tinta-lembut block">Kelas {siswa.kelas} · Asesmen: {tanggal(saran.assessment.tanggal)}</span>
           </div>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
           <Link
             to={`/siswa/${siswaId}/asesmen`}
-            className="text-[var(--aksi)] hover:underline inline-flex items-center gap-1 font-medium"
+            className="text-aksi hover:underline inline-flex items-center gap-1 font-medium"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[var(--aksen)]" />
+            <Sparkles className="w-3.5 h-3.5 text-aksen" />
             Tinjau Asesmen Hambatan Terakhir
           </Link>
           {ppi && (
@@ -408,7 +408,7 @@ export default function PpiEditor() {
               <span className="text-[var(--garis)]">·</span>
               <Link
                 to={`/ppi/${ppi.id}/sesi`}
-                className="text-[var(--aksi)] hover:underline inline-flex items-center gap-1 font-medium"
+                className="text-aksi hover:underline inline-flex items-center gap-1 font-medium"
               >
                 <BookOpen className="w-3.5 h-3.5" />
                 Buka Log Sesi Pendampingan (F6)
@@ -420,7 +420,7 @@ export default function PpiEditor() {
 
       {/* Alert Status */}
       {galatSimpan && (
-        <div className="anim-muncul rounded-sm border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+        <div className="anim-muncul rounded-sm border border-galat bg-red-50/50 p-4 text-galat text-sm flex items-start gap-3" role="alert">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">Penyimpanan Gagal</p>
@@ -429,13 +429,13 @@ export default function PpiEditor() {
         </div>
       )}
       {pesanSukses && (
-        <div className="anim-muncul rounded-sm border border-[var(--berhasil)] bg-emerald-50/50 p-4 text-[var(--berhasil)] text-sm flex items-center justify-between gap-4" role="status">
+        <div className="anim-muncul rounded-sm border border-berhasil bg-emerald-50/50 p-4 text-berhasil text-sm flex items-center justify-between gap-4" role="status">
           <div className="flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-[var(--berhasil)] shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-berhasil shrink-0" />
             <span className="font-medium">{pesanSukses}</span>
           </div>
           {ppi && (
-            <Button asChild size="sm" variant="outline" className="border-[var(--berhasil)] text-[var(--berhasil)] hover:bg-emerald-50 shrink-0">
+            <Button asChild size="sm" variant="outline" className="border-berhasil text-berhasil hover:bg-emerald-50 shrink-0">
               <Link to={`/ppi/${ppi.id}/sesi`}>
                 Catat Sesi
                 <ArrowRight className="w-4 h-4 ml-1" />
@@ -451,14 +451,14 @@ export default function PpiEditor() {
         <section className="anim-muncul lg:col-span-8 space-y-8">
           <form onSubmit={simpan} noValidate className="space-y-8">
             {/* 1. Rekomendasi Akomodasi dari Aturan */}
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--garis)] pb-4">
+            <div className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-garis pb-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[var(--aksen)]" />
-                    <h2 className="font-display text-xl font-bold text-[var(--tinta)]">Saran Akomodasi Aturan</h2>
+                    <Sparkles className="w-4 h-4 text-aksen" />
+                    <h2 className="font-display text-xl font-bold text-tinta">Saran Akomodasi Aturan</h2>
                   </div>
-                  <p className="text-xs text-[var(--tinta-lembut)] mt-1">
+                  <p className="text-xs text-tinta-lembut mt-1">
                     Dihitung dari {saran.hambatan.length} hambatan teramati. Guru memegang kendali penuh untuk menerima/menolak.
                   </p>
                 </div>
@@ -468,7 +468,7 @@ export default function PpiEditor() {
               </div>
 
               {kelompok.length === 0 ? (
-                <p className="text-sm text-[var(--tinta-lembut)] py-4">
+                <p className="text-sm text-tinta-lembut py-4">
                   Tidak ada aturan spesifik yang cocok untuk kombinasi hambatan saat ini. Anda tetap dapat menentukan tujuan belajar mandiri di bawah.
                 </p>
               ) : (
@@ -484,13 +484,13 @@ export default function PpiEditor() {
                         key={id}
                         className={`p-4 border rounded-sm transition-all space-y-3 ${
                           k.disetujui
-                            ? 'border-[var(--garis)] bg-transparent'
+                            ? 'border-garis bg-transparent'
                             : 'border-red-200 bg-red-50/20 opacity-80'
                         }`}
                       >
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div>
-                            <h3 className="font-bold text-sm text-[var(--tinta)] flex items-center gap-2">
+                            <h3 className="font-bold text-sm text-tinta flex items-center gap-2">
                               {a.nama}
                               <Badge
                                 variant={a.tingkat_bukti === 'kuat' ? 'default' : 'secondary'}
@@ -499,21 +499,21 @@ export default function PpiEditor() {
                                 {teksBukti(a.tingkat_bukti)}
                               </Badge>
                             </h3>
-                            <p className="text-xs text-[var(--tinta-lembut)] mt-1">
-                              Dari hambatan: <span className="font-medium text-[var(--tinta)]">{g.hambatan.join(', ')}</span>
+                            <p className="text-xs text-tinta-lembut mt-1">
+                              Dari hambatan: <span className="font-medium text-tinta">{g.hambatan.join(', ')}</span>
                               {a.sumber && ` · Sumber: ${a.sumber}`}
                             </p>
                           </div>
 
                           {/* Tombol Radio Keputusan Guru */}
-                          <div className="inline-flex rounded-sm border border-[var(--garis)] bg-[var(--latar-lembut)] p-0.5 shrink-0 self-start">
+                          <div className="inline-flex rounded-sm border border-garis bg-latar-lembut p-0.5 shrink-0 self-start">
                             <button
                               type="button"
                               onClick={() => putuskan(id, true)}
                               className={`flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-sm transition-colors ${
                                 k.disetujui
                                   ? 'bg-[var(--berhasil)] text-white shadow-xs'
-                                  : 'text-[var(--tinta-lembut)] hover:text-[var(--tinta)]'
+                                  : 'text-tinta-lembut hover:text-tinta'
                               }`}
                             >
                               <Check className="w-3.5 h-3.5" />
@@ -525,7 +525,7 @@ export default function PpiEditor() {
                               className={`flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-sm transition-colors ${
                                 !k.disetujui
                                   ? 'bg-[var(--galat)] text-white shadow-xs'
-                                  : 'text-[var(--tinta-lembut)] hover:text-[var(--tinta)]'
+                                  : 'text-tinta-lembut hover:text-tinta'
                               }`}
                             >
                               <X className="w-3.5 h-3.5" />
@@ -535,24 +535,24 @@ export default function PpiEditor() {
                         </div>
 
                         {a.deskripsi && (
-                          <p className="text-xs text-[var(--tinta)] leading-relaxed bg-[var(--latar-lembut)]/30 p-2.5 rounded-sm border border-[var(--garis)]">
+                          <p className="text-xs text-tinta leading-relaxed bg-latar-lembut/30 p-2.5 rounded-sm border border-garis">
                             {a.deskripsi}
                           </p>
                         )}
 
                         {g.alasan.map((alasan, i) => (
-                          <p key={i} className="text-xs text-[var(--tinta-lembut)]">
-                            <span className="font-semibold text-[var(--tinta)]">Alasan ilmiah:</span> {alasan}
+                          <p key={i} className="text-xs text-tinta-lembut">
+                            <span className="font-semibold text-tinta">Alasan ilmiah:</span> {alasan}
                           </p>
                         ))}
 
-                        <div className="text-[11px] font-mono text-[var(--tinta-lembut)]">
+                        <div className="text-[11px] font-mono text-tinta-lembut">
                           Ditinjau oleh: {a.ditinjau_oleh} · {tanggal(a.tanggal_tinjau)}
                         </div>
 
                         {/* Catatan Guru Opsional */}
-                        <div className="pt-2 border-t border-[var(--garis)]">
-                          <label htmlFor={`${idc}-catatan`} className="block text-[11px] font-mono text-[var(--tinta-lembut)] mb-1">
+                        <div className="pt-2 border-t border-garis">
+                          <label htmlFor={`${idc}-catatan`} className="block text-[11px] font-mono text-tinta-lembut mb-1">
                             CATATAN PENYESUAIAN GURU (OPSIONAL):
                           </label>
                           <Input
@@ -572,11 +572,11 @@ export default function PpiEditor() {
             </div>
 
             {/* 2. Tujuan & Indikator Terukur */}
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-[var(--garis)] pb-4">
+            <div className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
+              <div className="flex items-center justify-between border-b border-garis pb-4">
                 <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-[var(--aksen)]" />
-                  <h2 className="font-display text-xl font-bold text-[var(--tinta)]">Tujuan & Indikator Capaian</h2>
+                  <Target className="w-4 h-4 text-aksen" />
+                  <h2 className="font-display text-xl font-bold text-tinta">Tujuan & Indikator Capaian</h2>
                 </div>
                 <Button
                   type="button"
@@ -592,16 +592,16 @@ export default function PpiEditor() {
 
               <div className="space-y-4">
                 {tujuan.map((t, i) => (
-                  <div key={t.kunci} className="p-4 border border-[var(--garis)] rounded-sm bg-[var(--latar-lembut)]/20 space-y-3">
+                  <div key={t.kunci} className="p-4 border border-garis rounded-sm bg-latar-lembut/20 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold text-[var(--tinta)]">
+                      <span className="font-mono text-xs font-bold text-tinta">
                         TARGET #{i + 1}
                       </span>
                       {tujuan.length > 1 && (
                         <button
                           type="button"
                           onClick={() => setTujuan((lama) => lama.filter((b) => b.kunci !== t.kunci))}
-                          className="text-[var(--galat)] hover:underline text-xs flex items-center gap-1"
+                          className="text-galat hover:underline text-xs flex items-center gap-1"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           Hapus Target
@@ -610,8 +610,8 @@ export default function PpiEditor() {
                     </div>
 
                     <div>
-                      <label htmlFor={`tujuan-${t.kunci}`} className="block text-xs font-medium text-[var(--tinta)] mb-1">
-                        Rumusan Tujuan Pembelajaran <span className="text-[var(--aksen)]">*</span>
+                      <label htmlFor={`tujuan-${t.kunci}`} className="block text-xs font-medium text-tinta mb-1">
+                        Rumusan Tujuan Pembelajaran <span className="text-aksen">*</span>
                       </label>
                       <Input
                         id={`tujuan-${t.kunci}`}
@@ -627,8 +627,8 @@ export default function PpiEditor() {
                     </div>
 
                     <div>
-                      <label htmlFor={`indikator-${t.kunci}`} className="block text-xs font-medium text-[var(--tinta)] mb-1">
-                        Indikator Keberhasilan Terukur <span className="text-[var(--aksen)]">*</span>
+                      <label htmlFor={`indikator-${t.kunci}`} className="block text-xs font-medium text-tinta mb-1">
+                        Indikator Keberhasilan Terukur <span className="text-aksen">*</span>
                       </label>
                       <Input
                         id={`indikator-${t.kunci}`}
@@ -648,12 +648,12 @@ export default function PpiEditor() {
             </div>
 
             {/* 3. Ringkasan Eksekutif PPI */}
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-              <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
-                <FileText className="w-4 h-4 text-[var(--aksen)]" />
-                <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Ringkasan Draf PPI</h2>
+            <div className="border border-garis bg-kartu rounded-sm p-6 space-y-4">
+              <div className="flex items-center gap-2 border-b border-garis pb-3">
+                <FileText className="w-4 h-4 text-aksen" />
+                <h2 className="font-display text-lg font-bold text-tinta">Ringkasan Draf PPI</h2>
               </div>
-              <p className="text-xs text-[var(--tinta-lembut)]">
+              <p className="text-xs text-tinta-lembut">
                 Ikhtisar ringkas yang dapat dibaca oleh kepala sekolah, guru pendamping, dan wali murid di portal orang tua.
               </p>
               <Textarea
@@ -667,11 +667,11 @@ export default function PpiEditor() {
             </div>
 
             {/* Tombol Aksi Simpan */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-[var(--kartu)] border border-[var(--garis)] rounded-sm">
-              <span className="text-xs text-[var(--tinta-lembut)] font-mono">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-kartu border border-garis rounded-sm">
+              <span className="text-xs text-tinta-lembut font-mono">
                 * Simpan akan mempublikasikan versi baru ({versi.length ? `v${versi[0].nomor_versi + 1}` : 'v1'}) tanpa menimpa data lama.
               </span>
-              <Button type="submit" disabled={sibuk} className="shrink-0 bg-[var(--aksi)] hover:bg-[var(--aksi-gelap)] text-white">
+              <Button type="submit" disabled={sibuk} className="shrink-0 bg-aksi hover:bg-aksi-gelap text-white">
                 <Save className="w-4 h-4 mr-1.5" />
                 {sibuk ? 'Menyimpan Versi...' : 'Simpan Sebagai Versi Baru'}
               </Button>
@@ -681,11 +681,11 @@ export default function PpiEditor() {
 
         {/* Kolom Kanan: Riwayat Versi & Diff Inspector */}
         <aside className="anim-muncul lg:col-span-4 space-y-6">
-          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-[var(--garis)] pb-3">
+          <div className="border border-garis bg-kartu rounded-sm p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-garis pb-3">
               <div className="flex items-center gap-2">
-                <History className="w-4 h-4 text-[var(--aksen)]" />
-                <h2 className="font-display text-base font-bold text-[var(--tinta)]">Riwayat Versi PPI</h2>
+                <History className="w-4 h-4 text-aksen" />
+                <h2 className="font-display text-base font-bold text-tinta">Riwayat Versi PPI</h2>
               </div>
               <Badge variant="outline" className="font-mono text-xs">
                 {versi.length} Versi
@@ -693,18 +693,18 @@ export default function PpiEditor() {
             </div>
 
             {versi.length === 0 ? (
-              <p className="text-xs text-[var(--tinta-lembut)] py-4">Belum ada versi PPI yang pernah disimpan.</p>
+              <p className="text-xs text-tinta-lembut py-4">Belum ada versi PPI yang pernah disimpan.</p>
             ) : (
               <div className="space-y-3">
                 {versi.map((v, i) => (
                   <div
                     key={v.id}
                     className={`p-3.5 border rounded-sm text-xs space-y-2 ${
-                      i === 0 ? 'border-[var(--aksen)] bg-[var(--latar-lembut)]/30' : 'border-[var(--garis)]'
+                      i === 0 ? 'border-aksen bg-latar-lembut/30' : 'border-garis'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-[var(--tinta)]">
+                      <span className="font-mono font-bold text-tinta">
                         Versi {v.nomor_versi}
                       </span>
                       {i === 0 && (
@@ -713,16 +713,16 @@ export default function PpiEditor() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-[11px] text-[var(--tinta-lembut)] font-mono">
+                    <p className="text-[11px] text-tinta-lembut font-mono">
                       {tanggal(v.dibuat_pada)}
                     </p>
                     {v.ringkasan && (
-                      <p className="text-xs text-[var(--tinta)] line-clamp-2 italic">
+                      <p className="text-xs text-tinta line-clamp-2 italic">
                         &ldquo;{v.ringkasan}&rdquo;
                       </p>
                     )}
 
-                    <div className="pt-2 border-t border-[var(--garis)] flex items-center gap-2">
+                    <div className="pt-2 border-t border-garis flex items-center gap-2">
                       <Button
                         type="button"
                         variant="ghost"
@@ -756,23 +756,23 @@ export default function PpiEditor() {
 
           {/* Modal / Panel Perbandingan Versi (Diff) */}
           {beda && versi[0] && (
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-5 space-y-3">
-              <div className="flex items-center justify-between border-b border-[var(--garis)] pb-2">
+            <div className="border border-garis bg-kartu rounded-sm p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-garis pb-2">
                 <div className="flex items-center gap-1.5 font-bold text-xs">
-                  <Diff className="w-4 h-4 text-[var(--aksen)]" />
+                  <Diff className="w-4 h-4 text-aksen" />
                   <span>Perbandingan v{beda.tua} &rarr; v{beda.baru}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setBeda(null)}
-                  className="text-xs text-[var(--tinta-lembut)] hover:text-[var(--tinta)]"
+                  className="text-xs text-tinta-lembut hover:text-tinta"
                 >
                   Tutup
                 </button>
               </div>
 
               {beda.hasil.tambah.length + beda.hasil.hapus.length + beda.hasil.ubah.length === 0 ? (
-                <p className="text-xs text-[var(--tinta-lembut)]">Tidak ada perbedaan indikator antara kedua versi.</p>
+                <p className="text-xs text-tinta-lembut">Tidak ada perbedaan indikator antara kedua versi.</p>
               ) : (
                 <div className="space-y-3 text-xs font-mono">
                   {beda.hasil.tambah.length > 0 && (
@@ -816,18 +816,18 @@ export default function PpiEditor() {
 
           {/* Detail Versi Tertentu */}
           {versiDibuka && (
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-5 space-y-3 text-xs">
-              <div className="flex items-center justify-between border-b border-[var(--garis)] pb-2">
+            <div className="border border-garis bg-kartu rounded-sm p-5 space-y-3 text-xs">
+              <div className="flex items-center justify-between border-b border-garis pb-2">
                 <span className="font-bold">Detail Versi {versiDibuka.nomor_versi}</span>
                 <button
                   type="button"
                   onClick={() => setVersiDibuka(null)}
-                  className="text-xs text-[var(--tinta-lembut)] hover:text-[var(--tinta)]"
+                  className="text-xs text-tinta-lembut hover:text-tinta"
                 >
                   Tutup
                 </button>
               </div>
-              <p className="text-[11px] text-[var(--tinta-lembut)] font-mono">
+              <p className="text-[11px] text-tinta-lembut font-mono">
                 Dibuat: {tanggal(versiDibuka.dibuat_pada)}
               </p>
               <div>
@@ -837,7 +837,7 @@ export default function PpiEditor() {
                     <li key={g.id}>
                       <span className="font-medium">{g.tujuan}</span>
                       <br />
-                      <span className="text-[11px] text-[var(--tinta-lembut)] font-mono">&rarr; {g.indikator}</span>
+                      <span className="text-[11px] text-tinta-lembut font-mono">&rarr; {g.indikator}</span>
                     </li>
                   ))}
                 </ul>
@@ -849,3 +849,4 @@ export default function PpiEditor() {
     </div>
   );
 }
+

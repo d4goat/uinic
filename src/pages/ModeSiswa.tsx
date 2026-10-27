@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGSAP } from '@gsap/react';
@@ -26,7 +26,7 @@ import { Input } from '../components/ui/input';
  * dan tidak perlu mengetik apa pun. Daftar langkah hanya tersimpan di peramban perangkat.
  */
 
-const IKON = ['▶', '★', '●', '◆', '■', '▲', '✔', '♫'];
+const IKON = ['â–¶', 'â˜…', 'â—', 'â—†', 'â– ', 'â–²', 'âœ”', 'â™«'];
 const KUNCI_AWALAN = 'ppi-link:mode-siswa:';
 
 type Laju = 0.7 | 1 | 1.3;
@@ -235,37 +235,37 @@ export default function ModeSiswa() {
   return (
     <div ref={wadahRef} className="space-y-8 max-w-4xl mx-auto">
       {/* Header Mode Siswa */}
-      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+      <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center gap-2 mb-2">
           <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
             F11 · Jadwal Visual Siswa
           </Badge>
-          <span className="text-xs text-[var(--tinta-lembut)]">Ramah Autisme & Tanpa Akun Anak</span>
+          <span className="text-xs text-tinta-lembut">Ramah Autisme & Tanpa Akun Anak</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+            <h1 className="font-display text-3xl font-bold tracking-tight text-tinta sm:text-4xl">
               {materi ? materi.judul : 'Mode Siswa'}
             </h1>
-            <p className="mt-2 text-base text-[var(--tinta-lembut)] leading-relaxed">
+            <p className="mt-2 text-base text-tinta-lembut leading-relaxed">
               Panduan belajar langkah-demi-langkah dengan tombol visual besar untuk digunakan bersama guru di kelas.
             </p>
           </div>
 
           {/* Bar Kemajuan Visual */}
-          <div className="bg-[var(--kartu)] border border-[var(--garis)] p-4 rounded-sm shrink-0 min-w-[200px]">
+          <div className="bg-kartu border border-garis p-4 rounded-sm shrink-0 min-w-[200px]">
             <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-              <span className="text-[var(--tinta-lembut)]">KEMAJUAN</span>
-              <span className="font-bold text-[var(--tinta)]">{persenSelesai}%</span>
+              <span className="text-tinta-lembut">KEMAJUAN</span>
+              <span className="font-bold text-tinta">{persenSelesai}%</span>
             </div>
-            <div className="w-full bg-[var(--latar-lembut)] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-latar-lembut h-2 rounded-full overflow-hidden">
               <div
                 className="bg-[var(--aksen)] h-full transition-all duration-300"
                 style={{ width: `${persenSelesai}%` }}
               />
             </div>
-            <span className="text-[11px] font-mono text-[var(--tinta-lembut)] block mt-1">
+            <span className="text-[11px] font-mono text-tinta-lembut block mt-1">
               {jumlahSelesai} dari {langkah.length} langkah selesai
             </span>
           </div>
@@ -294,7 +294,7 @@ export default function ModeSiswa() {
           <Button
             size="sm"
             variant="ghost"
-            className="text-xs font-mono text-[var(--tinta-lembut)]"
+            className="text-xs font-mono text-tinta-lembut"
             onClick={aturUlang}
           >
             Atur Ulang Langkah Bawaan
@@ -303,7 +303,7 @@ export default function ModeSiswa() {
       </header>
 
       {galat && (
-        <div className="anim-muncul rounded-sm border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+        <div className="anim-muncul rounded-sm border border-galat bg-red-50/50 p-4 text-galat text-sm flex items-start gap-3" role="alert">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">Terjadi Kendala</p>
@@ -314,9 +314,9 @@ export default function ModeSiswa() {
 
       {/* Drawer Panel Materi Bacaan */}
       {panelMateri && (
-        <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-[var(--garis)] pb-3">
-            <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Naskah Sumber</h2>
+        <section className="anim-muncul border border-garis bg-kartu rounded-sm p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-garis pb-3">
+            <h2 className="font-display text-lg font-bold text-tinta">Naskah Sumber</h2>
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
@@ -340,7 +340,7 @@ export default function ModeSiswa() {
             </div>
           </div>
 
-          <div className="text-base text-[var(--tinta)] leading-relaxed space-y-3 font-sans">
+          <div className="text-base text-tinta leading-relaxed space-y-3 font-sans">
             {bagiParagraf(teksSumber).map((p, idx) => (
               <p key={idx}>{p}</p>
             ))}
@@ -350,13 +350,13 @@ export default function ModeSiswa() {
 
       {/* Daftar Langkah Visual Besar */}
       <section className="anim-muncul space-y-4">
-        <h2 className="font-display text-xl font-bold text-[var(--tinta)] flex items-center gap-2">
-          <ListTodo className="w-5 h-5 text-[var(--aksen)]" />
+        <h2 className="font-display text-xl font-bold text-tinta flex items-center gap-2">
+          <ListTodo className="w-5 h-5 text-aksen" />
           <span>Langkah Tugas Hari Ini</span>
         </h2>
 
         {langkah.length === 0 ? (
-          <div className="p-8 border border-[var(--garis)] bg-[var(--kartu)] rounded-sm text-center text-sm text-[var(--tinta-lembut)]">
+          <div className="p-8 border border-garis bg-kartu rounded-sm text-center text-sm text-tinta-lembut">
             Belum ada langkah visual. Tambahkan langkah pertama di formulir bawah.
           </div>
         ) : (
@@ -367,23 +367,23 @@ export default function ModeSiswa() {
                 className={`p-4 border rounded-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                   l.selesai
                     ? 'border-emerald-300 bg-emerald-50/40 opacity-70'
-                    : 'border-[var(--garis)] bg-[var(--kartu)] hover:border-[var(--garis-kuat)] shadow-xs'
+                    : 'border-garis bg-kartu hover:border-garis-kuat shadow-xs'
                 }`}
               >
                 <div className="flex items-center gap-4">
                   {/* Ikon Simbol Besar */}
                   <span className={`w-11 h-11 shrink-0 rounded-sm flex items-center justify-center font-bold text-lg select-none ${
-                    l.selesai ? 'bg-emerald-600 text-white' : 'bg-[var(--latar-lembut)] text-[var(--tinta)] border border-[var(--garis)]'
+                    l.selesai ? 'bg-emerald-600 text-white' : 'bg-latar-lembut text-tinta border border-garis'
                   }`}>
                     {l.ikon}
                   </span>
 
                   <div>
-                    <span className="text-[11px] font-mono text-[var(--tinta-lembut)] block uppercase">
+                    <span className="text-[11px] font-mono text-tinta-lembut block uppercase">
                       Langkah #{i + 1}
                     </span>
                     <p className={`text-base font-semibold leading-relaxed ${
-                      l.selesai ? 'line-through text-emerald-900' : 'text-[var(--tinta)]'
+                      l.selesai ? 'line-through text-emerald-900' : 'text-tinta'
                     }`}>
                       {l.teks}
                     </p>
@@ -418,7 +418,7 @@ export default function ModeSiswa() {
                     size="icon"
                     variant="ghost"
                     onClick={() => hapusLangkah(l.id)}
-                    className="h-11 w-11 text-[var(--tinta-lembut)] hover:text-[var(--galat)]"
+                    className="h-11 w-11 text-tinta-lembut hover:text-galat"
                     title={`Hapus langkah ${i + 1}`}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -431,9 +431,9 @@ export default function ModeSiswa() {
       </section>
 
       {/* Formulir Tambah Langkah Cepat */}
-      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-        <h3 className="font-display text-base font-bold text-[var(--tinta)] flex items-center gap-1.5">
-          <Plus className="w-4 h-4 text-[var(--aksen)]" />
+      <section className="anim-muncul border border-garis bg-kartu rounded-sm p-6 space-y-4">
+        <h3 className="font-display text-base font-bold text-tinta flex items-center gap-1.5">
+          <Plus className="w-4 h-4 text-aksen" />
           <span>Tambah Satu Langkah Visual Baru</span>
         </h3>
 
@@ -453,3 +453,4 @@ export default function ModeSiswa() {
     </div>
   );
 }
+

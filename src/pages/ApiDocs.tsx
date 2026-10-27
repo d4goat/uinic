@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+﻿import { useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
 import {
@@ -135,18 +135,18 @@ export default function ApiDocs() {
   return (
     <div ref={wadahRef} className="space-y-8">
       {/* Header Dokumentasi API */}
-      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+      <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center gap-2 mb-2">
           <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
             F9 · Spesifikasi OpenAPI & RPC
           </Badge>
-          <span className="text-xs text-[var(--tinta-lembut)]">PostgREST Engine & RLS PostgreSQL</span>
+          <span className="text-xs text-tinta-lembut">PostgREST Engine & RLS PostgreSQL</span>
         </div>
 
-        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-tinta sm:text-4xl">
           Dokumentasi Antarmuka Pemrograman (API)
         </h1>
-        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-3xl leading-relaxed">
+        <p className="mt-2 text-base text-tinta-lembut max-w-3xl leading-relaxed">
           PPI-Link menerapkan arsitektur serverless langsung di atas Supabase Postgres. Otorisasi dan validasi
           ditegakkan di tingkat basis data menggunakan Row Level Security (RLS) dan fungsi tersimpan berpredikat{' '}
           <code>security definer</code>.
@@ -156,39 +156,39 @@ export default function ApiDocs() {
       {/* Grid Arsitektur & OpenAPI Endpoint */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Arsitektur Singkat */}
-        <div className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-          <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
-            <Server className="w-4 h-4 text-[var(--aksen)]" />
-            <h2 className="font-display text-base font-bold text-[var(--tinta)]">Arsitektur Tanpa Backend Express</h2>
+        <div className="anim-muncul border border-garis bg-kartu rounded-sm p-6 space-y-4">
+          <div className="flex items-center gap-2 border-b border-garis pb-3">
+            <Server className="w-4 h-4 text-aksen" />
+            <h2 className="font-display text-base font-bold text-tinta">Arsitektur Tanpa Backend Express</h2>
           </div>
-          <ul className="text-xs text-[var(--tinta-lembut)] space-y-2.5 leading-relaxed">
+          <ul className="text-xs text-tinta-lembut space-y-2.5 leading-relaxed">
             <li className="flex items-start gap-2">
-              <span className="font-mono font-bold text-[var(--aksen)]">&rarr;</span>
+              <span className="font-mono font-bold text-aksen">&rarr;</span>
               <span><strong>Tanpa Middleware Rentan:</strong> Klien memanggil REST PostgREST secara langsung dengan token JWT terotentikasi.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-mono font-bold text-[var(--aksen)]">&rarr;</span>
+              <span className="font-mono font-bold text-aksen">&rarr;</span>
               <span><strong>RLS Multi-Tenant:</strong> Isolasi antar-sekolah dan antar-peran (guru, GPK, koordinator, wali) divalidasi oleh engine Postgres.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-mono font-bold text-[var(--aksen)]">&rarr;</span>
+              <span className="font-mono font-bold text-aksen">&rarr;</span>
               <span><strong>Enkripsi pgcrypto:</strong> Kolom catatan guru dienkripsi asimetris di dalam tabel database.</span>
             </li>
           </ul>
         </div>
 
         {/* OpenAPI Specification URL */}
-        <div className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4 flex flex-col justify-between">
+        <div className="anim-muncul border border-garis bg-kartu rounded-sm p-6 space-y-4 flex flex-col justify-between">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
-              <Code2 className="w-4 h-4 text-[var(--aksen)]" />
-              <h2 className="font-display text-base font-bold text-[var(--tinta)]">Spesifikasi OpenAPI Terbuka</h2>
+            <div className="flex items-center gap-2 border-b border-garis pb-3">
+              <Code2 className="w-4 h-4 text-aksen" />
+              <h2 className="font-display text-base font-bold text-tinta">Spesifikasi OpenAPI Terbuka</h2>
             </div>
-            <p className="text-xs text-[var(--tinta-lembut)] leading-relaxed">
+            <p className="text-xs text-tinta-lembut leading-relaxed">
               PostgREST menerbitkan spesifikasi OpenAPI 2.0 / Swagger secara dinamis sesuai skema database aktif.
               Dokumentasi ini selalu sinkron 100% dan tidak pernah basi.
             </p>
-            <div className="p-3 bg-[var(--latar-lembut)] border border-[var(--garis)] rounded-sm font-mono text-xs break-all text-[var(--tinta)]">
+            <div className="p-3 bg-latar-lembut border border-garis rounded-sm font-mono text-xs break-all text-tinta">
               {openApiUrl}
             </div>
           </div>
@@ -203,34 +203,34 @@ export default function ApiDocs() {
       </div>
 
       {/* Tabel Entitas REST */}
-      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-        <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
-          <Database className="w-4 h-4 text-[var(--aksen)]" />
-          <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Endpoints Tabel PostgREST (/rest/v1/*)</h2>
+      <section className="anim-muncul border border-garis bg-kartu rounded-sm p-6 space-y-4">
+        <div className="flex items-center gap-2 border-b border-garis pb-3">
+          <Database className="w-4 h-4 text-aksen" />
+          <h2 className="font-display text-lg font-bold text-tinta">Endpoints Tabel PostgREST (/rest/v1/*)</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
           {TABEL.map((t) => (
-            <div key={t.nama} className="p-3 border border-[var(--garis)] rounded-sm bg-[var(--latar-lembut)]/20">
-              <span className="font-bold text-[var(--aksen)] block">{t.nama}</span>
-              <span className="font-sans text-[var(--tinta-lembut)] text-[11px] mt-1 block">{t.isi}</span>
+            <div key={t.nama} className="p-3 border border-garis rounded-sm bg-latar-lembut/20">
+              <span className="font-bold text-aksen block">{t.nama}</span>
+              <span className="font-sans text-tinta-lembut text-[11px] mt-1 block">{t.isi}</span>
             </div>
           ))}
         </div>
       </section>
 
       {/* Tabel RPC Functions */}
-      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm overflow-hidden space-y-4 p-6">
-        <div className="flex items-center justify-between border-b border-[var(--garis)] pb-4">
+      <section className="anim-muncul border border-garis bg-kartu rounded-sm overflow-hidden space-y-4 p-6">
+        <div className="flex items-center justify-between border-b border-garis pb-4">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-[var(--aksen)]" />
-            <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Katalog Fungsi RPC (Remote Procedure Call)</h2>
+            <Layers className="w-4 h-4 text-aksen" />
+            <h2 className="font-display text-lg font-bold text-tinta">Katalog Fungsi RPC (Remote Procedure Call)</h2>
           </div>
           <Badge variant="outline" className="font-mono text-xs">{RPC.length} Prosedur</Badge>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-[var(--latar-lembut)] border-b border-[var(--garis)] font-mono text-[11px] uppercase text-[var(--tinta-lembut)]">
+            <thead className="bg-latar-lembut border-b border-garis font-mono text-[11px] uppercase text-tinta-lembut">
               <tr>
                 <th className="px-3 py-2.5 font-semibold">Nama Prosedur</th>
                 <th className="px-3 py-2.5 font-semibold">Argumen Input</th>
@@ -240,11 +240,11 @@ export default function ApiDocs() {
             </thead>
             <tbody className="divide-y divide-[var(--garis)] font-mono">
               {RPC.map((r) => (
-                <tr key={r.nama} className="hover:bg-[var(--latar-lembut)]/30 transition-colors">
-                  <td className="px-3 py-2.5 font-bold text-[var(--aksen)] whitespace-nowrap">
+                <tr key={r.nama} className="hover:bg-latar-lembut/30 transition-colors">
+                  <td className="px-3 py-2.5 font-bold text-aksen whitespace-nowrap">
                     {r.nama}
                   </td>
-                  <td className="px-3 py-2.5 text-[var(--tinta)] max-w-xs truncate" title={r.argumen}>
+                  <td className="px-3 py-2.5 text-tinta max-w-xs truncate" title={r.argumen}>
                     {r.argumen}
                   </td>
                   <td className="px-3 py-2.5 whitespace-nowrap">
@@ -252,7 +252,7 @@ export default function ApiDocs() {
                       {r.siapa}
                     </Badge>
                   </td>
-                  <td className="px-3 py-2.5 font-sans text-xs text-[var(--tinta-lembut)]">
+                  <td className="px-3 py-2.5 font-sans text-xs text-tinta-lembut">
                     {r.catatan}
                   </td>
                 </tr>
@@ -263,16 +263,16 @@ export default function ApiDocs() {
       </section>
 
       {/* Contoh Request cURL */}
-      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
-        <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-4">
-          <Terminal className="w-4 h-4 text-[var(--aksen)]" />
-          <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Contoh Permintaan HTTP (cURL)</h2>
+      <section className="anim-muncul border border-garis bg-kartu rounded-sm p-6 space-y-6">
+        <div className="flex items-center gap-2 border-b border-garis pb-4">
+          <Terminal className="w-4 h-4 text-aksen" />
+          <h2 className="font-display text-lg font-bold text-tinta">Contoh Permintaan HTTP (cURL)</h2>
         </div>
 
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between mb-1.5 text-xs">
-              <span className="font-bold text-[var(--tinta)]">1. Ambil Rekam dengan Token Sekali Pakai (Tanpa Login)</span>
+              <span className="font-bold text-tinta">1. Ambil Rekam dengan Token Sekali Pakai (Tanpa Login)</span>
               <button
                 type="button"
                 onClick={() =>
@@ -281,13 +281,13 @@ export default function ApiDocs() {
                     'curl-fetch',
                   )
                 }
-                className="text-[var(--aksi)] hover:underline flex items-center gap-1 font-mono text-[11px]"
+                className="text-aksi hover:underline flex items-center gap-1 font-mono text-[11px]"
               >
                 {salinTeks === 'curl-fetch' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                 {salinTeks === 'curl-fetch' ? 'Disalin!' : 'Salin cURL'}
               </button>
             </div>
-            <pre className="p-3 bg-black text-green-400 font-mono text-xs rounded-sm overflow-x-auto leading-relaxed border border-[var(--garis)]">
+            <pre className="p-3 bg-black text-green-400 font-mono text-xs rounded-sm overflow-x-auto leading-relaxed border border-garis">
 {`curl -X POST "$SUPABASE_URL/rest/v1/rpc/rpc_record_fetch" \\
   -H "apikey: $ANON_KEY" \\
   -H "Content-Type: application/json" \\
@@ -297,7 +297,7 @@ export default function ApiDocs() {
 
           <div>
             <div className="flex items-center justify-between mb-1.5 text-xs">
-              <span className="font-bold text-[var(--tinta)]">2. Minta Rekomendasi Akomodasi PPI (Akun Guru / GPK)</span>
+              <span className="font-bold text-tinta">2. Minta Rekomendasi Akomodasi PPI (Akun Guru / GPK)</span>
               <button
                 type="button"
                 onClick={() =>
@@ -306,13 +306,13 @@ export default function ApiDocs() {
                     'curl-suggest',
                   )
                 }
-                className="text-[var(--aksi)] hover:underline flex items-center gap-1 font-mono text-[11px]"
+                className="text-aksi hover:underline flex items-center gap-1 font-mono text-[11px]"
               >
                 {salinTeks === 'curl-suggest' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                 {salinTeks === 'curl-suggest' ? 'Disalin!' : 'Salin cURL'}
               </button>
             </div>
-            <pre className="p-3 bg-black text-green-400 font-mono text-xs rounded-sm overflow-x-auto leading-relaxed border border-[var(--garis)]">
+            <pre className="p-3 bg-black text-green-400 font-mono text-xs rounded-sm overflow-x-auto leading-relaxed border border-garis">
 {`curl -X POST "$SUPABASE_URL/rest/v1/rpc/rpc_ppi_suggest" \\
   -H "apikey: $ANON_KEY" \\
   -H "Authorization: Bearer $ACCESS_TOKEN" \\
@@ -324,11 +324,11 @@ export default function ApiDocs() {
       </section>
 
       {/* Tabel Kode Galat */}
-      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-        <h2 className="font-display text-base font-bold text-[var(--tinta)]">Kode Status & Galat PostgreSQL</h2>
+      <section className="anim-muncul border border-garis bg-kartu rounded-sm p-6 space-y-4">
+        <h2 className="font-display text-base font-bold text-tinta">Kode Status & Galat PostgreSQL</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-[var(--latar-lemaut)] border-b border-[var(--garis)] font-mono text-[11px] uppercase text-[var(--tinta-lembut)]">
+            <thead className="bg-[var(--latar-lemaut)] border-b border-garis font-mono text-[11px] uppercase text-tinta-lembut">
               <tr>
                 <th className="px-3 py-2 font-semibold">Kode SQLSTATE</th>
                 <th className="px-3 py-2 font-semibold">Penyebab Galat</th>
@@ -339,12 +339,12 @@ export default function ApiDocs() {
               <tr>
                 <td className="px-3 py-2 font-mono font-bold text-red-700">42501 (insufficient_privilege)</td>
                 <td className="px-3 py-2">Pelanggaran RLS: akun tidak memiliki hak akses atas tenant sekolah ini.</td>
-                <td className="px-3 py-2 text-[var(--tinta-lembut)]">Masuk dengan kredensial staf sekolah yang bersangkutan.</td>
+                <td className="px-3 py-2 text-tinta-lembut">Masuk dengan kredensial staf sekolah yang bersangkutan.</td>
               </tr>
               <tr>
                 <td className="px-3 py-2 font-mono font-bold text-amber-700">22023 (invalid_parameter_value)</td>
                 <td className="px-3 py-2">Token transfer kedaluwarsa, tidak cocok, atau sudah pernah terpakai.</td>
-                <td className="px-3 py-2 text-[var(--tinta-lembut)]">Minta koordinator sekolah asal menerbitkan token baru.</td>
+                <td className="px-3 py-2 text-tinta-lembut">Minta koordinator sekolah asal menerbitkan token baru.</td>
               </tr>
             </tbody>
           </table>
@@ -353,3 +353,4 @@ export default function ApiDocs() {
     </div>
   );
 }
+

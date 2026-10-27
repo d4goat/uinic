@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
 import {
@@ -63,13 +63,13 @@ export default function Audit() {
   return (
     <div ref={wadahRef} className="space-y-8">
       {/* Header Editorial */}
-      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+      <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
               F12 · Rekam Jejak Audit
             </Badge>
-            <span className="text-xs text-[var(--tinta-lembut)]">Trigger Postgres DB & Immutable Log</span>
+            <span className="text-xs text-tinta-lembut">Trigger Postgres DB & Immutable Log</span>
           </div>
 
           <Button
@@ -84,17 +84,17 @@ export default function Audit() {
           </Button>
         </div>
 
-        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-tinta sm:text-4xl">
           Jejak Audit Sistem
         </h1>
-        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-3xl leading-relaxed">
+        <p className="mt-2 text-base text-tinta-lembut max-w-3xl leading-relaxed">
           Seluruh mutasi data sensitif (tambah, ubah, hapus) dicatat secara otomatis oleh trigger basis data
           PostgreSQL pada tabel <code>audit_logs</code>. Pembacaan data sensitif dicatat eksplisit oleh aplikasi untuk akuntabilitas hukum.
         </p>
       </header>
 
       {galat && (
-        <div className="anim-muncul rounded-sm border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+        <div className="anim-muncul rounded-sm border border-galat bg-red-50/50 p-4 text-galat text-sm flex items-start gap-3" role="alert">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">Kendala Memuat Audit</p>
@@ -104,28 +104,28 @@ export default function Audit() {
       )}
 
       {/* Tabel Audit Modern */}
-      <section className="anim-muncul border border-[var(--garis)] bg-[var(--kartu)] rounded-sm overflow-hidden">
-        <div className="p-4 border-b border-[var(--garis)] bg-[var(--latar-lembut)]/40 flex items-center justify-between">
+      <section className="anim-muncul border border-garis bg-kartu rounded-sm overflow-hidden">
+        <div className="p-4 border-b border-garis bg-latar-lembut/40 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Database className="w-4 h-4 text-[var(--aksen)]" />
-            <span className="text-xs font-mono font-bold uppercase text-[var(--tinta)]">50 Entri Audit Terkini</span>
+            <Database className="w-4 h-4 text-aksen" />
+            <span className="text-xs font-mono font-bold uppercase text-tinta">50 Entri Audit Terkini</span>
           </div>
-          <span className="text-[11px] font-mono text-[var(--tinta-lembut)]">
-            Total termuat: <span className="font-bold text-[var(--tinta)]">{baris.length}</span> log
+          <span className="text-[11px] font-mono text-tinta-lembut">
+            Total termuat: <span className="font-bold text-tinta">{baris.length}</span> log
           </span>
         </div>
 
         {memuat ? (
           <div className="p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-[var(--aksen)] border-t-transparent" />
-            <p className="mt-3 text-xs text-[var(--tinta-lembut)] font-mono">Mengambil catatan audit dari database...</p>
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-aksen border-t-transparent" />
+            <p className="mt-3 text-xs text-tinta-lembut font-mono">Mengambil catatan audit dari database...</p>
           </div>
         ) : baris.length === 0 ? (
-          <div className="p-8 text-center text-xs text-[var(--tinta-lembut)]">Belum ada aktivitas tercatat pada tabel audit.</div>
+          <div className="p-8 text-center text-xs text-tinta-lembut">Belum ada aktivitas tercatat pada tabel audit.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-[var(--latar-lembut)] border-b border-[var(--garis)] font-mono uppercase text-[11px] text-[var(--tinta-lembut)]">
+              <thead className="bg-latar-lembut border-b border-garis font-mono uppercase text-[11px] text-tinta-lembut">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Waktu Stempel</th>
                   <th className="px-4 py-3 font-semibold">Aksi</th>
@@ -142,8 +142,8 @@ export default function Audit() {
                   const isUpdate = aksi === 'update';
 
                   return (
-                    <tr key={b.id} className="hover:bg-[var(--latar-lembut)]/40 transition-colors">
-                      <td className="px-4 py-3 text-[var(--tinta-lembut)] shrink-0 whitespace-nowrap">
+                    <tr key={b.id} className="hover:bg-latar-lembut/40 transition-colors">
+                      <td className="px-4 py-3 text-tinta-lembut shrink-0 whitespace-nowrap">
                         {waktu(b.waktu)}
                       </td>
                       <td className="px-4 py-3">
@@ -161,15 +161,15 @@ export default function Audit() {
                           {labelAksi(aksi)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-bold text-[var(--tinta)]">
+                      <td className="px-4 py-3 font-bold text-tinta">
                         {b.objek}
                       </td>
-                      <td className="px-4 py-3 text-[var(--tinta-lembut)] max-w-[140px] truncate" title={b.objek_id ?? undefined}>
+                      <td className="px-4 py-3 text-tinta-lembut max-w-[140px] truncate" title={b.objek_id ?? undefined}>
                         {b.objek_id ?? '—'}
                       </td>
                       <td className="px-4 py-3">
                         {b.user_id ? (
-                          <span className="text-[var(--tinta-lembut)] truncate block max-w-[180px]" title={b.user_id}>
+                          <span className="text-tinta-lembut truncate block max-w-[180px]" title={b.user_id}>
                             {b.user_id}
                           </span>
                         ) : (
@@ -190,3 +190,4 @@ export default function Audit() {
     </div>
   );
 }
+

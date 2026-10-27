@@ -9,9 +9,9 @@
  * 2. DUA WARNA TEKS: --color-tinta dan --color-tinta-lembut. Keduanya >= 4,5:1 di
  *    atas --color-latar dan --color-latar-lembut (WCAG 2.1 AA, PRD §7).
  *    Dijaga oleh `npm run cek:kontras` — bukan oleh ingatan.
- * 3. TANPA FONT DARI JARINGAN: seluruh font dibundel dari node_modules
- *    (@fontsource-variable/*). Perangkat sekolah sering luring, dan CSP di
- *    index.html hanya mengizinkan font dari asal yang sama (font-src 'self').
+ * 3. TANPA FONT DARI JARINGAN: seluruh font dibundel lokal (Neue Montreal dari
+ *    /fonts, @fontsource-variable untuk Display & Mono). Perangkat sekolah sering
+ *    luring, dan CSP di index.html hanya mengizinkan font dari asal yang sama.
  * 4. FOKUS KEYBOARD SELALU TERLIHAT; tidak ada outline yang dihapus.
  * 5. SEMUA UKURAN DALAM rem supaya zoom peramban bekerja. Mode teks besar
  *    menaikkan font-size akar, bukan menambal satu per satu.
@@ -24,6 +24,20 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @custom-variant dark (&:is(.dark *));
+
+/* ------------------------------------------------------------------ font ---
+ * Neue Montreal: font badan utama PPI-Link. Dibundel lokal di /public/fonts,
+ * sehingga tidak bergantung CDN dan aman untuk CSP strict (font-src 'self').
+ * Implementasi @font-face standar — kompatibel dengan Vite, tidak butuh Next.js. */
+@font-face {
+  font-family: 'Neue Montreal';
+  src: url('/fonts/neue-montreal/regular/index.woff2') format('woff2'),
+       url('/fonts/neue-montreal/regular/index.woff') format('woff'),
+       url('/fonts/neue-montreal/regular/index.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ------------------------------------------------------------------- token ---
  * Palet mentah + peran semantiknya. Namespace @theme milik Tailwind v4:
@@ -52,10 +66,11 @@
   --color-peringatan: #8a3b00;
   --color-galat: #8c1d1d;
 
-  /* Pasangan tipografi: grotesk rapat untuk tajuk, humanis netral untuk badan
-     bacaan, monospace untuk metadata/tag/penghitung/stempel waktu. */
+  /* Pasangan tipografi: grotesk rapat untuk tajuk, Neue Montreal untuk badan
+     bacaan (karakter humanis dengan kepribadian yang tetap bersih), monospace
+     untuk metadata/tag/penghitung/stempel waktu. */
   --font-display: 'Archivo Variable', Archivo, 'Helvetica Neue', Arial, sans-serif;
-  --font-sans: 'Inter Variable', Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Neue Montreal', 'Inter Variable', Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
 }
 
@@ -270,7 +285,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
   }
   .lompati-ke-konten:focus { left: 0.5rem; top: 0.5rem; color: #fff; }
 
-  /* --- bilah --- */
+  /* --- bilah (legacy, dipertahankan untuk referensi) --- */
   .bilah {
     display: flex;
     gap: 1.5rem;
@@ -280,7 +295,235 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
     border-bottom: 1px solid var(--garis);
     background: var(--latar);
   }
+
+  /* --- bilah-utama: navbar app baru ---
+     Tiga zona: merek | nav | akhir (profil+keluar). Tinggi tetap 3.5rem.
+     Di mobile: merek + hamburger (nav dan profil tersembunyi). */
+  .bilah-utama {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    height: 3.5rem;
+    padding: 0 1.5rem;
+    border-bottom: 1px solid var(--garis);
+    background: var(--latar);
+    /* Stacking context baru supaya konten halaman tidak muncul di atas bilah. */
+  }
+
+  .merek-link {
+    text-decoration: none;
+    color: inherit;
+    flex-shrink: 0;
+    margin-right: 2rem;
+  }
+  .merek-link:hover { color: inherit; }
+
   .bilah-merek {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.125rem;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+  /* Titik aksen merek — tetap ada di navbar baru. */
+  .bilah-merek::after {
+    content: '';
+    display: inline-block;
+    width: 0.375rem;
+    height: 0.375rem;
+    background: var(--aksen);
+    border-radius: 0;
+    flex-shrink: 0;
+  }
+
+  /* Nav desktop: satu baris tautan, sembunyi di mobile. */
+  .nav-desktop {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+    overflow: hidden;
+  }
+  @media (max-width: 48rem) {
+    .nav-desktop { display: none; }
+  }
+
+  .nav-tautan {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    position: relative;
+    text-decoration: none;
+    color: var(--tinta-lembut);
+    padding: 0.3125rem 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 450;
+    border-radius: 2px;
+    white-space: nowrap;
+    transition: color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+                background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .nav-tautan:hover {
+    color: var(--tinta);
+    background-color: var(--latar-lembut);
+  }
+  .nav-tautan[aria-current='page'] {
+    color: var(--tinta);
+    font-weight: 600;
+    background-color: var(--latar-lembut);
+  }
+  /* Garis bawah aktif */
+  .nav-tautan::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0.625rem;
+    bottom: 0;
+    height: 1.5px;
+    background: var(--aksen);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .nav-tautan:hover::after { transform: scaleX(1); }
+  .nav-tautan[aria-current='page']::after { transform: scaleX(1); }
+  .nav-ikon { opacity: 0.6; flex-shrink: 0; }
+  .nav-tautan[aria-current='page'] .nav-ikon,
+  .nav-tautan:hover .nav-ikon { opacity: 1; }
+
+  /* Panel akhir: profil chip + tombol keluar + hamburger. */
+  .bilah-akhir {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  /* Chip profil: nama + badge peran. */
+  .profil-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--garis);
+    border-radius: 999px;
+    background: var(--latar-lembut);
+  }
+  @media (max-width: 48rem) {
+    .profil-chip { display: none; }
+  }
+  .profil-nama {
+    font-size: 0.8125rem;
+    color: var(--tinta);
+    font-weight: 500;
+    max-width: 10rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Tombol keluar: sekunder kecil, label sembunyi di mobile. */
+  .keluar-tombol { gap: 0.375rem; }
+  .keluar-label {
+    display: inline;
+  }
+  @media (max-width: 30rem) {
+    .keluar-label { display: none; }
+  }
+
+  /* Hamburger: hanya tampil di mobile. */
+  .hamburger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid var(--garis);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--tinta);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .hamburger:hover { background-color: var(--latar-lembut); }
+  @media (max-width: 48rem) {
+    .hamburger { display: flex; }
+  }
+
+  /* Drawer nav mobile: panel geser dari kiri. */
+  .nav-mobile {
+    position: fixed;
+    inset-block: 3.5rem 0;
+    left: 0;
+    width: min(16rem, 80vw);
+    background: var(--latar);
+    border-right: 1px solid var(--garis);
+    z-index: 45;
+    padding: 1rem 0;
+    overflow-y: auto;
+    /* Animasi masuk sederhana — dihormati prefers-reduced-motion di bawah. */
+    animation: geser-masuk 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes geser-masuk {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(0); }
+  }
+  .nav-mobile-tautan {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    text-decoration: none;
+    color: var(--tinta-lembut);
+    font-size: 0.9375rem;
+    border-left: 2px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  }
+  .nav-mobile-tautan:hover { color: var(--tinta); background-color: var(--latar-lembut); }
+  .nav-mobile-tautan[aria-current='page'] {
+    color: var(--tinta);
+    font-weight: 600;
+    border-left-color: var(--aksen);
+    background-color: var(--latar-lembut);
+  }
+
+  /* Overlay semi-transparan untuk drawer mobile. */
+  .nav-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 44;
+    background: color-mix(in srgb, var(--tinta) 30%, transparent);
+    backdrop-filter: blur(2px);
+    animation: kabur-masuk 0.22s ease both;
+  }
+  @keyframes kabur-masuk {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* Footer bilah — identik dengan bilah lama. */
+  .bilah-footer {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0.875rem 1.5rem;
+    border-top: 1px solid var(--garis);
+    background: var(--latar);
+  }
+
+  /* Padding atas halaman utama supaya tidak ketutup navbar sticky. */
+  .halaman-utama { padding-top: 2.5rem; }
+
+  /* Merek lama tetap utuh untuk Landing. */
+  .bilah-merek-lama {
     font-family: var(--font-display);
     font-weight: 700;
     font-size: 1.125rem;
@@ -290,39 +533,13 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
     align-items: baseline;
     gap: 0.5rem;
   }
-  /* Titik aksen merek. */
-  .bilah-merek::after {
+  .bilah-merek-lama::after {
     content: '';
     width: 0.4rem;
     height: 0.4rem;
     background: var(--aksen);
     align-self: center;
   }
-  .bilah nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
-  .bilah nav a {
-    position: relative;
-    text-decoration: none;
-    color: var(--tinta-lembut);
-    padding: 0.25rem 0;
-    font-size: 0.9375rem;
-    transition: color 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .bilah nav a:hover { color: var(--tinta); }
-  /* Penanda halaman aktif: garis yang terisi dari kiri. */
-  .bilah nav a::after {
-    content: '';
-    position: absolute;
-    inset-inline: 0;
-    bottom: -1px;
-    height: 2px;
-    background: var(--aksen);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .bilah nav a:hover::after { transform: scaleX(1); }
-  .bilah nav a[aria-current='page'] { color: var(--tinta); font-weight: 600; }
-  .bilah nav a[aria-current='page']::after { transform: scaleX(1); background: var(--tinta); }
   .bilah-akhir { margin-left: auto; display: flex; gap: 1rem; align-items: center; }
 
   /* --- kartu --- */

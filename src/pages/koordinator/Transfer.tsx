@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
 import {
@@ -247,25 +247,25 @@ export default function Transfer() {
   return (
     <div ref={wadahRef} className="space-y-8">
       {/* Header Koordinator */}
-      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+      <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center gap-2 mb-2">
           <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
             F8 · Protokol Transfer Rekam
           </Badge>
-          <span className="text-xs text-[var(--tinta-lembut)]">Otentikasi Kriptografis Token Sekali Pakai</span>
+          <span className="text-xs text-tinta-lembut">Otentikasi Kriptografis Token Sekali Pakai</span>
         </div>
 
-        <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-tinta sm:text-4xl">
           Transfer Rekam Antar-Sekolah
         </h1>
-        <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-3xl leading-relaxed">
+        <p className="mt-2 text-base text-tinta-lembut max-w-3xl leading-relaxed">
           Koordinator menerbitkan token sekali pakai bertenggat waktu untuk mengirim rekam PPI ke sekolah mitra.
           Transfer dilindungi RLS, wajib mendapatkan persetujuan wali aktif, dan hanya menyimpan sidik hash SHA-256 di basis data.
         </p>
       </header>
 
       {galatMuat && (
-        <div className="anim-muncul rounded-sm border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+        <div className="anim-muncul rounded-sm border border-galat bg-red-50/50 p-4 text-galat text-sm flex items-start gap-3" role="alert">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">Gagal Memuat Data</p>
@@ -279,27 +279,27 @@ export default function Transfer() {
         {/* Kolom Kiri: Buat Token & Ambil Rekam */}
         <div className="anim-muncul lg:col-span-7 space-y-8">
           {/* 1. Buat Token Transfer */}
-          <section className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
-            <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-4">
-              <KeyRound className="w-4 h-4 text-[var(--aksen)]" />
-              <h2 className="font-display text-xl font-bold text-[var(--tinta)]">1. Terbitkan Token Transfer</h2>
+          <section className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
+            <div className="flex items-center gap-2 border-b border-garis pb-4">
+              <KeyRound className="w-4 h-4 text-aksen" />
+              <h2 className="font-display text-xl font-bold text-tinta">1. Terbitkan Token Transfer</h2>
             </div>
 
             {memuat ? (
-              <div className="p-8 text-center font-mono text-xs text-[var(--tinta-lembut)]">
+              <div className="p-8 text-center font-mono text-xs text-tinta-lembut">
                 Memuat data siswa dan sekolah mitra...
               </div>
             ) : (
               <div className="space-y-5">
                 <div>
-                  <label htmlFor="pilih-siswa" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
-                    PILIH SISWA <span className="text-[var(--aksen)]">*</span>
+                  <label htmlFor="pilih-siswa" className="block text-xs font-mono font-medium text-tinta mb-1">
+                    PILIH SISWA <span className="text-aksen">*</span>
                   </label>
                   <select
                     id="pilih-siswa"
                     value={siswaId}
                     onChange={(e) => setSiswaId(e.target.value)}
-                    className="w-full text-sm rounded-sm border border-[var(--garis)] bg-[var(--kartu)] p-2.5 font-medium outline-hidden"
+                    className="w-full text-sm rounded-sm border border-garis bg-kartu p-2.5 font-medium outline-hidden"
                   >
                     <option value="">&mdash; Pilih Siswa yang Akan Ditransfer &mdash;</option>
                     {siswa.map((s) => (
@@ -314,9 +314,9 @@ export default function Transfer() {
                 {siswaId && (
                   <div className="p-3.5 border rounded-sm text-xs space-y-1.5 transition-all">
                     {memuatConsent ? (
-                      <span className="text-[var(--tinta-lembut)] font-mono">Memeriksa status persetujuan wali...</span>
+                      <span className="text-tinta-lembut font-mono">Memeriksa status persetujuan wali...</span>
                     ) : galatConsent ? (
-                      <p className="text-[var(--galat)]">{galatConsent}</p>
+                      <p className="text-galat">{galatConsent}</p>
                     ) : consent && !adaConsentAktif(consent) ? (
                       <div className="flex items-start gap-2.5 text-amber-800">
                         <ShieldAlert className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
@@ -337,15 +337,15 @@ export default function Transfer() {
                 )}
 
                 <div>
-                  <label htmlFor="pilih-tujuan" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
-                    SEKOLAH TUJUAN <span className="text-[var(--aksen)]">*</span>
+                  <label htmlFor="pilih-tujuan" className="block text-xs font-mono font-medium text-tinta mb-1">
+                    SEKOLAH TUJUAN <span className="text-aksen">*</span>
                   </label>
                   <select
                     id="pilih-tujuan"
                     value={keSchoolId}
                     onChange={(e) => setKeSchoolId(e.target.value)}
                     disabled={!siswaId}
-                    className="w-full text-sm rounded-sm border border-[var(--garis)] bg-[var(--kartu)] p-2.5 outline-hidden disabled:opacity-50"
+                    className="w-full text-sm rounded-sm border border-garis bg-kartu p-2.5 outline-hidden disabled:opacity-50"
                   >
                     <option value="">&mdash; Pilih Sekolah Tujuan Transfer &mdash;</option>
                     {sekolahTujuan.map((s) => (
@@ -357,7 +357,7 @@ export default function Transfer() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                  <label className="block text-xs font-mono font-medium text-tinta mb-1">
                     MASA BERLAKU TOKEN (EXPIRATION)
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -368,8 +368,8 @@ export default function Transfer() {
                         onClick={() => setJam(p.jam)}
                         className={`text-xs py-2 px-3 border rounded-sm font-medium transition-all ${
                           jam === p.jam
-                            ? 'border-[var(--aksen)] bg-[var(--aksen)]/5 text-[var(--aksen)] font-bold'
-                            : 'border-[var(--garis)] text-[var(--tinta-lembut)] hover:text-[var(--tinta)]'
+                            ? 'border-aksen bg-[var(--aksen)]/5 text-aksen font-bold'
+                            : 'border-garis text-tinta-lembut hover:text-tinta'
                         }`}
                       >
                         {p.label}
@@ -391,7 +391,7 @@ export default function Transfer() {
                 </div>
 
                 {galatBuat && (
-                  <p className="text-xs text-[var(--galat)] p-3 border border-[var(--galat)] bg-red-50/50 rounded-sm">
+                  <p className="text-xs text-galat p-3 border border-galat bg-red-50/50 rounded-sm">
                     {galatBuat}
                   </p>
                 )}
@@ -400,22 +400,22 @@ export default function Transfer() {
 
             {/* Hasil Terbit Token (Sekali Tampil) */}
             {hasil && (
-              <div className="p-5 border-2 border-[var(--aksen)] bg-[var(--latar-lembut)]/40 rounded-sm space-y-4">
-                <div className="flex items-center gap-2 text-[var(--aksen)] font-bold text-sm">
+              <div className="p-5 border-2 border-aksen bg-latar-lembut/40 rounded-sm space-y-4">
+                <div className="flex items-center gap-2 text-aksen font-bold text-sm">
                   <Sparkles className="w-4 h-4" />
                   <span>TOKEN TRANSFER BERHASIL DITERBITKAN</span>
                 </div>
-                <p className="text-xs text-[var(--tinta-lembut)] leading-relaxed">
+                <p className="text-xs text-tinta-lembut leading-relaxed">
                   <strong>Penting:</strong> Token ini hanya ditampilkan satu kali sekarang demi keamanan data.
                   Segera salin dan serahkan kepada koordinator sekolah tujuan.
                 </p>
 
-                <div className="p-3 bg-white border border-[var(--garis)] rounded-sm font-mono text-sm break-all font-bold text-[var(--tinta)] select-all">
+                <div className="p-3 bg-white border border-garis rounded-sm font-mono text-sm break-all font-bold text-tinta select-all">
                   {hasil.token}
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-                  <span className="font-mono text-[var(--tinta-lembut)]">
+                  <span className="font-mono text-tinta-lembut">
                     Kedaluwarsa: <strong>{waktu(hasil.kedaluwarsa)}</strong>
                   </span>
                   <div className="flex items-center gap-2">
@@ -444,18 +444,18 @@ export default function Transfer() {
           </section>
 
           {/* 2. Ambil Rekam di Sekolah Tujuan */}
-          <section className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
-            <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-4">
-              <Download className="w-4 h-4 text-[var(--aksen)]" />
-              <h2 className="font-display text-xl font-bold text-[var(--tinta)]">2. Terima Rekam di Sekolah Tujuan</h2>
+          <section className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
+            <div className="flex items-center gap-2 border-b border-garis pb-4">
+              <Download className="w-4 h-4 text-aksen" />
+              <h2 className="font-display text-xl font-bold text-tinta">2. Terima Rekam di Sekolah Tujuan</h2>
             </div>
-            <p className="text-xs text-[var(--tinta-lembut)]">
+            <p className="text-xs text-tinta-lembut">
               Digunakan oleh sekolah tujuan untuk menukar token transfer dengan bundel data JSON lengkap siswa.
             </p>
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="input-token" className="block text-xs font-mono font-medium text-[var(--tinta)] mb-1">
+                <label htmlFor="input-token" className="block text-xs font-mono font-medium text-tinta mb-1">
                   TOKEN TRANSFER DARI SEKOLAH ASAL
                 </label>
                 <Input
@@ -478,14 +478,14 @@ export default function Transfer() {
               </Button>
 
               {galatAmbil && (
-                <div className="p-3.5 border border-[var(--galat)] bg-red-50/50 rounded-sm text-xs text-[var(--galat)] space-y-1">
+                <div className="p-3.5 border border-galat bg-red-50/50 rounded-sm text-xs text-galat space-y-1">
                   <p className="font-bold">{galatAmbil.teks}</p>
                   <p>{galatAmbil.saran}</p>
                 </div>
               )}
 
               {hasilAmbil !== null && (
-                <div className="space-y-3 pt-3 border-t border-[var(--garis)]">
+                <div className="space-y-3 pt-3 border-t border-garis">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -501,7 +501,7 @@ export default function Transfer() {
                       Simpan File JSON
                     </Button>
                   </div>
-                  <pre className="p-3 rounded-sm border border-[var(--garis)] bg-black text-green-400 font-mono text-[11px] max-h-64 overflow-y-auto leading-snug">
+                  <pre className="p-3 rounded-sm border border-garis bg-black text-green-400 font-mono text-[11px] max-h-64 overflow-y-auto leading-snug">
                     {JSON.stringify(hasilAmbil, null, 2)}
                   </pre>
                 </div>
@@ -512,11 +512,11 @@ export default function Transfer() {
 
         {/* Kolom Kanan: Log Riwayat Transfer (5 Kolom) */}
         <aside className="anim-muncul lg:col-span-5 space-y-6">
-          <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-[var(--garis)] pb-3">
+          <div className="border border-garis bg-kartu rounded-sm p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-garis pb-3">
               <div className="flex items-center gap-2">
-                <History className="w-4 h-4 text-[var(--aksen)]" />
-                <h2 className="font-display text-base font-bold text-[var(--tinta)]">Log Aktivitas Transfer</h2>
+                <History className="w-4 h-4 text-aksen" />
+                <h2 className="font-display text-base font-bold text-tinta">Log Aktivitas Transfer</h2>
               </div>
               <Button size="sm" variant="ghost" className="h-7 text-xs px-2 font-mono" onClick={() => void muatRiwayat()}>
                 <RefreshCw className="w-3 h-3 mr-1" />
@@ -524,10 +524,10 @@ export default function Transfer() {
               </Button>
             </div>
 
-            {galatRiwayat && <p className="text-xs text-[var(--galat)]">{galatRiwayat}</p>}
+            {galatRiwayat && <p className="text-xs text-galat">{galatRiwayat}</p>}
 
             {riwayat.length === 0 ? (
-              <p className="text-xs text-[var(--tinta-lembut)] py-4">Belum ada token transfer tercatat.</p>
+              <p className="text-xs text-tinta-lembut py-4">Belum ada token transfer tercatat.</p>
             ) : (
               <div className="space-y-3">
                 {riwayat.map((r) => {
@@ -535,9 +535,9 @@ export default function Transfer() {
                   const sudahDipakai = Boolean(r.dipakai_pada);
 
                   return (
-                    <div key={r.id} className="p-3.5 border border-[var(--garis)] rounded-sm text-xs space-y-2 bg-transparent">
+                    <div key={r.id} className="p-3.5 border border-garis rounded-sm text-xs space-y-2 bg-transparent">
                       <div className="flex items-center justify-between font-mono">
-                        <span className="font-bold text-[var(--tinta)]">
+                        <span className="font-bold text-tinta">
                           {s ? `${s.kode} (${s.inisial})` : r.student_id}
                         </span>
                         <Badge
@@ -550,10 +550,10 @@ export default function Transfer() {
                         </Badge>
                       </div>
 
-                      <div className="text-[11px] text-[var(--tinta-lembut)] space-y-0.5">
+                      <div className="text-[11px] text-tinta-lembut space-y-0.5">
                         <p className="flex items-center gap-1">
                           <School className="w-3 h-3" />
-                          Tujuan: <span className="font-semibold text-[var(--tinta)]">{namaSekolah(r.ke_school)}</span>
+                          Tujuan: <span className="font-semibold text-tinta">{namaSekolah(r.ke_school)}</span>
                         </p>
                         <p className="font-mono">Dibuat: {waktu(r.dibuat_pada)}</p>
                         <p className="font-mono">Kedaluwarsa: {waktu(r.kedaluwarsa)}</p>
@@ -572,3 +572,4 @@ export default function Transfer() {
     </div>
   );
 }
+

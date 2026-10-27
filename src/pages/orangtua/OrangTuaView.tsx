@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
@@ -154,34 +154,34 @@ export default function OrangTuaView() {
   return (
     <div ref={wadahRef} className="space-y-8">
       {/* Header Portal Orang Tua */}
-      <header className="anim-muncul border-b border-[var(--garis)] pb-6">
+      <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center gap-2 mb-2">
           <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
             F7 · Portal Orang Tua / Wali
           </Badge>
-          <span className="text-xs text-[var(--tinta-lembut)]">Transparan & Baca-Saja</span>
+          <span className="text-xs text-tinta-lembut">Transparan & Baca-Saja</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
           <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight text-[var(--tinta)] sm:text-4xl">
+            <h1 className="font-display text-3xl font-bold tracking-tight text-tinta sm:text-4xl">
               Kemajuan Belajar Anak
             </h1>
-            <p className="mt-2 text-base text-[var(--tinta-lembut)] max-w-2xl leading-relaxed">
+            <p className="mt-2 text-base text-tinta-lembut max-w-2xl leading-relaxed">
               Ringkasan resmi Program Pembelajaran Individual (PPI) dan log aktivitas belajar anak Anda di sekolah inklusif.
             </p>
           </div>
 
           {anak.length > 1 && (
-            <div className="bg-[var(--kartu)] border border-[var(--garis)] p-3 rounded-sm shrink-0">
-              <label htmlFor="pilih-anak" className="block text-[11px] font-mono text-[var(--tinta-lembut)] mb-1">
+            <div className="bg-kartu border border-garis p-3 rounded-sm shrink-0">
+              <label htmlFor="pilih-anak" className="block text-[11px] font-mono text-tinta-lembut mb-1">
                 PILIH ANAK
               </label>
               <select
                 id="pilih-anak"
                 value={dipilih}
                 onChange={(e) => setDipilih(e.target.value)}
-                className="text-sm font-semibold rounded-sm border border-[var(--garis)] bg-white p-1.5 focus:border-[var(--aksen)] outline-hidden"
+                className="text-sm font-semibold rounded-sm border border-garis bg-white p-1.5 focus:border-aksen outline-hidden"
               >
                 {anak.map((a) => (
                   <option key={a.id} value={a.id}>
@@ -196,7 +196,7 @@ export default function OrangTuaView() {
 
       {/* Umpan Balik Status */}
       {galat && (
-        <div className="anim-muncul rounded-sm border border-[var(--galat)] bg-red-50/50 p-4 text-[var(--galat)] text-sm flex items-start gap-3" role="alert">
+        <div className="anim-muncul rounded-sm border border-galat bg-red-50/50 p-4 text-galat text-sm flex items-start gap-3" role="alert">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
             <p className="font-semibold">Terjadi Kendala</p>
@@ -205,22 +205,22 @@ export default function OrangTuaView() {
         </div>
       )}
       {pesan && (
-        <div className="anim-muncul rounded-sm border border-[var(--berhasil)] bg-emerald-50/50 p-4 text-[var(--berhasil)] text-sm flex items-center gap-3" role="status">
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-[var(--berhasil)]" />
+        <div className="anim-muncul rounded-sm border border-berhasil bg-emerald-50/50 p-4 text-berhasil text-sm flex items-center gap-3" role="status">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-berhasil" />
           <span className="font-medium">{pesan}</span>
         </div>
       )}
 
       {memuat ? (
-        <div className="p-16 text-center border border-[var(--garis)] bg-[var(--kartu)] rounded-sm">
-          <div className="inline-block animate-spin rounded-full h-7 w-7 border-2 border-[var(--aksen)] border-t-transparent" />
-          <p className="mt-3 text-sm text-[var(--tinta-lembut)] font-mono">Memuat data anak & PPI...</p>
+        <div className="p-16 text-center border border-garis bg-kartu rounded-sm">
+          <div className="inline-block animate-spin rounded-full h-7 w-7 border-2 border-aksen border-t-transparent" />
+          <p className="mt-3 text-sm text-tinta-lembut font-mono">Memuat data anak & PPI...</p>
         </div>
       ) : !ringkasan ? (
-        <div className="p-8 text-center border border-[var(--garis)] bg-[var(--kartu)] rounded-sm space-y-2">
-          <Users className="w-10 h-10 mx-auto text-[var(--tinta-lembut)] opacity-40 mb-2" />
-          <p className="font-medium text-[var(--tinta)]">Belum ada anak yang tertaut</p>
-          <p className="text-sm text-[var(--tinta-lembut)] max-w-md mx-auto">
+        <div className="p-8 text-center border border-garis bg-kartu rounded-sm space-y-2">
+          <Users className="w-10 h-10 mx-auto text-tinta-lembut opacity-40 mb-2" />
+          <p className="font-medium text-tinta">Belum ada anak yang tertaut</p>
+          <p className="text-sm text-tinta-lembut max-w-md mx-auto">
             Hubungi koordinator inklusi atau staf sekolah untuk menautkan akun wali Anda dengan identitas siswa.
           </p>
         </div>
@@ -229,37 +229,37 @@ export default function OrangTuaView() {
           {/* Kolom Kiri: PPI & Sesi (8 Kolom) */}
           <section className="anim-muncul lg:col-span-8 space-y-8">
             {/* Kartu Profil Anak */}
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6">
-              <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3 mb-4">
-                <User className="w-4 h-4 text-[var(--aksen)]" />
-                <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Identitas Peserta Didik</h2>
+            <div className="border border-garis bg-kartu rounded-sm p-6">
+              <div className="flex items-center gap-2 border-b border-garis pb-3 mb-4">
+                <User className="w-4 h-4 text-aksen" />
+                <h2 className="font-display text-lg font-bold text-tinta">Identitas Peserta Didik</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm font-mono">
                 <div>
-                  <span className="text-[11px] text-[var(--tinta-lembut)] block">KODE PSEUDONIM</span>
-                  <span className="font-bold text-[var(--tinta)]">{ringkasan.siswa.kode}</span>
+                  <span className="text-[11px] text-tinta-lembut block">KODE PSEUDONIM</span>
+                  <span className="font-bold text-tinta">{ringkasan.siswa.kode}</span>
                 </div>
                 <div>
-                  <span className="text-[11px] text-[var(--tinta-lembut)] block">INISIAL</span>
-                  <span className="font-bold text-[var(--tinta)]">{ringkasan.siswa.inisial}</span>
+                  <span className="text-[11px] text-tinta-lembut block">INISIAL</span>
+                  <span className="font-bold text-tinta">{ringkasan.siswa.inisial}</span>
                 </div>
                 <div>
-                  <span className="text-[11px] text-[var(--tinta-lembut)] block">KELAS</span>
-                  <span className="font-bold text-[var(--tinta)]">{ringkasan.siswa.kelas}</span>
+                  <span className="text-[11px] text-tinta-lembut block">KELAS</span>
+                  <span className="font-bold text-tinta">{ringkasan.siswa.kelas}</span>
                 </div>
                 <div>
-                  <span className="text-[11px] text-[var(--tinta-lembut)] block">SEKOLAH</span>
-                  <span className="font-bold text-[var(--tinta)] truncate block">{ringkasan.sekolah}</span>
+                  <span className="text-[11px] text-tinta-lembut block">SEKOLAH</span>
+                  <span className="font-bold text-tinta truncate block">{ringkasan.sekolah}</span>
                 </div>
               </div>
             </div>
 
             {/* Program Pembelajaran Individual (PPI) */}
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-6">
-              <div className="flex items-center justify-between border-b border-[var(--garis)] pb-4">
+            <div className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
+              <div className="flex items-center justify-between border-b border-garis pb-4">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-[var(--aksen)]" />
-                  <h2 className="font-display text-xl font-bold text-[var(--tinta)]">Rencana Pembelajaran (PPI)</h2>
+                  <FileText className="w-4 h-4 text-aksen" />
+                  <h2 className="font-display text-xl font-bold text-tinta">Rencana Pembelajaran (PPI)</h2>
                 </div>
                 {ppi && (
                   <Badge variant="outline" className="font-mono text-xs">
@@ -271,11 +271,11 @@ export default function OrangTuaView() {
               {ppi ? (
                 <div className="space-y-6">
                   {ppi.ringkasan && (
-                    <div className="bg-[var(--latar-lembut)]/30 p-4 rounded-sm border border-[var(--garis)]">
-                      <span className="text-xs font-mono font-semibold text-[var(--tinta-lembut)] block mb-1">
+                    <div className="bg-latar-lembut/30 p-4 rounded-sm border border-garis">
+                      <span className="text-xs font-mono font-semibold text-tinta-lembut block mb-1">
                         RINGKASAN PROGRAM
                       </span>
-                      <p className="text-sm text-[var(--tinta)] leading-relaxed italic">
+                      <p className="text-sm text-tinta leading-relaxed italic">
                         &ldquo;{ppi.ringkasan}&rdquo;
                       </p>
                     </div>
@@ -283,14 +283,14 @@ export default function OrangTuaView() {
 
                   {/* Target & Indikator */}
                   <div className="space-y-3">
-                    <h3 className="font-bold text-sm text-[var(--tinta)]">Target Pembelajaran Terukur</h3>
+                    <h3 className="font-bold text-sm text-tinta">Target Pembelajaran Terukur</h3>
                     <div className="space-y-2.5">
                       {ppi.tujuan.map((t, idx) => (
-                        <div key={idx} className="p-3 border border-[var(--garis)] rounded-sm text-sm bg-white space-y-1">
-                          <p className="font-medium text-[var(--tinta)]">{t.tujuan}</p>
-                          <p className="text-xs text-[var(--tinta-lembut)] font-mono flex items-center gap-1">
+                        <div key={idx} className="p-3 border border-garis rounded-sm text-sm bg-white space-y-1">
+                          <p className="font-medium text-tinta">{t.tujuan}</p>
+                          <p className="text-xs text-tinta-lembut font-mono flex items-center gap-1">
                             <span>Indikator:</span>
-                            <span className="text-[var(--tinta)]">{t.indikator}</span>
+                            <span className="text-tinta">{t.indikator}</span>
                           </p>
                         </div>
                       ))}
@@ -298,8 +298,8 @@ export default function OrangTuaView() {
                   </div>
 
                   {/* Akomodasi Disetujui */}
-                  <div className="space-y-3 border-t border-[var(--garis)] pt-4">
-                    <h3 className="font-bold text-sm text-[var(--tinta)]">Dukungan Akomodasi di Kelas</h3>
+                  <div className="space-y-3 border-t border-garis pt-4">
+                    <h3 className="font-bold text-sm text-tinta">Dukungan Akomodasi di Kelas</h3>
                     <div className="flex flex-wrap gap-2">
                       {ppi.akomodasi.map((a, idx) => (
                         <span
@@ -318,28 +318,28 @@ export default function OrangTuaView() {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-[var(--tinta-lembut)] py-4">Belum ada draf PPI tersimpan untuk anak ini.</p>
+                <p className="text-sm text-tinta-lembut py-4">Belum ada draf PPI tersimpan untuk anak ini.</p>
               )}
             </div>
 
             {/* 10 Sesi Pendampingan Terakhir */}
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-              <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
-                <Clock className="w-4 h-4 text-[var(--aksen)]" />
-                <h2 className="font-display text-lg font-bold text-[var(--tinta)]">Catatan Perkembangan Sesi</h2>
+            <div className="border border-garis bg-kartu rounded-sm p-6 space-y-4">
+              <div className="flex items-center gap-2 border-b border-garis pb-3">
+                <Clock className="w-4 h-4 text-aksen" />
+                <h2 className="font-display text-lg font-bold text-tinta">Catatan Perkembangan Sesi</h2>
               </div>
-              <p className="text-xs text-[var(--tinta-lembut)]">
+              <p className="text-xs text-tinta-lembut">
                 10 sesi pendampingan terakhir yang dicatat oleh guru kelas dan guru pendamping khusus.
               </p>
 
               {ringkasan.sesi.length === 0 ? (
-                <p className="text-xs text-[var(--tinta-lembut)] py-3">Belum ada sesi pendampingan tercatat.</p>
+                <p className="text-xs text-tinta-lembut py-3">Belum ada sesi pendampingan tercatat.</p>
               ) : (
                 <div className="space-y-3">
                   {ringkasan.sesi.map((s, idx) => (
-                    <div key={idx} className="p-3 border border-[var(--garis)] rounded-sm text-xs space-y-1 bg-transparent">
+                    <div key={idx} className="p-3 border border-garis rounded-sm text-xs space-y-1 bg-transparent">
                       <div className="flex items-center justify-between font-mono">
-                        <span className="text-[var(--tinta-lembut)]">{tanggal(s.tanggal)}</span>
+                        <span className="text-tinta-lembut">{tanggal(s.tanggal)}</span>
                         <Badge
                           variant={s.capaian === 'tercapai' ? 'default' : 'secondary'}
                           className={`text-[10px] uppercase font-mono ${
@@ -349,7 +349,7 @@ export default function OrangTuaView() {
                           {TEKS_CAPAIAN[s.capaian] ?? s.capaian}
                         </Badge>
                       </div>
-                      <p className="text-sm text-[var(--tinta)] mt-1">{s.catatan || 'Tanpa catatan khusus.'}</p>
+                      <p className="text-sm text-tinta mt-1">{s.catatan || 'Tanpa catatan khusus.'}</p>
                     </div>
                   ))}
                 </div>
@@ -359,13 +359,13 @@ export default function OrangTuaView() {
 
           {/* Kolom Kanan: Persetujuan Berbagi Rekam (F8 Transfer Consent) */}
           <aside className="anim-muncul lg:col-span-4 space-y-6">
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-4">
-              <div className="flex items-center gap-2 border-b border-[var(--garis)] pb-3">
-                <ShieldCheck className="w-4 h-4 text-[var(--aksen)]" />
-                <h2 className="font-display text-base font-bold text-[var(--tinta)]">Persetujuan Berbagi Rekam</h2>
+            <div className="border border-garis bg-kartu rounded-sm p-6 space-y-4">
+              <div className="flex items-center gap-2 border-b border-garis pb-3">
+                <ShieldCheck className="w-4 h-4 text-aksen" />
+                <h2 className="font-display text-base font-bold text-tinta">Persetujuan Berbagi Rekam</h2>
               </div>
 
-              <p className="text-xs text-[var(--tinta-lembut)] leading-relaxed">
+              <p className="text-xs text-tinta-lembut leading-relaxed">
                 Sesuai prinsip kedaulatan data dan UU PDP, sekolah tujuan hanya dapat mengakses rekam PPI jika orang tua/wali
                 telah memberikan persetujuan aktif secara tertulis di sistem.
               </p>
@@ -380,7 +380,7 @@ export default function OrangTuaView() {
                   </Badge>
                 </div>
                 {terakhir && (
-                  <p className="text-[11px] text-[var(--tinta-lembut)] font-mono">
+                  <p className="text-[11px] text-tinta-lembut font-mono">
                     Berlaku sampai: {tanggal(terakhir.berlaku_hingga)}
                   </p>
                 )}
@@ -391,7 +391,7 @@ export default function OrangTuaView() {
                   type="button"
                   disabled={sibuk || aktif}
                   onClick={() => void ubahPersetujuan('disetujui')}
-                  className="w-full text-xs font-medium bg-[var(--aksi)] text-white hover:bg-[var(--aksi-gelap)]"
+                  className="w-full text-xs font-medium bg-aksi text-white hover:bg-aksi-gelap"
                 >
                   <HeartHandshake className="w-3.5 h-3.5 mr-1.5" />
                   Beri Persetujuan Berbagi Rekam
@@ -409,22 +409,22 @@ export default function OrangTuaView() {
             </div>
 
             {/* Riwayat Persetujuan */}
-            <div className="border border-[var(--garis)] bg-[var(--kartu)] rounded-sm p-6 space-y-3 text-xs">
-              <div className="flex items-center gap-1.5 border-b border-[var(--garis)] pb-2 font-bold">
-                <History className="w-3.5 h-3.5 text-[var(--aksen)]" />
+            <div className="border border-garis bg-kartu rounded-sm p-6 space-y-3 text-xs">
+              <div className="flex items-center gap-1.5 border-b border-garis pb-2 font-bold">
+                <History className="w-3.5 h-3.5 text-aksen" />
                 <span>Log Riwayat Persetujuan</span>
               </div>
               {ringkasan.persetujuan.length === 0 ? (
-                <p className="text-xs text-[var(--tinta-lembut)]">Belum ada riwayat persetujuan.</p>
+                <p className="text-xs text-tinta-lembut">Belum ada riwayat persetujuan.</p>
               ) : (
                 <div className="space-y-2 max-h-[220px] overflow-y-auto">
                   {ringkasan.persetujuan.map((c) => (
-                    <div key={c.id} className="p-2 border border-[var(--garis)] rounded-sm font-mono text-[11px] space-y-0.5">
+                    <div key={c.id} className="p-2 border border-garis rounded-sm font-mono text-[11px] space-y-0.5">
                       <div className="flex justify-between font-bold">
                         <span>{c.jenis.replace('_', ' ').toUpperCase()}</span>
                         <span>{TEKS_STATUS[c.status]}</span>
                       </div>
-                      <span className="text-[10px] text-[var(--tinta-lembut)] block">{tanggal(c.dibuat_pada)}</span>
+                      <span className="text-[10px] text-tinta-lembut block">{tanggal(c.dibuat_pada)}</span>
                     </div>
                   ))}
                 </div>
@@ -436,3 +436,4 @@ export default function OrangTuaView() {
     </div>
   );
 }
+
