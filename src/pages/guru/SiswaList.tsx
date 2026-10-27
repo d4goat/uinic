@@ -154,7 +154,7 @@ export default function SiswaList() {
       {/* Header Editorial */}
       <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex flex-wrap items-center gap-2 mb-2">
-          <Badge variant="outline" className="font-mono text-xs tracking-wider uppercase">
+          <Badge variant="outline" className="font-sans text-xs tracking-wider uppercase">
             F2 · Direktori Siswa
           </Badge>
           <span className="text-xs text-tinta-lembut">Privasi Terjaga Tanpa NIK</span>
@@ -205,7 +205,7 @@ export default function SiswaList() {
                 aria-label="Cari siswa"
               />
             </div>
-            <div className="font-mono text-xs text-tinta-lembut shrink-0 self-center">
+            <div className="font-sans text-xs text-tinta-lembut shrink-0 self-center">
               Menampilkan <span className="font-bold text-tinta">{hasil.length}</span> dari {daftar.length} siswa
             </div>
           </div>
@@ -213,7 +213,7 @@ export default function SiswaList() {
           {memuat ? (
             <div className="p-12 text-center border border-garis bg-kartu rounded-2xl shadow-xs">
               <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-aksen border-t-transparent" />
-              <p className="mt-3 text-sm text-tinta-lembut font-mono">Memuat direktori siswa...</p>
+              <p className="mt-3 text-sm text-tinta-lembut font-sans">Memuat direktori siswa...</p>
             </div>
           ) : daftar.length === 0 ? (
             <div className="p-8 text-center border border-garis bg-kartu rounded-2xl shadow-xs">
@@ -235,7 +235,7 @@ export default function SiswaList() {
           ) : (
             <div className="overflow-x-auto border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)]">
               <table className="w-full text-left text-sm border-collapse">
-                <thead className="bg-latar-lembut border-b border-garis font-mono text-xs uppercase text-tinta-lembut">
+                <thead className="bg-latar-lembut border-b border-garis font-sans text-xs uppercase text-tinta-lembut">
                   <tr>
                     <th className="px-4 py-3.5 font-semibold">Siswa (Pseudonim)</th>
                     <th className="px-4 py-3.5 font-semibold">Kelas</th>
@@ -252,17 +252,17 @@ export default function SiswaList() {
                             {s.inisial}
                           </div>
                           <div>
-                            <span className="font-mono font-bold text-tinta block">{s.kode}</span>
+                            <span className="font-sans font-bold text-tinta block">{s.kode}</span>
                             <span className="text-[11px] text-tinta-lembut block">Inisial: {s.inisial}</span>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant="outline" className="font-mono text-xs rounded-lg">
+                        <Badge variant="outline" className="font-sans text-xs rounded-lg">
                           {s.kelas}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs text-tinta-lembut">
+                      <td className="px-4 py-3 font-sans text-xs text-tinta-lembut">
                         {s.tahun_lahir}
                       </td>
                       <td className="px-4 py-3 text-right">
@@ -314,7 +314,7 @@ export default function SiswaList() {
 
             <form onSubmit={(e) => void kirim(e)} noValidate className="space-y-4">
               <div>
-                <label htmlFor="kode-siswa" className="block text-xs font-mono font-medium text-tinta mb-1">
+                <label htmlFor="kode-siswa" className="block text-xs font-sans font-medium text-tinta mb-1">
                   KODE SISWA <span className="text-aksen">*</span>
                 </label>
                 <Input
@@ -322,7 +322,7 @@ export default function SiswaList() {
                   value={isian.kode}
                   onChange={(e) => ubah('kode', e.target.value.toUpperCase())}
                   placeholder="Contoh: S-001"
-                  className="font-mono uppercase text-sm"
+                  className="font-sans uppercase text-sm"
                   aria-invalid={galatIsian.kode ? true : undefined}
                 />
                 {galatIsian.kode && (
@@ -333,7 +333,7 @@ export default function SiswaList() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="inisial-siswa" className="block text-xs font-mono font-medium text-tinta mb-1">
+                  <label htmlFor="inisial-siswa" className="block text-xs font-sans font-medium text-tinta mb-1">
                     INISIAL <span className="text-aksen">*</span>
                   </label>
                   <Input
@@ -341,7 +341,7 @@ export default function SiswaList() {
                     value={isian.inisial}
                     onChange={(e) => ubah('inisial', e.target.value.toUpperCase())}
                     placeholder="ARS"
-                    className="font-mono uppercase text-sm"
+                    className="font-sans uppercase text-sm"
                     maxLength={3}
                     aria-invalid={galatIsian.inisial ? true : undefined}
                   />
@@ -351,7 +351,7 @@ export default function SiswaList() {
                 </div>
 
                 <div>
-                  <label htmlFor="kelas-siswa" className="block text-xs font-mono font-medium text-tinta mb-1">
+                  <label htmlFor="kelas-siswa" className="block text-xs font-sans font-medium text-tinta mb-1">
                     KELAS <span className="text-aksen">*</span>
                   </label>
                   <Input
@@ -369,7 +369,7 @@ export default function SiswaList() {
               </div>
 
               <div>
-                <label htmlFor="tahun-siswa" className="block text-xs font-mono font-medium text-tinta mb-1">
+                <label htmlFor="tahun-siswa" className="block text-xs font-sans font-medium text-tinta mb-1">
                   TAHUN LAHIR <span className="text-aksen">*</span>
                 </label>
                 <Input
@@ -378,7 +378,7 @@ export default function SiswaList() {
                   value={isian.tahun_lahir}
                   onChange={(e) => ubah('tahun_lahir', e.target.value.replace(/\D/g, '').slice(0, 4))}
                   placeholder="2012"
-                  className="font-mono text-sm"
+                  className="font-sans text-sm"
                   aria-invalid={galatIsian.tahun_lahir ? true : undefined}
                 />
                 {galatIsian.tahun_lahir && (

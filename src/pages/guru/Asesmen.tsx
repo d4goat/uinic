@@ -176,7 +176,7 @@ export default function Asesmen() {
             </Link>
           </Button>
           <span className="text-xs text-[var(--garis)]">/</span>
-          <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+          <Badge variant="outline" className="font-sans text-xs uppercase tracking-wider">
             F3 · Asesmen Hambatan
           </Badge>
         </div>
@@ -193,7 +193,7 @@ export default function Asesmen() {
           </div>
 
           {kode && (
-            <div className="bg-kartu border border-garis p-3 rounded-sm shrink-0 font-mono text-right">
+            <div className="bg-kartu border border-garis p-3 rounded-sm shrink-0 font-sans text-right">
               <span className="text-[11px] text-tinta-lembut block">SUBJEK ASESMEN</span>
               <span className="text-lg font-bold text-tinta">{kode}</span>
               {inisial && <span className="text-xs text-tinta-lembut block">Inisial: {inisial}</span>}
@@ -239,7 +239,7 @@ export default function Asesmen() {
                   Centang hambatan dan tetapkan tingkat intensitasnya di lingkungan kelas.
                 </p>
               </div>
-              <Badge variant="secondary" className="font-mono text-xs">
+              <Badge variant="secondary" className="font-sans text-xs">
                 {jumlahTerpilih} Dipilih
               </Badge>
             </div>
@@ -247,7 +247,7 @@ export default function Asesmen() {
             {memuat ? (
               <div className="p-8 text-center">
                 <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-aksen border-t-transparent" />
-                <p className="mt-2 text-xs text-tinta-lembut font-mono">Memuat referensi hambatan...</p>
+                <p className="mt-2 text-xs text-tinta-lembut font-sans">Memuat referensi hambatan...</p>
               </div>
             ) : (
               <form onSubmit={(e) => void kirim(e)} className="space-y-6">
@@ -287,7 +287,7 @@ export default function Asesmen() {
                             {/* Pilihan Tingkat jika dicentang */}
                             {dicentang && (
                               <div className="mt-3 pt-3 border-t border-garis flex flex-wrap items-center gap-3">
-                                <span className="text-xs font-mono font-medium text-tinta">
+                                <span className="text-xs font-sans font-medium text-tinta">
                                   TINGKAT INTENSITAS:
                                 </span>
                                 <div className="inline-flex rounded-sm border border-garis bg-kartu p-0.5">
@@ -341,7 +341,7 @@ export default function Asesmen() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-garis">
-                  <span className="text-xs text-tinta-lembut font-mono">
+                  <span className="text-xs text-tinta-lembut font-sans">
                     * Menyimpan asesmen akan mencatat versi baru dan mengkalkulasi rekomendasi akomodasi PPI.
                   </span>
                   <Button type="submit" disabled={menyimpan} className="shrink-0">
@@ -378,12 +378,12 @@ export default function Asesmen() {
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-[11px] text-tinta-lembut flex items-center gap-1">
+                      <span className="font-sans text-[11px] text-tinta-lembut flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {tanggalIndo(b.tanggal)}
                       </span>
                       {urutan === 0 && (
-                        <Badge variant="outline" className="text-[10px] uppercase font-mono border-aksen text-aksen">
+                        <Badge variant="outline" className="text-[10px] uppercase font-sans border-aksen text-aksen">
                           Terbaru
                         </Badge>
                       )}

@@ -137,7 +137,7 @@ export default function ApiDocs() {
       {/* Header Dokumentasi API */}
       <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center gap-2 mb-2">
-          <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+          <Badge variant="outline" className="font-sans text-xs uppercase tracking-wider">
             F9 · Spesifikasi OpenAPI & RPC
           </Badge>
           <span className="text-xs text-tinta-lembut">PostgREST Engine & RLS PostgreSQL</span>
@@ -163,15 +163,15 @@ export default function ApiDocs() {
           </div>
           <ul className="text-xs text-tinta-lembut space-y-2.5 leading-relaxed">
             <li className="flex items-start gap-2">
-              <span className="font-mono font-bold text-aksen">&rarr;</span>
+              <span className="font-sans font-bold text-aksen">&rarr;</span>
               <span><strong>Tanpa Middleware Rentan:</strong> Klien memanggil REST PostgREST secara langsung dengan token JWT terotentikasi.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-mono font-bold text-aksen">&rarr;</span>
+              <span className="font-sans font-bold text-aksen">&rarr;</span>
               <span><strong>RLS Multi-Tenant:</strong> Isolasi antar-sekolah dan antar-peran (guru, GPK, koordinator, wali) divalidasi oleh engine Postgres.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="font-mono font-bold text-aksen">&rarr;</span>
+              <span className="font-sans font-bold text-aksen">&rarr;</span>
               <span><strong>Enkripsi pgcrypto:</strong> Kolom catatan guru dienkripsi asimetris di dalam tabel database.</span>
             </li>
           </ul>
@@ -188,12 +188,12 @@ export default function ApiDocs() {
               PostgREST menerbitkan spesifikasi OpenAPI 2.0 / Swagger secara dinamis sesuai skema database aktif.
               Dokumentasi ini selalu sinkron 100% dan tidak pernah basi.
             </p>
-            <div className="p-3 bg-latar-lembut border border-garis rounded-sm font-mono text-xs break-all text-tinta">
+            <div className="p-3 bg-latar-lembut border border-garis rounded-sm font-sans text-xs break-all text-tinta">
               {openApiUrl}
             </div>
           </div>
 
-          <Button asChild size="sm" variant="default" className="w-full text-xs font-mono">
+          <Button asChild size="sm" variant="default" className="w-full text-xs font-sans">
             <a href={openApiUrl} target="_blank" rel="noreferrer">
               <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
               Buka Spesifikasi OpenAPI JSON
@@ -208,7 +208,7 @@ export default function ApiDocs() {
           <Database className="w-4 h-4 text-aksen" />
           <h2 className="font-display text-lg font-bold text-tinta">Endpoints Tabel PostgREST (/rest/v1/*)</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-sans">
           {TABEL.map((t) => (
             <div key={t.nama} className="p-3 border border-garis rounded-sm bg-latar-lembut/20">
               <span className="font-bold text-aksen block">{t.nama}</span>
@@ -225,12 +225,12 @@ export default function ApiDocs() {
             <Layers className="w-4 h-4 text-aksen" />
             <h2 className="font-display text-lg font-bold text-tinta">Katalog Fungsi RPC (Remote Procedure Call)</h2>
           </div>
-          <Badge variant="outline" className="font-mono text-xs">{RPC.length} Prosedur</Badge>
+          <Badge variant="outline" className="font-sans text-xs">{RPC.length} Prosedur</Badge>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-latar-lembut border-b border-garis font-mono text-[11px] uppercase text-tinta-lembut">
+            <thead className="bg-latar-lembut border-b border-garis font-sans text-[11px] uppercase text-tinta-lembut">
               <tr>
                 <th className="px-3 py-2.5 font-semibold">Nama Prosedur</th>
                 <th className="px-3 py-2.5 font-semibold">Argumen Input</th>
@@ -238,7 +238,7 @@ export default function ApiDocs() {
                 <th className="px-3 py-2.5 font-semibold">Keterangan</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--garis)] font-mono">
+            <tbody className="divide-y divide-[var(--garis)] font-sans">
               {RPC.map((r) => (
                 <tr key={r.nama} className="hover:bg-latar-lembut/30 transition-colors">
                   <td className="px-3 py-2.5 font-bold text-aksen whitespace-nowrap">
@@ -248,7 +248,7 @@ export default function ApiDocs() {
                     {r.argumen}
                   </td>
                   <td className="px-3 py-2.5 whitespace-nowrap">
-                    <Badge variant="secondary" className="text-[10px] uppercase font-mono">
+                    <Badge variant="secondary" className="text-[10px] uppercase font-sans">
                       {r.siapa}
                     </Badge>
                   </td>
@@ -281,13 +281,13 @@ export default function ApiDocs() {
                     'curl-fetch',
                   )
                 }
-                className="text-aksi hover:underline flex items-center gap-1 font-mono text-[11px]"
+                className="text-aksi hover:underline flex items-center gap-1 font-sans text-[11px]"
               >
                 {salinTeks === 'curl-fetch' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                 {salinTeks === 'curl-fetch' ? 'Disalin!' : 'Salin cURL'}
               </button>
             </div>
-            <pre className="p-3 bg-black text-green-400 font-mono text-xs rounded-sm overflow-x-auto leading-relaxed border border-garis">
+            <pre className="p-3 bg-black text-green-400 font-sans text-xs rounded-sm overflow-x-auto leading-relaxed border border-garis">
 {`curl -X POST "$SUPABASE_URL/rest/v1/rpc/rpc_record_fetch" \\
   -H "apikey: $ANON_KEY" \\
   -H "Content-Type: application/json" \\
@@ -306,13 +306,13 @@ export default function ApiDocs() {
                     'curl-suggest',
                   )
                 }
-                className="text-aksi hover:underline flex items-center gap-1 font-mono text-[11px]"
+                className="text-aksi hover:underline flex items-center gap-1 font-sans text-[11px]"
               >
                 {salinTeks === 'curl-suggest' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                 {salinTeks === 'curl-suggest' ? 'Disalin!' : 'Salin cURL'}
               </button>
             </div>
-            <pre className="p-3 bg-black text-green-400 font-mono text-xs rounded-sm overflow-x-auto leading-relaxed border border-garis">
+            <pre className="p-3 bg-black text-green-400 font-sans text-xs rounded-sm overflow-x-auto leading-relaxed border border-garis">
 {`curl -X POST "$SUPABASE_URL/rest/v1/rpc/rpc_ppi_suggest" \\
   -H "apikey: $ANON_KEY" \\
   -H "Authorization: Bearer $ACCESS_TOKEN" \\
@@ -328,7 +328,7 @@ export default function ApiDocs() {
         <h2 className="font-display text-base font-bold text-tinta">Kode Status & Galat PostgreSQL</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-[var(--latar-lemaut)] border-b border-garis font-mono text-[11px] uppercase text-tinta-lembut">
+            <thead className="bg-[var(--latar-lemaut)] border-b border-garis font-sans text-[11px] uppercase text-tinta-lembut">
               <tr>
                 <th className="px-3 py-2 font-semibold">Kode SQLSTATE</th>
                 <th className="px-3 py-2 font-semibold">Penyebab Galat</th>
@@ -337,12 +337,12 @@ export default function ApiDocs() {
             </thead>
             <tbody className="divide-y divide-[var(--garis)]">
               <tr>
-                <td className="px-3 py-2 font-mono font-bold text-red-700">42501 (insufficient_privilege)</td>
+                <td className="px-3 py-2 font-sans font-bold text-red-700">42501 (insufficient_privilege)</td>
                 <td className="px-3 py-2">Pelanggaran RLS: akun tidak memiliki hak akses atas tenant sekolah ini.</td>
                 <td className="px-3 py-2 text-tinta-lembut">Masuk dengan kredensial staf sekolah yang bersangkutan.</td>
               </tr>
               <tr>
-                <td className="px-3 py-2 font-mono font-bold text-amber-700">22023 (invalid_parameter_value)</td>
+                <td className="px-3 py-2 font-sans font-bold text-amber-700">22023 (invalid_parameter_value)</td>
                 <td className="px-3 py-2">Token transfer kedaluwarsa, tidak cocok, atau sudah pernah terpakai.</td>
                 <td className="px-3 py-2 text-tinta-lembut">Minta koordinator sekolah asal menerbitkan token baru.</td>
               </tr>

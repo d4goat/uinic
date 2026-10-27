@@ -237,7 +237,7 @@ export default function ModeSiswa() {
       {/* Header Mode Siswa */}
       <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center gap-2 mb-2">
-          <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+          <Badge variant="outline" className="font-sans text-xs uppercase tracking-wider">
             F11 · Jadwal Visual Siswa
           </Badge>
           <span className="text-xs text-tinta-lembut">Ramah Autisme & Tanpa Akun Anak</span>
@@ -255,7 +255,7 @@ export default function ModeSiswa() {
 
           {/* Bar Kemajuan Visual */}
           <div className="bg-kartu border border-garis p-4 rounded-sm shrink-0 min-w-[200px]">
-            <div className="flex items-center justify-between text-xs font-mono mb-1.5">
+            <div className="flex items-center justify-between text-xs font-sans mb-1.5">
               <span className="text-tinta-lembut">KEMAJUAN</span>
               <span className="font-bold text-tinta">{persenSelesai}%</span>
             </div>
@@ -265,7 +265,7 @@ export default function ModeSiswa() {
                 style={{ width: `${persenSelesai}%` }}
               />
             </div>
-            <span className="text-[11px] font-mono text-tinta-lembut block mt-1">
+            <span className="text-[11px] font-sans text-tinta-lembut block mt-1">
               {jumlahSelesai} dari {langkah.length} langkah selesai
             </span>
           </div>
@@ -276,7 +276,7 @@ export default function ModeSiswa() {
           <Button
             size="sm"
             variant="outline"
-            className="text-xs font-mono"
+            className="text-xs font-sans"
             onClick={() => setPanelMateri((p) => !p)}
           >
             <BookOpen className="w-3.5 h-3.5 mr-1" />
@@ -285,7 +285,7 @@ export default function ModeSiswa() {
           <Button
             size="sm"
             variant="outline"
-            className="text-xs font-mono"
+            className="text-xs font-sans"
             onClick={ulangiDariAwal}
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1" />
@@ -294,7 +294,7 @@ export default function ModeSiswa() {
           <Button
             size="sm"
             variant="ghost"
-            className="text-xs font-mono text-tinta-lembut"
+            className="text-xs font-sans text-tinta-lembut"
             onClick={aturUlang}
           >
             Atur Ulang Langkah Bawaan
@@ -322,7 +322,7 @@ export default function ModeSiswa() {
                 size="sm"
                 onClick={bacakan}
                 disabled={!bisaBacakan || langkah.length === 0 || sedangBicara}
-                className="h-8 text-xs font-mono"
+                className="h-8 text-xs font-sans"
               >
                 <Play className="w-3.5 h-3.5 mr-1" />
                 {sedangBicara ? 'Membaca...' : 'Bacakan'}
@@ -332,7 +332,7 @@ export default function ModeSiswa() {
                 variant="outline"
                 onClick={hentikan}
                 disabled={!bisaBacakan || !sedangBicara}
-                className="h-8 text-xs font-mono"
+                className="h-8 text-xs font-sans"
               >
                 <Square className="w-3.5 h-3.5 mr-1" />
                 Berhenti
@@ -379,7 +379,7 @@ export default function ModeSiswa() {
                   </span>
 
                   <div>
-                    <span className="text-[11px] font-mono text-tinta-lembut block uppercase tracking-wider">
+                    <span className="text-[11px] font-sans text-tinta-lembut block uppercase tracking-wider">
                       Langkah #{i + 1}
                     </span>
                     <p className={`text-lg font-semibold leading-relaxed ${

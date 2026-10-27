@@ -284,7 +284,7 @@ export default function PpiEditor() {
     return (
       <div className="p-16 text-center border border-garis bg-kartu rounded-sm">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-aksen border-t-transparent" />
-        <p className="mt-3 text-sm text-tinta-lembut font-mono">Memuat saran akomodasi & draf PPI...</p>
+        <p className="mt-3 text-sm text-tinta-lembut font-sans">Memuat saran akomodasi & draf PPI...</p>
       </div>
     );
   }
@@ -368,11 +368,11 @@ export default function PpiEditor() {
             </Link>
           </Button>
           <span className="text-xs text-[var(--garis)]">/</span>
-          <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+          <Badge variant="outline" className="font-sans text-xs uppercase tracking-wider">
             F4 & F5 · Draf PPI Berversi
           </Badge>
           {ppi && (
-            <Badge variant="secondary" className="font-mono text-xs">
+            <Badge variant="secondary" className="font-sans text-xs">
               Versi Aktif: v{ppi.versi_aktif}
             </Badge>
           )}
@@ -389,7 +389,7 @@ export default function PpiEditor() {
             </p>
           </div>
 
-          <div className="bg-kartu border border-garis p-3 rounded-sm shrink-0 font-mono text-right">
+          <div className="bg-kartu border border-garis p-3 rounded-sm shrink-0 font-sans text-right">
             <span className="text-[11px] text-tinta-lembut block">SUBJEK SISWA</span>
             <span className="text-lg font-bold text-tinta">{siswa.kode} ({siswa.inisial})</span>
             <span className="text-xs text-tinta-lembut block">Kelas {siswa.kelas} · Asesmen: {tanggal(saran.assessment.tanggal)}</span>
@@ -473,7 +473,7 @@ export default function PpiEditor() {
                     Dihitung dari {saran.hambatan.length} hambatan teramati. Guru memegang kendali penuh untuk menerima/menolak.
                   </p>
                 </div>
-                <Badge variant="outline" className="font-mono text-xs self-start sm:self-auto">
+                <Badge variant="outline" className="font-sans text-xs self-start sm:self-auto">
                   {jumlahSetuju} Disetujui dari {kelompok.length}
                 </Badge>
               </div>
@@ -505,7 +505,7 @@ export default function PpiEditor() {
                               {a.nama}
                               <Badge
                                 variant={a.tingkat_bukti === 'kuat' ? 'default' : 'secondary'}
-                                className="font-mono text-[10px] uppercase font-normal"
+                                className="font-sans text-[10px] uppercase font-normal"
                               >
                                 {teksBukti(a.tingkat_bukti)}
                               </Badge>
@@ -557,13 +557,13 @@ export default function PpiEditor() {
                           </p>
                         ))}
 
-                        <div className="text-[11px] font-mono text-tinta-lembut">
+                        <div className="text-[11px] font-sans text-tinta-lembut">
                           Ditinjau oleh: {a.ditinjau_oleh} · {tanggal(a.tanggal_tinjau)}
                         </div>
 
                         {/* Catatan Guru Opsional */}
                         <div className="pt-2 border-t border-garis">
-                          <label htmlFor={`${idc}-catatan`} className="block text-[11px] font-mono text-tinta-lembut mb-1">
+                          <label htmlFor={`${idc}-catatan`} className="block text-[11px] font-sans text-tinta-lembut mb-1">
                             CATATAN PENYESUAIAN GURU (OPSIONAL):
                           </label>
                           <Input
@@ -594,7 +594,7 @@ export default function PpiEditor() {
                   variant="outline"
                   size="sm"
                   onClick={() => setTujuan((lama) => [...lama, buatBaris()])}
-                  className="h-8 text-xs font-mono"
+                  className="h-8 text-xs font-sans"
                 >
                   <Plus className="w-3.5 h-3.5 mr-1" />
                   Tambah Baris
@@ -605,7 +605,7 @@ export default function PpiEditor() {
                 {tujuan.map((t, i) => (
                   <div key={t.kunci} className="p-4 border border-garis rounded-sm bg-latar-lembut/20 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold text-tinta">
+                      <span className="font-sans text-xs font-bold text-tinta">
                         TARGET #{i + 1}
                       </span>
                       {tujuan.length > 1 && (
@@ -679,7 +679,7 @@ export default function PpiEditor() {
 
             {/* Tombol Aksi Simpan */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-kartu border border-garis rounded-sm">
-              <span className="text-xs text-tinta-lembut font-mono">
+              <span className="text-xs text-tinta-lembut font-sans">
                 * Simpan akan mempublikasikan versi baru ({versi.length ? `v${versi[0].nomor_versi + 1}` : 'v1'}) tanpa menimpa data lama.
               </span>
               <Button type="submit" disabled={sibuk} className="shrink-0 bg-aksi hover:bg-aksi-gelap text-white">
@@ -698,7 +698,7 @@ export default function PpiEditor() {
                 <History className="w-4 h-4 text-aksen" />
                 <h2 className="font-display text-base font-bold text-tinta">Riwayat Versi PPI</h2>
               </div>
-              <Badge variant="outline" className="font-mono text-xs">
+              <Badge variant="outline" className="font-sans text-xs">
                 {versi.length} Versi
               </Badge>
             </div>
@@ -715,16 +715,16 @@ export default function PpiEditor() {
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-tinta">
+                      <span className="font-sans font-bold text-tinta">
                         Versi {v.nomor_versi}
                       </span>
                       {i === 0 && (
-                        <Badge variant="default" className="text-[10px] font-mono uppercase bg-[var(--aksen)] text-white">
+                        <Badge variant="default" className="text-[10px] font-sans uppercase bg-[var(--aksen)] text-white">
                           Aktif
                         </Badge>
                       )}
                     </div>
-                    <p className="text-[11px] text-tinta-lembut font-mono">
+                    <p className="text-[11px] text-tinta-lembut font-sans">
                       {tanggal(v.dibuat_pada)}
                     </p>
                     {v.ringkasan && (
@@ -751,7 +751,7 @@ export default function PpiEditor() {
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-7 text-xs px-2 font-mono"
+                          className="h-7 text-xs px-2 font-sans"
                           onClick={() => bukaBeda(v)}
                         >
                           <GitCompare className="w-3 h-3 mr-1" />
@@ -785,7 +785,7 @@ export default function PpiEditor() {
               {beda.hasil.tambah.length + beda.hasil.hapus.length + beda.hasil.ubah.length === 0 ? (
                 <p className="text-xs text-tinta-lembut">Tidak ada perbedaan indikator antara kedua versi.</p>
               ) : (
-                <div className="space-y-3 text-xs font-mono">
+                <div className="space-y-3 text-xs font-sans">
                   {beda.hasil.tambah.length > 0 && (
                     <div className="space-y-1">
                       <span className="text-emerald-700 font-bold block text-[11px]">+ DITAMBAHKAN:</span>
@@ -838,7 +838,7 @@ export default function PpiEditor() {
                   Tutup
                 </button>
               </div>
-              <p className="text-[11px] text-tinta-lembut font-mono">
+              <p className="text-[11px] text-tinta-lembut font-sans">
                 Dibuat: {tanggal(versiDibuka.dibuat_pada)}
               </p>
               <div>
@@ -848,7 +848,7 @@ export default function PpiEditor() {
                     <li key={g.id}>
                       <span className="font-medium">{g.tujuan}</span>
                       <br />
-                      <span className="text-[11px] text-tinta-lembut font-mono">&rarr; {g.indikator}</span>
+                      <span className="text-[11px] text-tinta-lembut font-sans">&rarr; {g.indikator}</span>
                     </li>
                   ))}
                 </ul>

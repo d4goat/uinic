@@ -249,7 +249,7 @@ export default function Transfer() {
       {/* Header Koordinator */}
       <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center gap-2 mb-2">
-          <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+          <Badge variant="outline" className="font-sans text-xs uppercase tracking-wider">
             F8 · Protokol Transfer Rekam
           </Badge>
           <span className="text-xs text-tinta-lembut">Otentikasi Kriptografis Token Sekali Pakai</span>
@@ -286,13 +286,13 @@ export default function Transfer() {
             </div>
 
             {memuat ? (
-              <div className="p-8 text-center font-mono text-xs text-tinta-lembut">
+              <div className="p-8 text-center font-sans text-xs text-tinta-lembut">
                 Memuat data siswa dan sekolah mitra...
               </div>
             ) : (
               <div className="space-y-5">
                 <div>
-                  <label htmlFor="pilih-siswa" className="block text-xs font-mono font-medium text-tinta mb-1">
+                  <label htmlFor="pilih-siswa" className="block text-xs font-sans font-medium text-tinta mb-1">
                     PILIH SISWA <span className="text-aksen">*</span>
                   </label>
                   <select
@@ -314,7 +314,7 @@ export default function Transfer() {
                 {siswaId && (
                   <div className="p-3.5 border rounded-sm text-xs space-y-1.5 transition-all">
                     {memuatConsent ? (
-                      <span className="text-tinta-lembut font-mono">Memeriksa status persetujuan wali...</span>
+                      <span className="text-tinta-lembut font-sans">Memeriksa status persetujuan wali...</span>
                     ) : galatConsent ? (
                       <p className="text-galat">{galatConsent}</p>
                     ) : consent && !adaConsentAktif(consent) ? (
@@ -337,7 +337,7 @@ export default function Transfer() {
                 )}
 
                 <div>
-                  <label htmlFor="pilih-tujuan" className="block text-xs font-mono font-medium text-tinta mb-1">
+                  <label htmlFor="pilih-tujuan" className="block text-xs font-sans font-medium text-tinta mb-1">
                     SEKOLAH TUJUAN <span className="text-aksen">*</span>
                   </label>
                   <select
@@ -357,7 +357,7 @@ export default function Transfer() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono font-medium text-tinta mb-1">
+                  <label className="block text-xs font-sans font-medium text-tinta mb-1">
                     MASA BERLAKU TOKEN (EXPIRATION)
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -366,10 +366,10 @@ export default function Transfer() {
                         key={p.jam}
                         type="button"
                         onClick={() => setJam(p.jam)}
-                        className={`text-xs py-2 px-3 border rounded-sm font-medium transition-all ${
+                        className={`text-xs py-2.5 px-3 border rounded-xl font-medium transition-all duration-300 ${
                           jam === p.jam
-                            ? 'border-aksen bg-[var(--aksen)]/5 text-aksen font-bold'
-                            : 'border-garis text-tinta-lembut hover:text-tinta'
+                            ? 'border-aksi bg-aksi text-white font-bold shadow-xs'
+                            : 'border-garis bg-kartu text-tinta hover:border-aksi hover:text-aksi'
                         }`}
                       >
                         {p.label}
@@ -383,7 +383,7 @@ export default function Transfer() {
                     type="button"
                     onClick={() => void buat()}
                     disabled={!bolehBuat || sedangBuat}
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto h-10 px-5 text-sm font-semibold rounded-xl bg-aksi text-white hover:bg-aksi-gelap transition-all duration-300 shadow-xs"
                   >
                     <KeyRound className="w-4 h-4 mr-1.5" />
                     {sedangBuat ? 'Menerbitkan Token...' : 'Buat Token Transfer'}
@@ -410,16 +410,16 @@ export default function Transfer() {
                   Segera salin dan serahkan kepada koordinator sekolah tujuan.
                 </p>
 
-                <div className="p-3 bg-white border border-garis rounded-sm font-mono text-sm break-all font-bold text-tinta select-all">
+                <div className="p-3 bg-white border border-garis rounded-sm font-sans text-sm break-all font-bold text-tinta select-all">
                   {hasil.token}
                 </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-                  <span className="font-mono text-tinta-lembut">
+                  <span className="font-sans text-tinta-lembut">
                     Kedaluwarsa: <strong>{waktu(hasil.kedaluwarsa)}</strong>
                   </span>
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" onClick={() => void salinToken()} className="text-xs font-mono">
+                    <Button size="sm" variant="outline" onClick={() => void salinToken()} className="text-xs font-sans">
                       <Copy className="w-3.5 h-3.5 mr-1" />
                       Salin Token
                     </Button>
@@ -428,7 +428,7 @@ export default function Transfer() {
                       variant="default"
                       onClick={() => void unduhRekamDenganToken()}
                       disabled={sedangUnduh}
-                      className="text-xs font-mono"
+                      className="text-xs font-sans"
                     >
                       <Download className="w-3.5 h-3.5 mr-1" />
                       {sedangUnduh ? 'Mengunduh...' : 'Tes Unduh JSON'}
@@ -437,7 +437,7 @@ export default function Transfer() {
                 </div>
 
                 {statusSalin && (
-                  <p className="text-xs text-emerald-700 font-mono">{statusSalin}</p>
+                  <p className="text-xs text-emerald-700 font-sans">{statusSalin}</p>
                 )}
               </div>
             )}
@@ -455,7 +455,7 @@ export default function Transfer() {
 
             <div className="space-y-4">
               <div>
-                <label htmlFor="input-token" className="block text-xs font-mono font-medium text-tinta mb-1">
+                <label htmlFor="input-token" className="block text-xs font-sans font-medium text-tinta mb-1">
                   TOKEN TRANSFER DARI SEKOLAH ASAL
                 </label>
                 <Input
@@ -464,7 +464,7 @@ export default function Transfer() {
                   value={token}
                   onChange={(e) => setToken(e.target.value)}
                   placeholder="Tempelkan token transfer di sini..."
-                  className="font-mono text-xs"
+                  className="font-sans text-xs"
                 />
               </div>
 
@@ -494,14 +494,14 @@ export default function Transfer() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-xs font-mono"
+                      className="text-xs font-sans"
                       onClick={() => unduhJson(hasilAmbil, `rekam-transfer-${token.trim().slice(0, 8)}.json`)}
                     >
                       <Download className="w-3.5 h-3.5 mr-1" />
                       Simpan File JSON
                     </Button>
                   </div>
-                  <pre className="p-3 rounded-sm border border-garis bg-black text-green-400 font-mono text-[11px] max-h-64 overflow-y-auto leading-snug">
+                  <pre className="p-3 rounded-sm border border-garis bg-black text-green-400 font-sans text-[11px] max-h-64 overflow-y-auto leading-snug">
                     {JSON.stringify(hasilAmbil, null, 2)}
                   </pre>
                 </div>
@@ -518,7 +518,7 @@ export default function Transfer() {
                 <History className="w-4 h-4 text-aksen" />
                 <h2 className="font-display text-base font-bold text-tinta">Log Aktivitas Transfer</h2>
               </div>
-              <Button size="sm" variant="ghost" className="h-7 text-xs px-2 font-mono" onClick={() => void muatRiwayat()}>
+              <Button size="sm" variant="ghost" className="h-7 text-xs px-2 font-sans" onClick={() => void muatRiwayat()}>
                 <RefreshCw className="w-3 h-3 mr-1" />
                 Muat Ulang
               </Button>
@@ -536,13 +536,13 @@ export default function Transfer() {
 
                   return (
                     <div key={r.id} className="p-3.5 border border-garis rounded-sm text-xs space-y-2 bg-transparent">
-                      <div className="flex items-center justify-between font-mono">
+                      <div className="flex items-center justify-between font-sans">
                         <span className="font-bold text-tinta">
                           {s ? `${s.kode} (${s.inisial})` : r.student_id}
                         </span>
                         <Badge
                           variant={sudahDipakai ? 'secondary' : 'default'}
-                          className={`text-[10px] uppercase font-mono ${
+                          className={`text-[10px] uppercase font-sans ${
                             !sudahDipakai ? 'bg-[var(--aksen)] text-white' : ''
                           }`}
                         >
@@ -555,10 +555,10 @@ export default function Transfer() {
                           <School className="w-3 h-3" />
                           Tujuan: <span className="font-semibold text-tinta">{namaSekolah(r.ke_school)}</span>
                         </p>
-                        <p className="font-mono">Dibuat: {waktu(r.dibuat_pada)}</p>
-                        <p className="font-mono">Kedaluwarsa: {waktu(r.kedaluwarsa)}</p>
+                        <p className="font-sans">Dibuat: {waktu(r.dibuat_pada)}</p>
+                        <p className="font-sans">Kedaluwarsa: {waktu(r.kedaluwarsa)}</p>
                         {r.dipakai_pada && (
-                          <p className="text-emerald-700 font-mono font-medium">Diambil: {waktu(r.dipakai_pada)}</p>
+                          <p className="text-emerald-700 font-sans font-medium">Diambil: {waktu(r.dipakai_pada)}</p>
                         )}
                       </div>
                     </div>

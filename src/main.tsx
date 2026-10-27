@@ -5,7 +5,6 @@ import { BrowserRouter } from 'react-router-dom'
 // mengizinkan font asal-sama, dan perangkat sekolah sering luring.
 import '@fontsource-variable/archivo/wght.css'
 import '@fontsource-variable/inter/wght.css'
-import '@fontsource-variable/jetbrains-mono/wght.css'
 import 'lenis/dist/lenis.css'
 import './styles/theme.css'
 import App from './App.tsx'

@@ -20,8 +20,6 @@ import { Separator } from '@/components/ui/separator';
 import AnatomiSaran from '@/components/AnatomiSaran';
 import Magnetik from '@/components/Magnetik';
 import RevealText from '@/components/RevealText';
-import DemoSwitcher from '@/components/DemoSwitcher';
-import PwaStatusPill from '@/components/PwaStatusPill';
 
 /** PRD §2 apa adanya: masalah, sumber, dan seberapa kuat buktinya. */
 const MASALAH = [
@@ -65,21 +63,19 @@ export default function Landing() {
                 </span>
                 <span className="w-1.5 h-1.5 rounded-full bg-aksen" aria-hidden="true"></span>
               </div>
-              <span className="text-[10px] font-mono text-tinta-lembut uppercase tracking-wider hidden sm:inline">
+              <span className="text-[10px] font-sans text-tinta-lembut uppercase tracking-wider hidden sm:inline">
                 Sanctuary Inklusif · UINIC 8.0
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <PwaStatusPill />
-            <DemoSwitcher />
             <Button asChild variant="outline" className="h-8 text-xs rounded-xl hidden sm:inline-flex">
               <Link to="/api-docs">
                 <FileJson size={13} className="mr-1" />
                 API Docs
               </Link>
             </Button>
-            <Button asChild className="h-8 text-xs font-semibold rounded-xl bg-aksi text-white hover:bg-aksi-gelap shadow-xs">
+            <Button asChild className="h-8 text-xs font-semibold rounded-xl bg-aksi text-white hover:bg-aksi-gelap transition-all duration-300 shadow-xs">
               <Link to="/login">Masuk</Link>
             </Button>
           </div>
@@ -175,7 +171,7 @@ export default function Landing() {
                 <h3 className="mt-0">{m.judul}</h3>
                 <p className="text-tinta-lembut">{m.isi}</p>
                 <div className="mt-2">
-                  <Badge variant="outline" className="font-mono text-xs text-tinta-lembut font-normal">
+                  <Badge variant="outline" className="font-sans text-xs text-tinta-lembut font-normal">
                     {m.bukti}
                   </Badge>
                 </div>

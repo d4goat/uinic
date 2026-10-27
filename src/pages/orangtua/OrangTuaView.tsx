@@ -156,7 +156,7 @@ export default function OrangTuaView() {
       {/* Header Portal Orang Tua */}
       <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center gap-2 mb-2">
-          <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+          <Badge variant="outline" className="font-sans text-xs uppercase tracking-wider">
             F7 · Portal Orang Tua / Wali
           </Badge>
           <span className="text-xs text-tinta-lembut">Transparan & Baca-Saja</span>
@@ -174,7 +174,7 @@ export default function OrangTuaView() {
 
           {anak.length > 1 && (
             <div className="bg-kartu border border-garis p-3 rounded-sm shrink-0">
-              <label htmlFor="pilih-anak" className="block text-[11px] font-mono text-tinta-lembut mb-1">
+              <label htmlFor="pilih-anak" className="block text-[11px] font-sans text-tinta-lembut mb-1">
                 PILIH ANAK
               </label>
               <select
@@ -214,7 +214,7 @@ export default function OrangTuaView() {
       {memuat ? (
         <div className="p-16 text-center border border-garis bg-kartu rounded-sm">
           <div className="inline-block animate-spin rounded-full h-7 w-7 border-2 border-aksen border-t-transparent" />
-          <p className="mt-3 text-sm text-tinta-lembut font-mono">Memuat data anak & PPI...</p>
+          <p className="mt-3 text-sm text-tinta-lembut font-sans">Memuat data anak & PPI...</p>
         </div>
       ) : !ringkasan ? (
         <div className="p-8 text-center border border-garis bg-kartu rounded-sm space-y-2">
@@ -234,7 +234,7 @@ export default function OrangTuaView() {
                 <User className="w-4 h-4 text-aksi" />
                 <h2 className="font-display text-lg font-bold text-tinta">Identitas Peserta Didik</h2>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm font-mono">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm font-sans">
                 <div>
                   <span className="text-[11px] text-tinta-lembut block">KODE PSEUDONIM</span>
                   <span className="font-bold text-tinta">{ringkasan.siswa.kode}</span>
@@ -262,7 +262,7 @@ export default function OrangTuaView() {
                   <h2 className="font-display text-xl font-bold text-tinta">Rencana Pembelajaran (PPI)</h2>
                 </div>
                 {ppi && (
-                  <Badge variant="outline" className="font-mono text-xs">
+                  <Badge variant="outline" className="font-sans text-xs">
                     Versi {ppi.versi} · {tanggal(ppi.diperbarui)}
                   </Badge>
                 )}
@@ -272,7 +272,7 @@ export default function OrangTuaView() {
                 <div className="space-y-6">
                   {ppi.ringkasan && (
                     <div className="bg-latar-lembut/30 p-4 rounded-sm border border-garis">
-                      <span className="text-xs font-mono font-semibold text-tinta-lembut block mb-1">
+                      <span className="text-xs font-sans font-semibold text-tinta-lembut block mb-1">
                         RINGKASAN PROGRAM
                       </span>
                       <p className="text-sm text-tinta leading-relaxed italic">
@@ -288,7 +288,7 @@ export default function OrangTuaView() {
                       {ppi.tujuan.map((t, idx) => (
                         <div key={idx} className="p-3 border border-garis rounded-sm text-sm bg-white space-y-1">
                           <p className="font-medium text-tinta">{t.tujuan}</p>
-                          <p className="text-xs text-tinta-lembut font-mono flex items-center gap-1">
+                          <p className="text-xs text-tinta-lembut font-sans flex items-center gap-1">
                             <span>Indikator:</span>
                             <span className="text-tinta">{t.indikator}</span>
                           </p>
@@ -338,11 +338,11 @@ export default function OrangTuaView() {
                 <div className="space-y-3">
                   {ringkasan.sesi.map((s, idx) => (
                     <div key={idx} className="p-3 border border-garis rounded-sm text-xs space-y-1 bg-transparent">
-                      <div className="flex items-center justify-between font-mono">
+                      <div className="flex items-center justify-between font-sans">
                         <span className="text-tinta-lembut">{tanggal(s.tanggal)}</span>
                         <Badge
                           variant={s.capaian === 'tercapai' ? 'default' : 'secondary'}
-                          className={`text-[10px] uppercase font-mono ${
+                          className={`text-[10px] uppercase font-sans ${
                             s.capaian === 'tercapai' ? 'bg-emerald-700 text-white' : ''
                           }`}
                         >
@@ -374,13 +374,13 @@ export default function OrangTuaView() {
                 aktif ? 'border-emerald-300 bg-emerald-50/60' : 'border-amber-300 bg-amber-50/60'
               }`}>
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[11px] font-bold">STATUS PERSETUJUAN:</span>
+                  <span className="font-sans text-[11px] font-bold">STATUS PERSETUJUAN:</span>
                   <Badge variant={aktif ? 'default' : 'outline'} className={aktif ? 'bg-emerald-700 text-white' : ''}>
                     {terakhir ? TEKS_STATUS[terakhir.status] : 'Belum Ada'}
                   </Badge>
                 </div>
                 {terakhir && (
-                  <p className="text-[11px] text-tinta-lembut font-mono">
+                  <p className="text-[11px] text-tinta-lembut font-sans">
                     Berlaku sampai: {tanggal(terakhir.berlaku_hingga)}
                   </p>
                 )}
@@ -419,7 +419,7 @@ export default function OrangTuaView() {
               ) : (
                 <div className="space-y-2 max-h-[220px] overflow-y-auto">
                   {ringkasan.persetujuan.map((c) => (
-                    <div key={c.id} className="p-2 border border-garis rounded-sm font-mono text-[11px] space-y-0.5">
+                    <div key={c.id} className="p-2 border border-garis rounded-sm font-sans text-[11px] space-y-0.5">
                       <div className="flex justify-between font-bold">
                         <span>{c.jenis.replace('_', ' ').toUpperCase()}</span>
                         <span>{TEKS_STATUS[c.status]}</span>

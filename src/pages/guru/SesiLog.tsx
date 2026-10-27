@@ -206,13 +206,13 @@ export default function SesiLog() {
               </Link>
             </Button>
             <span className="text-xs text-[var(--garis)]">/</span>
-            <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+            <Badge variant="outline" className="font-sans text-xs uppercase tracking-wider">
               F6 · Log Sesi & Offline Sync
             </Badge>
           </div>
 
           {/* Indikator Status Jaringan */}
-          <div className="flex items-center gap-2 text-xs font-mono">
+          <div className="flex items-center gap-2 text-xs font-sans">
             {daring ? (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border border-emerald-300 bg-emerald-50 text-emerald-800">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -239,19 +239,19 @@ export default function SesiLog() {
 
         {/* Ringkasan Statistik Capaian (design.md Modul 4) */}
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-mono">
+          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-sans">
             <span className="text-xs text-tinta-lembut block">TOTAL SESI</span>
             <span className="text-2xl font-bold text-tinta">{jumlahSesi}</span>
           </div>
-          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-mono">
+          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-sans">
             <span className="text-xs text-emerald-700 block">TERCAPAI</span>
             <span className="text-2xl font-bold text-emerald-800">{rekap.tercapai}</span>
           </div>
-          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-mono">
+          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-sans">
             <span className="text-xs text-amber-700 block">SEBAGIAN</span>
             <span className="text-2xl font-bold text-amber-800">{rekap.sebagian}</span>
           </div>
-          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-mono">
+          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-sans">
             <span className="text-xs text-red-700 block">BELUM</span>
             <span className="text-2xl font-bold text-red-800">{rekap.belum}</span>
           </div>
@@ -294,7 +294,7 @@ export default function SesiLog() {
 
             <form onSubmit={(e) => void simpan(e)} className="space-y-5">
               <div>
-                <label htmlFor="sesi-tujuan" className="block text-xs font-mono font-medium text-tinta mb-1">
+                <label htmlFor="sesi-tujuan" className="block text-xs font-sans font-medium text-tinta mb-1">
                   TARGET PPI / INDIKATOR
                 </label>
                 <select
@@ -317,7 +317,7 @@ export default function SesiLog() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="sesi-tanggal" className="block text-xs font-mono font-medium text-tinta mb-1">
+                  <label htmlFor="sesi-tanggal" className="block text-xs font-sans font-medium text-tinta mb-1">
                     TANGGAL PELAKSANAAN <span className="text-aksen">*</span>
                   </label>
                   <input
@@ -326,12 +326,12 @@ export default function SesiLog() {
                     value={tanggal}
                     onChange={(e) => setTanggal(e.target.value)}
                     required
-                    className="w-full text-sm rounded-sm border border-garis bg-kartu p-2.5 font-mono"
+                    className="w-full text-sm rounded-sm border border-garis bg-kartu p-2.5 font-sans"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono font-medium text-tinta mb-1">
+                  <label className="block text-xs font-sans font-medium text-tinta mb-1">
                     STATUS CAPAIAN <span className="text-aksen">*</span>
                   </label>
                   <div className="grid grid-cols-3 gap-1.5 p-1 border border-garis rounded-sm bg-latar-lembut">
@@ -359,11 +359,11 @@ export default function SesiLog() {
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label htmlFor="sesi-catatan" className="text-xs font-mono font-medium text-tinta flex items-center gap-1.5">
+                  <label htmlFor="sesi-catatan" className="text-xs font-sans font-medium text-tinta flex items-center gap-1.5">
                     <Lock className="w-3.5 h-3.5 text-aksen" />
                     CATATAN PERILAKU / EVALUASI (TERENKRIPSI)
                   </label>
-                  <span className="text-[11px] font-mono text-tinta-lembut">Maks. 500 karakter</span>
+                  <span className="text-[11px] font-sans text-tinta-lembut">Maks. 500 karakter</span>
                 </div>
                 <Textarea
                   id="sesi-catatan"
@@ -395,7 +395,7 @@ export default function SesiLog() {
                 <CloudOff className="w-4 h-4 text-aksen" />
                 <h2 className="font-display text-base font-bold text-tinta">Antrean Offline Lokal</h2>
               </div>
-              <Badge variant={antrean.length > 0 ? 'default' : 'outline'} className="font-mono text-xs">
+              <Badge variant={antrean.length > 0 ? 'default' : 'outline'} className="font-sans text-xs">
                 {antrean.length} Menunggu
               </Badge>
             </div>
@@ -412,7 +412,7 @@ export default function SesiLog() {
                 <div className="space-y-2">
                   {antrean.map((s) => (
                     <div key={s.client_uuid} className="p-3 border border-garis rounded-sm text-xs bg-latar-lembut/30 space-y-1">
-                      <div className="flex items-center justify-between font-mono text-[11px]">
+                      <div className="flex items-center justify-between font-sans text-[11px]">
                         <span>{formatTanggal(s.tanggal)}</span>
                         <Badge variant="secondary" className="text-[10px] uppercase">
                           {LABEL[s.status_capaian]}
@@ -428,7 +428,7 @@ export default function SesiLog() {
                   variant="outline"
                   onClick={() => void kirim()}
                   disabled={mengirim || !daring}
-                  className="w-full text-xs font-mono"
+                  className="w-full text-xs font-sans"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${mengirim ? 'animate-spin' : ''}`} />
                   {mengirim ? 'Mengirim Antrean...' : 'Sinkronkan Sekarang'}
@@ -450,14 +450,14 @@ export default function SesiLog() {
               <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
                 {sesi.map((s) => (
                   <div key={s.id} className="p-3 border border-garis rounded-sm text-xs space-y-1.5 bg-transparent">
-                    <div className="flex items-center justify-between font-mono">
+                    <div className="flex items-center justify-between font-sans">
                       <span className="text-[11px] text-tinta-lembut flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {formatTanggal(s.tanggal)}
                       </span>
                       <Badge
                         variant={s.status_capaian === 'tercapai' ? 'default' : 'secondary'}
-                        className={`text-[10px] font-mono ${
+                        className={`text-[10px] font-sans ${
                           s.status_capaian === 'tercapai' ? 'bg-emerald-700 text-white' : ''
                         }`}
                       >

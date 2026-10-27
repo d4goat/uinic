@@ -66,7 +66,7 @@ export default function Audit() {
       <header className="anim-muncul border-b border-garis pb-6">
         <div className="flex items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="font-mono text-xs uppercase tracking-wider">
+            <Badge variant="outline" className="font-sans text-xs uppercase tracking-wider">
               F12 · Rekam Jejak Audit
             </Badge>
             <span className="text-xs text-tinta-lembut">Trigger Postgres DB & Immutable Log</span>
@@ -75,7 +75,7 @@ export default function Audit() {
           <Button
             size="sm"
             variant="outline"
-            className="h-8 text-xs font-mono"
+            className="h-8 text-xs font-sans"
             onClick={() => void muat()}
             disabled={memuat}
           >
@@ -108,9 +108,9 @@ export default function Audit() {
         <div className="p-4 border-b border-garis bg-latar-lembut/70 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Database className="w-4 h-4 text-aksi" />
-            <span className="text-xs font-mono font-bold uppercase text-tinta">50 Entri Audit Terkini</span>
+            <span className="text-xs font-sans font-bold uppercase text-tinta">50 Entri Audit Terkini</span>
           </div>
-          <span className="text-[11px] font-mono text-tinta-lembut">
+          <span className="text-[11px] font-sans text-tinta-lembut">
             Total termuat: <span className="font-bold text-tinta">{baris.length}</span> log
           </span>
         </div>
@@ -118,14 +118,14 @@ export default function Audit() {
         {memuat ? (
           <div className="p-12 text-center">
             <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-aksen border-t-transparent" />
-            <p className="mt-3 text-xs text-tinta-lembut font-mono">Mengambil catatan audit dari database...</p>
+            <p className="mt-3 text-xs text-tinta-lembut font-sans">Mengambil catatan audit dari database...</p>
           </div>
         ) : baris.length === 0 ? (
           <div className="p-8 text-center text-xs text-tinta-lembut">Belum ada aktivitas tercatat pada tabel audit.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-latar-lembut border-b border-garis font-mono uppercase text-[11px] text-tinta-lembut">
+              <thead className="bg-latar-lembut border-b border-garis font-sans uppercase text-[11px] text-tinta-lembut">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Waktu Stempel</th>
                   <th className="px-4 py-3 font-semibold">Aksi</th>
@@ -134,7 +134,7 @@ export default function Audit() {
                   <th className="px-4 py-3 font-semibold">Identitas Pengguna</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--garis)] font-mono">
+              <tbody className="divide-y divide-[var(--garis)] font-sans">
                 {baris.map((b) => {
                   const aksi = b.aksi;
                   const isInsert = aksi === 'insert';
@@ -173,7 +173,7 @@ export default function Audit() {
                             {b.user_id}
                           </span>
                         ) : (
-                          <Badge variant="outline" className="text-[10px] uppercase font-mono border-amber-300 text-amber-800 bg-amber-50">
+                          <Badge variant="outline" className="text-[10px] uppercase font-sans border-amber-300 text-amber-800 bg-amber-50">
                             <Key className="w-3 h-3 mr-1" />
                             Token Transfer
                           </Badge>

@@ -34,7 +34,7 @@
   src: url('/fonts/neue-montreal/regular/index.woff2') format('woff2'),
        url('/fonts/neue-montreal/regular/index.woff') format('woff'),
        url('/fonts/neue-montreal/regular/index.ttf') format('truetype');
-  font-weight: 400;
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
@@ -69,10 +69,10 @@
   --color-peringatan: #945000;   /* Amber Honey Deep */
   --color-galat: #8c1d1d;        /* Muted Crimson */
 
-  /* Pasangan tipografi (design.md §4) */
-  --font-display: 'Archivo Variable', Archivo, 'Helvetica Neue', Arial, sans-serif;
-  --font-sans: 'Neue Montreal', 'Inter Variable', Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+  /* Pasangan tipografi: full font sans Neue Montreal (design.md & permintaan pengguna) */
+  --font-display: 'Neue Montreal', 'Archivo Variable', Archivo, system-ui, -apple-system, sans-serif;
+  --font-sans: 'Neue Montreal', 'Inter Variable', Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: 'Neue Montreal', 'Inter Variable', Inter, system-ui, -apple-system, sans-serif;
 }
 
 /* Nama pendek lama tetap hidup: alias ke token @theme */
@@ -96,7 +96,7 @@
   --berhasil: var(--color-berhasil);
   --peringatan: var(--color-peringatan);
   --galat: var(--color-galat);
-  --radius: 0.875rem;            /* 14px — soft-tactile architecture (design.md §1 & §5) */
+  --radius: 0.875rem;            /* 14px — soft-tactile architecture */
   --lebar-baca: 60ch;            /* batas lebar teks badan */
   --lebar-panggung: 84rem;       /* batas lebar panggung */
   color-scheme: light;
@@ -174,7 +174,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
     @apply bg-background text-foreground;
   }
 
-  a { color: var(--aksi); text-underline-offset: 0.18em; }
+  a { color: var(--aksi); text-underline-offset: 0.18em; transition: color 0.3s ease-out; }
   a:hover { color: var(--aksi-gelap); }
 
   :focus-visible {
@@ -193,7 +193,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
   li { margin-bottom: 0.25rem; }
   blockquote { margin: 0 0 1.5rem; padding-left: 1.25rem; border-left: 3px solid var(--aksen); }
   hr { border: 0; border-top: 1px solid var(--garis); margin: 2rem 0; }
-  code, kbd, samp { font-family: var(--font-mono); font-size: 0.9em; }
+  code, kbd, samp { font-family: var(--font-sans); font-size: 0.9em; }
   img, svg, video { max-width: 100%; height: auto; }
 
   /* Ikon Lucide selalu 1,5px — garis rambut yang sama dengan kisi. */
@@ -253,7 +253,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
   }
   /* Metadata, tag, penghitung, stempel waktu — selalu monospace. */
   .meta {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.6875rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -604,41 +604,59 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
     button, .tombol, input, select, textarea, label.pilihan { min-height: 2.75rem; }
   }
 
-  button, .tombol {
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .tombol, .tombol-primer {
     font: inherit;
     font-size: 0.9375rem;
-    font-weight: 500;
+    font-weight: 550;
     cursor: pointer;
     border-radius: var(--radius);
-    padding: 0.5rem 0.875rem;
+    padding: 0.5rem 1rem;
     border: 1px solid var(--aksi);
-    color: #fff;
+    color: #ffffff;
     background-color: var(--aksi);
-    background-image: linear-gradient(var(--aksi-gelap), var(--aksi-gelap));
-    background-repeat: no-repeat;
-    background-size: 0% 100%;
-    background-position: 0 0;
     text-decoration: none;
-    display: inline-block;
-    transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  button:hover, .tombol:hover { background-size: 100% 100%; border-color: var(--aksi-gelap); color: #fff; }
-  button[disabled] { opacity: 0.55; cursor: progress; }
+  .tombol:hover, .tombol-primer:hover {
+    background-color: var(--aksi-gelap);
+    border-color: var(--aksi-gelap);
+    color: #ffffff;
+    box-shadow: 0 4px 14px -2px rgba(45, 106, 79, 0.25);
+  }
+  button[disabled], .tombol[disabled] { opacity: 0.55; cursor: not-allowed; }
   .tombol-sekunder {
-    background-color: transparent;
-    background-image: linear-gradient(var(--latar-lembut), var(--latar-lembut));
-    color: var(--aksi);
+    background-color: var(--latar-lembut);
+    color: var(--tinta);
+    border: 1px solid var(--garis);
+  }
+  .tombol-sekunder:hover {
+    background-color: var(--latar);
+    color: var(--tinta);
     border-color: var(--garis-kuat);
   }
-  .tombol-sekunder:hover { color: var(--aksi-gelap); border-color: var(--aksi); }
   .tombol-bahaya {
-    background-color: transparent;
-    background-image: linear-gradient(#fdf3f3, #fdf3f3);
+    background-color: #fdf3f3;
     color: var(--galat);
+    border: 1px solid #fecaca;
+  }
+  .tombol-bahaya:hover {
+    background-color: var(--galat);
+    color: #ffffff;
     border-color: var(--galat);
   }
-  .tombol-bahaya:hover { color: #fff; background-image: linear-gradient(var(--galat), var(--galat)); border-color: var(--galat); }
-  .tombol-kecil { padding: 0.3rem 0.625rem; font-size: 0.8125rem; }
+  .tombol-kecil { padding: 0.35rem 0.75rem; font-size: 0.8125rem; border-radius: 0.625rem; }
 
   /* Tautan teks dengan garis bawah yang terisi dari kiri saat hover. */
   .tautan-arah {
@@ -660,7 +678,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
   caption {
     text-align: left;
     padding-bottom: 0.5rem;
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.6875rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -668,7 +686,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
   }
   th, td { text-align: left; padding: 0.625rem 0.75rem; border-bottom: 1px solid var(--garis); vertical-align: top; }
   th {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.6875rem;
     font-weight: 500;
     letter-spacing: 0.08em;
@@ -683,7 +701,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
   /* --- tag --- */
   .lencana {
     display: inline-block;
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.6875rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -699,7 +717,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
   .lencana-capaian { border-color: var(--tinta-lembut); }
 
   /* --- pesan status ---
-     Label monospace di atas pesan: jenis pesan tidak pernah ditandai warna saja. */
+     Label di atas pesan: jenis pesan tidak pernah ditandai warna saja. */
   .pesan {
     border: 1px solid var(--garis);
     border-left: 3px solid var(--aksi);
@@ -711,7 +729,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
   .pesan::before {
     content: 'INFO';
     display: block;
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.6875rem;
     letter-spacing: 0.12em;
     color: var(--aksi);
@@ -739,7 +757,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
   .langkah[data-selesai='true'] { border-color: var(--berhasil); background: var(--kartu); }
   .langkah-ikon { font-size: 1.9rem; line-height: 1; width: 2.4rem; text-align: center; }
   .langkah-nomor {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.75rem;
     letter-spacing: 0.08em;
     color: var(--tinta-lembut);
@@ -808,7 +826,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
   }
   .hero-meta { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
   .hero-meta li { display: grid; gap: 0.1rem; margin: 0; max-width: none; }
-  .hero-meta strong { font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 500; }
+  .hero-meta strong { font-family: var(--font-sans); font-size: 0.8125rem; font-weight: 500; }
 
   /* Alur PPI: garis waktu bernomor, satu langkah per baris. */
   .alur { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--garis); }
@@ -822,7 +840,7 @@ html[data-mode='kontras-tinggi'] .kursor-aksen { display: none; }
     margin: 0;
     max-width: none;
   }
-  .alur-nomor { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--aksen); padding-top: 0.2rem; }
+  .alur-nomor { font-family: var(--font-sans); font-size: 0.8125rem; color: var(--aksen); padding-top: 0.2rem; }
   .alur h3 { margin: 0 0 0.25rem; }
 
   /* Bilah kemajuan gulir: garis rambut 2px yang terisi sesuai posisi baca. */
