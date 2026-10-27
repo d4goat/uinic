@@ -33,6 +33,8 @@ import { antre, bacaAntrean, kirimAntrean } from '../../lib/offline';
 import type { Capaian, Sesi, SesiAntrean } from '../../lib/types';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
 import { Textarea } from '../../components/ui/textarea';
 
 type Tujuan = { id: string; tujuan: string; indikator: string };
@@ -317,16 +319,16 @@ export default function SesiLog() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="sesi-tanggal" className="block text-xs font-sans font-medium text-tinta mb-1">
+                  <Label htmlFor="sesi-tanggal" className="block text-xs font-sans font-medium text-tinta mb-1.5">
                     TANGGAL PELAKSANAAN <span className="text-aksen">*</span>
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     id="sesi-tanggal"
                     type="date"
                     value={tanggal}
                     onChange={(e) => setTanggal(e.target.value)}
                     required
-                    className="w-full text-sm rounded-sm border border-garis bg-kartu p-2.5 font-sans"
+                    className="w-full text-sm rounded-lg border-garis bg-kartu h-10 font-sans focus-visible:ring-aksi"
                   />
                 </div>
 

@@ -18,7 +18,9 @@ import type { Siswa } from '../../lib/types';
 import { useAuth } from '../../auth/AuthContext';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
 
 /** F2 — data siswa pseudonim. Cermin constraint `students` di supabase/schema.sql;
  *  DB tetap memvalidasi ulang, ini hanya supaya galat muncul dekat kolomnya. */
@@ -303,97 +305,101 @@ export default function SiswaList() {
 
         {/* Kolom Kanan: Tambah Siswa Form (4 Kolom) */}
         <section className="anim-muncul lg:col-span-4">
-          <div className="border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)] p-6 sticky top-24">
-            <div className="flex items-center gap-2 mb-4 border-b border-garis pb-3">
-              <Plus className="w-4 h-4 text-aksen" />
-              <h2 className="font-display text-lg font-bold text-tinta">Tambah Siswa</h2>
-            </div>
-            <p className="text-xs text-tinta-lembut mb-4">
-              Gunakan kode pseudonim acak untuk melindungi privasi peserta didik (sesuai UU PDP & PRD §2).
-            </p>
-
-            <form onSubmit={(e) => void kirim(e)} noValidate className="space-y-4">
-              <div>
-                <label htmlFor="kode-siswa" className="block text-xs font-sans font-medium text-tinta mb-1">
-                  KODE SISWA <span className="text-aksen">*</span>
-                </label>
-                <Input
-                  id="kode-siswa"
-                  value={isian.kode}
-                  onChange={(e) => ubah('kode', e.target.value.toUpperCase())}
-                  placeholder="Contoh: S-001"
-                  className="font-sans uppercase text-sm"
-                  aria-invalid={galatIsian.kode ? true : undefined}
-                />
-                {galatIsian.kode && (
-                  <p className="text-xs text-galat mt-1">{galatIsian.kode}</p>
-                )}
-                <span className="text-[11px] text-tinta-lembut">3-12 karakter huruf/angka/tanda hubung.</span>
+          <Card className="border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)] sticky top-24 overflow-hidden">
+            <CardHeader className="pb-3 border-b border-garis">
+              <div className="flex items-center gap-2">
+                <Plus className="w-4 h-4 text-aksen" />
+                <CardTitle className="font-display text-lg font-bold text-tinta">Tambah Siswa</CardTitle>
               </div>
+              <CardDescription className="text-xs text-tinta-lembut mt-1">
+                Gunakan kode pseudonim acak untuk melindungi privasi peserta didik (sesuai UU PDP & PRD §2).
+              </CardDescription>
+            </CardHeader>
 
-              <div className="grid grid-cols-2 gap-3">
+            <CardContent className="pt-4">
+              <form onSubmit={(e) => void kirim(e)} noValidate className="space-y-4">
                 <div>
-                  <label htmlFor="inisial-siswa" className="block text-xs font-sans font-medium text-tinta mb-1">
-                    INISIAL <span className="text-aksen">*</span>
-                  </label>
+                  <Label htmlFor="kode-siswa" className="block text-xs font-sans font-medium text-tinta mb-1.5">
+                    KODE SISWA <span className="text-aksen">*</span>
+                  </Label>
                   <Input
-                    id="inisial-siswa"
-                    value={isian.inisial}
-                    onChange={(e) => ubah('inisial', e.target.value.toUpperCase())}
-                    placeholder="ARS"
+                    id="kode-siswa"
+                    value={isian.kode}
+                    onChange={(e) => ubah('kode', e.target.value.toUpperCase())}
+                    placeholder="Contoh: S-001"
                     className="font-sans uppercase text-sm"
-                    maxLength={3}
-                    aria-invalid={galatIsian.inisial ? true : undefined}
+                    aria-invalid={galatIsian.kode ? true : undefined}
                   />
-                  {galatIsian.inisial && (
-                    <p className="text-xs text-galat mt-1">{galatIsian.inisial}</p>
+                  {galatIsian.kode && (
+                    <p className="text-xs text-galat mt-1">{galatIsian.kode}</p>
                   )}
+                  <span className="text-[11px] text-tinta-lembut block mt-1">3-12 karakter huruf/angka/tanda hubung.</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="inisial-siswa" className="block text-xs font-sans font-medium text-tinta mb-1.5">
+                      INISIAL <span className="text-aksen">*</span>
+                    </Label>
+                    <Input
+                      id="inisial-siswa"
+                      value={isian.inisial}
+                      onChange={(e) => ubah('inisial', e.target.value.toUpperCase())}
+                      placeholder="ARS"
+                      className="font-sans uppercase text-sm"
+                      maxLength={3}
+                      aria-invalid={galatIsian.inisial ? true : undefined}
+                    />
+                    {galatIsian.inisial && (
+                      <p className="text-xs text-galat mt-1">{galatIsian.inisial}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="kelas-siswa" className="block text-xs font-sans font-medium text-tinta mb-1.5">
+                      KELAS <span className="text-aksen">*</span>
+                    </Label>
+                    <Input
+                      id="kelas-siswa"
+                      value={isian.kelas}
+                      onChange={(e) => ubah('kelas', e.target.value)}
+                      placeholder="7A"
+                      className="text-sm"
+                      aria-invalid={galatIsian.kelas ? true : undefined}
+                    />
+                    {galatIsian.kelas && (
+                      <p className="text-xs text-galat mt-1">{galatIsian.kelas}</p>
+                    )}
+                  </div>
                 </div>
 
                 <div>
-                  <label htmlFor="kelas-siswa" className="block text-xs font-sans font-medium text-tinta mb-1">
-                    KELAS <span className="text-aksen">*</span>
-                  </label>
+                  <Label htmlFor="tahun-siswa" className="block text-xs font-sans font-medium text-tinta mb-1.5">
+                    TAHUN LAHIR <span className="text-aksen">*</span>
+                  </Label>
                   <Input
-                    id="kelas-siswa"
-                    value={isian.kelas}
-                    onChange={(e) => ubah('kelas', e.target.value)}
-                    placeholder="7A"
-                    className="text-sm"
-                    aria-invalid={galatIsian.kelas ? true : undefined}
+                    id="tahun-siswa"
+                    inputMode="numeric"
+                    value={isian.tahun_lahir}
+                    onChange={(e) => ubah('tahun_lahir', e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    placeholder="2012"
+                    className="font-sans text-sm"
+                    aria-invalid={galatIsian.tahun_lahir ? true : undefined}
                   />
-                  {galatIsian.kelas && (
-                    <p className="text-xs text-galat mt-1">{galatIsian.kelas}</p>
+                  {galatIsian.tahun_lahir && (
+                    <p className="text-xs text-galat mt-1">{galatIsian.tahun_lahir}</p>
                   )}
+                  <span className="text-[11px] text-tinta-lembut block mt-1">Rentang {TAHUN_MIN}&ndash;{TAHUN_INI}.</span>
                 </div>
-              </div>
 
-              <div>
-                <label htmlFor="tahun-siswa" className="block text-xs font-sans font-medium text-tinta mb-1">
-                  TAHUN LAHIR <span className="text-aksen">*</span>
-                </label>
-                <Input
-                  id="tahun-siswa"
-                  inputMode="numeric"
-                  value={isian.tahun_lahir}
-                  onChange={(e) => ubah('tahun_lahir', e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  placeholder="2012"
-                  className="font-sans text-sm"
-                  aria-invalid={galatIsian.tahun_lahir ? true : undefined}
-                />
-                {galatIsian.tahun_lahir && (
-                  <p className="text-xs text-galat mt-1">{galatIsian.tahun_lahir}</p>
-                )}
-                <span className="text-[11px] text-tinta-lembut">Rentang {TAHUN_MIN}&ndash;{TAHUN_INI}.</span>
-              </div>
-
-              <div className="pt-2">
-                <Button type="submit" disabled={sedangKirim} className="w-full">
-                  {sedangKirim ? 'Menyimpan...' : 'Simpan Data Siswa'}
-                </Button>
-              </div>
-            </form>
-          </div>
+                <div className="pt-2">
+                  <Button type="submit" disabled={sedangKirim} className="w-full bg-aksi text-white hover:bg-aksi-gelap transition-all duration-300">
+                    {sedangKirim ? 'Menyimpan...' : 'Simpan Data Siswa'}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </section>
       </div>
     </div>
