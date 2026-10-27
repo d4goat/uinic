@@ -122,7 +122,6 @@ export default function Login() {
                       name="email"
                       type="email"
                       placeholder="nama@sekolah.sch.id"
-                      autoComplete="username"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -139,7 +138,6 @@ export default function Login() {
                       name="password"
                       type="password"
                       placeholder="••••••••"
-                      autoComplete="current-password"
                       required
                       value={sandi}
                       onChange={(e) => setSandi(e.target.value)}

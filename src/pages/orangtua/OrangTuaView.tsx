@@ -90,7 +90,7 @@ export default function OrangTuaView() {
         const r = await ringkasanWali(dipilih);
         if (!hidup) return;
         setRingkasan(r);
-        void catatAkses('wali_ringkasan', dipilih, { aksi: 'buka' }).catch(() => {});
+        void catatAkses('wali_ringkasan', dipilih, { aksi: 'buka' }).catch(() => { });
       } catch (e) {
         if (hidup) {
           setRingkasan(null);
@@ -219,7 +219,7 @@ export default function OrangTuaView() {
       ) : !ringkasan ? (
         <div className="p-8 text-center border border-garis bg-kartu rounded-sm space-y-2">
           <Users className="w-10 h-10 mx-auto text-tinta-lembut opacity-40 mb-2" />
-          <p className="font-medium text-tinta">Belum ada anak yang tertaut</p>
+          <p className="font-medium text-tinta max-w-md mx-auto">Belum ada anak yang tertaut</p>
           <p className="text-sm text-tinta-lembut max-w-md mx-auto">
             Hubungi koordinator inklusi atau staf sekolah untuk menautkan akun wali Anda dengan identitas siswa.
           </p>
@@ -304,11 +304,10 @@ export default function OrangTuaView() {
                       {ppi.akomodasi.map((a, idx) => (
                         <span
                           key={idx}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm border text-xs font-medium ${
-                            a.disetujui
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm border text-xs font-medium ${a.disetujui
                               ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
                               : 'border-gray-200 bg-gray-50 text-gray-500 line-through'
-                          }`}
+                            }`}
                         >
                           {a.disetujui ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : null}
                           {a.nama}
@@ -342,9 +341,8 @@ export default function OrangTuaView() {
                         <span className="text-tinta-lembut">{tanggal(s.tanggal)}</span>
                         <Badge
                           variant={s.capaian === 'tercapai' ? 'default' : 'secondary'}
-                          className={`text-[10px] uppercase font-sans ${
-                            s.capaian === 'tercapai' ? 'bg-emerald-700 text-white' : ''
-                          }`}
+                          className={`text-[10px] uppercase font-sans ${s.capaian === 'tercapai' ? 'bg-emerald-700 text-white' : ''
+                            }`}
                         >
                           {TEKS_CAPAIAN[s.capaian] ?? s.capaian}
                         </Badge>
@@ -370,9 +368,8 @@ export default function OrangTuaView() {
                 telah memberikan persetujuan aktif secara tertulis di sistem.
               </p>
 
-              <div className={`p-4 rounded-sm border text-xs space-y-2 ${
-                aktif ? 'border-emerald-300 bg-emerald-50/60' : 'border-amber-300 bg-amber-50/60'
-              }`}>
+              <div className={`p-4 rounded-sm border text-xs space-y-2 ${aktif ? 'border-emerald-300 bg-emerald-50/60' : 'border-amber-300 bg-amber-50/60'
+                }`}>
                 <div className="flex items-center justify-between">
                   <span className="font-sans text-[11px] font-bold">STATUS PERSETUJUAN:</span>
                   <Badge variant={aktif ? 'default' : 'outline'} className={aktif ? 'bg-emerald-700 text-white' : ''}>

@@ -119,7 +119,7 @@ export default function AppShell({ children }: { children?: ReactNode }) {
                   <span className="font-display font-bold text-lg leading-tight tracking-tight text-tinta">
                     PPI-Link
                   </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-aksen" aria-hidden="true" />
+                  {/* <span className="w-1.5 h-1.5 rounded-full bg-aksen" aria-hidden="true" /> */}
                 </div>
                 <span className="text-[11px] text-tinta-lembut uppercase tracking-wider hidden sm:inline font-medium">
                   Sanctuary Inklusif
@@ -138,10 +138,9 @@ export default function AppShell({ children }: { children?: ReactNode }) {
                 key={m.ke}
                 to={m.ke}
                 className={({ isActive }) =>
-                  `inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ease-out ${
-                    isActive
-                      ? 'bg-kartu text-aksi font-semibold shadow-xs'
-                      : 'text-tinta-lembut hover:text-tinta hover:bg-latar/70'
+                  `inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ease-out ${isActive
+                    ? 'bg-kartu text-aksi font-semibold shadow-xs'
+                    : 'text-tinta-lembut hover:text-tinta hover:bg-latar/70'
                   }`
                 }
               >
@@ -177,9 +176,8 @@ export default function AppShell({ children }: { children?: ReactNode }) {
                       {profil.nama ? profil.nama.charAt(0).toUpperCase() : 'U'}
                     </div>
                     <span
-                      className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-white transition-colors duration-300 ${
-                        isOffline ? 'bg-amber-500' : 'bg-emerald-500'
-                      }`}
+                      className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-white transition-colors duration-300 ${isOffline ? 'bg-amber-500' : 'bg-emerald-500'
+                        }`}
                       title={isOffline ? 'Mode Offline' : 'Tersambung'}
                     />
                   </div>
@@ -196,9 +194,8 @@ export default function AppShell({ children }: { children?: ReactNode }) {
 
                   <ChevronDown
                     size={14}
-                    className={`text-tinta-lembut transition-transform duration-300 ${
-                      profilDropdown ? 'rotate-180' : ''
-                    }`}
+                    className={`text-tinta-lembut transition-transform duration-300 ${profilDropdown ? 'rotate-180' : ''
+                      }`}
                     aria-hidden="true"
                   />
                 </button>
@@ -237,16 +234,14 @@ export default function AppShell({ children }: { children?: ReactNode }) {
                           Status Jaringan
                         </span>
                         <span
-                          className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            isOffline
+                          className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${isOffline
                               ? 'bg-amber-100 text-amber-900 border border-amber-300'
                               : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                          }`}
+                            }`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              isOffline ? 'bg-amber-600' : 'bg-emerald-600'
-                            }`}
+                            className={`w-1.5 h-1.5 rounded-full ${isOffline ? 'bg-amber-600' : 'bg-emerald-600'
+                              }`}
                           />
                           {isOffline ? 'Offline' : 'Online'}
                         </span>
@@ -337,16 +332,14 @@ export default function AppShell({ children }: { children?: ReactNode }) {
                   </div>
                 </div>
                 <span
-                  className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    isOffline
+                  className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${isOffline
                       ? 'bg-amber-100 text-amber-900 border border-amber-300'
                       : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      isOffline ? 'bg-amber-600' : 'bg-emerald-600'
-                    }`}
+                    className={`w-1.5 h-1.5 rounded-full ${isOffline ? 'bg-amber-600' : 'bg-emerald-600'
+                      }`}
                   />
                   {isOffline ? 'Offline' : 'Online'}
                 </span>
@@ -358,10 +351,9 @@ export default function AppShell({ children }: { children?: ReactNode }) {
                   key={m.ke}
                   to={m.ke}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 p-2.5 rounded-xl text-xs font-medium border transition-all duration-300 ${
-                      isActive
-                        ? 'bg-aksi-lembut text-aksi border-aksi/40 font-semibold'
-                        : 'bg-latar text-tinta-lembut border-garis hover:text-tinta'
+                    `flex items-center gap-2 p-2.5 rounded-xl text-xs font-medium border transition-all duration-300 ${isActive
+                      ? 'bg-aksi-lembut text-aksi border-aksi/40 font-semibold'
+                      : 'bg-latar text-tinta-lembut border-garis hover:text-tinta'
                     }`
                   }
                 >
