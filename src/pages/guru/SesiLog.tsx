@@ -1,4 +1,4 @@
-﻿// F6: catat sesi pendampingan terhadap tujuan PPI.
+// F6: catat sesi pendampingan terhadap tujuan PPI.
 // Tahan offline: sesi yang gagal terkirim dititipkan ke antrean
 // perangkat (lib/offline.ts) dan dikirim ulang otomatis; client_uuid membuat
 // pengiriman ulang idempoten di sisi server.
@@ -237,21 +237,21 @@ export default function SesiLog() {
           lokal dan tersinkronisasi idempoten saat terhubung kembali.
         </p>
 
-        {/* Ringkasan Statistik Capaian */}
+        {/* Ringkasan Statistik Capaian (design.md Modul 4) */}
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-3.5 border border-garis bg-kartu rounded-sm font-mono">
+          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-mono">
             <span className="text-xs text-tinta-lembut block">TOTAL SESI</span>
             <span className="text-2xl font-bold text-tinta">{jumlahSesi}</span>
           </div>
-          <div className="p-3.5 border border-garis bg-kartu rounded-sm font-mono">
+          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-mono">
             <span className="text-xs text-emerald-700 block">TERCAPAI</span>
             <span className="text-2xl font-bold text-emerald-800">{rekap.tercapai}</span>
           </div>
-          <div className="p-3.5 border border-garis bg-kartu rounded-sm font-mono">
+          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-mono">
             <span className="text-xs text-amber-700 block">SEBAGIAN</span>
             <span className="text-2xl font-bold text-amber-800">{rekap.sebagian}</span>
           </div>
-          <div className="p-3.5 border border-garis bg-kartu rounded-sm font-mono">
+          <div className="p-4 border border-garis bg-kartu rounded-2xl shadow-xs font-mono">
             <span className="text-xs text-red-700 block">BELUM</span>
             <span className="text-2xl font-bold text-red-800">{rekap.belum}</span>
           </div>
@@ -261,7 +261,7 @@ export default function SesiLog() {
       {/* Alert Umpan Balik */}
       {pesan && (
         <div
-          className={`anim-muncul rounded-sm border p-4 text-sm flex items-start gap-3 ${
+          className={`anim-muncul rounded-2xl border p-4 text-sm flex items-start gap-3 shadow-xs ${
             pesan.jenis === 'berhasil'
               ? 'border-berhasil bg-emerald-50/50 text-berhasil'
               : pesan.jenis === 'peringatan'
@@ -271,7 +271,7 @@ export default function SesiLog() {
           role={pesan.jenis === 'galat' ? 'alert' : 'status'}
         >
           {pesan.jenis === 'berhasil' ? (
-            <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-berhasil" />
           ) : (
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           )}
@@ -286,9 +286,9 @@ export default function SesiLog() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Kolom Kiri: Form Sesi Baru */}
         <section className="anim-muncul lg:col-span-7 space-y-6">
-          <div className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
+          <div className="border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)] p-6 space-y-6">
             <div className="flex items-center gap-2 border-b border-garis pb-4">
-              <Calendar className="w-4 h-4 text-aksen" />
+              <Calendar className="w-4 h-4 text-aksi" />
               <h2 className="font-display text-xl font-bold text-tinta">Catat Sesi Baru</h2>
             </div>
 

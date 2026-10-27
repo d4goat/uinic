@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
@@ -266,7 +266,7 @@ export default function MateriAksesibel() {
       {/* Grid Asimetris: Daftar Materi (4 Kolom) + Pembaca Materi (8 Kolom) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Kolom Kiri: Koleksi Materi */}
-        <section className="anim-muncul lg:col-span-4 border border-garis bg-kartu rounded-sm p-6 space-y-4">
+        <section className="anim-muncul lg:col-span-4 border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)] p-6 space-y-4">
           <div className="flex items-center gap-2 border-b border-garis pb-3">
             <BookOpen className="w-4 h-4 text-aksen" />
             <h2 className="font-display text-base font-bold text-tinta">Pustaka Materi</h2>
@@ -285,14 +285,14 @@ export default function MateriAksesibel() {
                   key={m.id}
                   type="button"
                   onClick={() => void bukaMateri(m)}
-                  className={`w-full text-left p-3 rounded-sm text-xs font-medium transition-all flex items-center justify-between border ${
+                  className={`w-full text-left p-3 rounded-xl text-xs font-medium transition-all flex items-center justify-between border ${
                     terpilih?.id === m.id
-                      ? 'border-aksen bg-[var(--aksen)]/5 font-bold text-aksen'
-                      : 'border-garis hover:border-garis-kuat text-tinta'
+                      ? 'border-aksi bg-aksi-lembut/80 font-bold text-aksi shadow-xs'
+                      : 'border-garis hover:border-garis-kuat text-tinta hover:bg-latar-lembut/50'
                   }`}
                 >
                   <span className="truncate pr-2">{m.judul}</span>
-                  {terpilih?.id === m.id && <Sparkles className="w-3.5 h-3.5 shrink-0" />}
+                  {terpilih?.id === m.id && <Sparkles className="w-3.5 h-3.5 shrink-0 text-aksi" />}
                 </button>
               ))}
             </div>
@@ -301,9 +301,9 @@ export default function MateriAksesibel() {
 
         {/* Kolom Kanan: Pembaca & Kontrol Aksesibilitas */}
         <section className="anim-muncul lg:col-span-8 space-y-6">
-          <div className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
+          <div className="border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)] p-6 space-y-6">
             {/* Toolbar Kontrol Tampilan & Suara */}
-            <div className="p-4 bg-latar-lembut/40 border border-garis rounded-sm space-y-4">
+            <div className="p-4 bg-latar-lembut/70 border border-garis rounded-xl space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 {/* Mode Tampilan */}
                 <div className="flex items-center gap-1.5">
@@ -311,8 +311,8 @@ export default function MateriAksesibel() {
                   <button
                     type="button"
                     onClick={() => setMode('')}
-                    className={`px-2.5 py-1 text-xs rounded-sm border font-medium transition-colors ${
-                      mode === '' ? 'bg-tinta text-white border-[var(--tinta)]' : 'border-garis text-tinta-lembut'
+                    className={`px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors ${
+                      mode === '' ? 'bg-aksi text-white border-aksi font-semibold' : 'border-garis text-tinta-lembut bg-kartu'
                     }`}
                   >
                     Standar
@@ -320,8 +320,8 @@ export default function MateriAksesibel() {
                   <button
                     type="button"
                     onClick={() => setMode('teks-besar')}
-                    className={`px-2.5 py-1 text-xs rounded-sm border font-medium transition-colors ${
-                      mode === 'teks-besar' ? 'bg-tinta text-white border-[var(--tinta)]' : 'border-garis text-tinta-lembut'
+                    className={`px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors ${
+                      mode === 'teks-besar' ? 'bg-aksi text-white border-aksi font-semibold' : 'border-garis text-tinta-lembut bg-kartu'
                     }`}
                   >
                     Teks Besar
@@ -329,8 +329,8 @@ export default function MateriAksesibel() {
                   <button
                     type="button"
                     onClick={() => setMode('kontras-tinggi')}
-                    className={`px-2.5 py-1 text-xs rounded-sm border font-medium transition-colors ${
-                      mode === 'kontras-tinggi' ? 'bg-tinta text-white border-[var(--tinta)]' : 'border-garis text-tinta-lembut'
+                    className={`px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors ${
+                      mode === 'kontras-tinggi' ? 'bg-aksi text-white border-aksi font-semibold' : 'border-garis text-tinta-lembut bg-kartu'
                     }`}
                   >
                     Kontras Tinggi
@@ -341,8 +341,8 @@ export default function MateriAksesibel() {
                 <button
                   type="button"
                   onClick={() => setPendek((p) => !p)}
-                  className={`px-3 py-1 text-xs font-mono rounded-sm border transition-colors flex items-center gap-1.5 ${
-                    pendek ? 'border-aksen bg-[var(--aksen)] text-white' : 'border-garis text-tinta-lembut'
+                  className={`px-3 py-1.5 text-xs font-mono rounded-lg border transition-colors flex items-center gap-1.5 ${
+                    pendek ? 'border-aksi bg-aksi text-white font-semibold' : 'border-garis text-tinta-lembut bg-kartu'
                   }`}
                 >
                   <ListOrdered className="w-3.5 h-3.5" />
@@ -401,28 +401,31 @@ export default function MateriAksesibel() {
               )}
             </div>
 
-            {/* Konten Teks Terbaca */}
+            {/* Konten Teks Terbaca (design.md Modul 3: Reading Sanctuary) */}
             {terpilih ? (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <h2 className="font-display text-2xl font-bold tracking-tight text-tinta">
                   {terpilih.judul}
                 </h2>
 
                 {pendek ? (
                   <div className="space-y-3">
-                    <span className="text-xs font-mono text-aksen block font-bold">
-                      STRUKTUR KALIMAT PENDEK BERURUTAN:
+                    <span className="text-xs font-mono text-aksi block font-bold tracking-wider">
+                      FOKUS SATU KALIMAT PER KARTU (CHUNKING):
                     </span>
-                    <ol className="space-y-2.5 list-decimal pl-5">
+                    <ol className="space-y-3 list-decimal pl-5">
                       {kalimat.map((k, idx) => (
-                        <li key={idx} className="p-2.5 rounded-sm bg-latar-lembut/30 border border-garis text-base text-tinta leading-relaxed">
+                        <li
+                          key={idx}
+                          className="p-4 rounded-xl bg-bacaan border border-garis text-base text-tinta leading-relaxed shadow-xs transition-colors hover:border-aksi/50"
+                        >
                           {k}
                         </li>
                       ))}
                     </ol>
                   </div>
                 ) : (
-                  <div className="space-y-4 text-base text-tinta leading-relaxed font-sans">
+                  <div className="p-6 md:p-8 rounded-2xl bg-bacaan border border-garis shadow-xs space-y-4 text-base text-tinta leading-relaxed font-sans max-w-[60ch]">
                     {paragraf.map((p, idx) => (
                       <p key={idx}>{p}</p>
                     ))}

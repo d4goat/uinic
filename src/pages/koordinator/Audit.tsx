@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
 import {
@@ -104,10 +104,10 @@ export default function Audit() {
       )}
 
       {/* Tabel Audit Modern */}
-      <section className="anim-muncul border border-garis bg-kartu rounded-sm overflow-hidden">
-        <div className="p-4 border-b border-garis bg-latar-lembut/40 flex items-center justify-between">
+      <section className="anim-muncul border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)] overflow-hidden">
+        <div className="p-4 border-b border-garis bg-latar-lembut/70 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Database className="w-4 h-4 text-aksen" />
+            <Database className="w-4 h-4 text-aksi" />
             <span className="text-xs font-mono font-bold uppercase text-tinta">50 Entri Audit Terkini</span>
           </div>
           <span className="text-[11px] font-mono text-tinta-lembut">

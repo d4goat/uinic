@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useGSAP } from '@gsap/react';
@@ -192,7 +192,7 @@ export default function SiswaList() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Kolom Kiri: Cari & Tabel Siswa (8 Kolom) */}
         <section className="anim-muncul lg:col-span-8 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-kartu border border-garis rounded-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-kartu border border-garis rounded-2xl shadow-xs">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-tinta-lembut" />
               <Input
@@ -201,7 +201,7 @@ export default function SiswaList() {
                 value={cari}
                 onChange={(e) => setCari(e.target.value)}
                 placeholder="Cari kode, inisial, atau kelas..."
-                className="pl-9 h-10 border-garis text-sm bg-transparent"
+                className="pl-9 h-10 border-garis text-sm bg-transparent rounded-xl"
                 aria-label="Cari siswa"
               />
             </div>
@@ -211,12 +211,12 @@ export default function SiswaList() {
           </div>
 
           {memuat ? (
-            <div className="p-12 text-center border border-garis bg-kartu rounded-sm">
+            <div className="p-12 text-center border border-garis bg-kartu rounded-2xl shadow-xs">
               <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-aksen border-t-transparent" />
               <p className="mt-3 text-sm text-tinta-lembut font-mono">Memuat direktori siswa...</p>
             </div>
           ) : daftar.length === 0 ? (
-            <div className="p-8 text-center border border-garis bg-kartu rounded-sm">
+            <div className="p-8 text-center border border-garis bg-kartu rounded-2xl shadow-xs">
               <Users className="w-10 h-10 mx-auto text-tinta-lembut opacity-40 mb-3" />
               <p className="font-medium text-tinta">Belum ada siswa di sekolah ini</p>
               <p className="text-sm text-tinta-lembut mt-1 max-w-md mx-auto">
@@ -224,37 +224,41 @@ export default function SiswaList() {
               </p>
             </div>
           ) : hasil.length === 0 ? (
-            <div className="p-8 text-center border border-garis bg-kartu rounded-sm">
+            <div className="p-8 text-center border border-garis bg-kartu rounded-2xl shadow-xs">
               <p className="text-sm text-tinta-lembut">
                 Tidak ada siswa yang cocok dengan kata kunci &ldquo;{cari.trim()}&rdquo;.
               </p>
-              <Button variant="outline" size="sm" onClick={() => setCari('')} className="mt-3">
+              <Button variant="outline" size="sm" onClick={() => setCari('')} className="mt-3 rounded-xl">
                 Reset Pencarian
               </Button>
             </div>
           ) : (
-            <div className="overflow-x-auto border border-garis bg-kartu rounded-sm">
+            <div className="overflow-x-auto border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)]">
               <table className="w-full text-left text-sm border-collapse">
                 <thead className="bg-latar-lembut border-b border-garis font-mono text-xs uppercase text-tinta-lembut">
                   <tr>
-                    <th className="px-4 py-3 font-semibold">Kode</th>
-                    <th className="px-4 py-3 font-semibold">Inisial</th>
-                    <th className="px-4 py-3 font-semibold">Kelas</th>
-                    <th className="px-4 py-3 font-semibold">Tahun Lahir</th>
-                    <th className="px-4 py-3 font-semibold text-right">Tindakan</th>
+                    <th className="px-4 py-3.5 font-semibold">Siswa (Pseudonim)</th>
+                    <th className="px-4 py-3.5 font-semibold">Kelas</th>
+                    <th className="px-4 py-3.5 font-semibold">Tahun Lahir</th>
+                    <th className="px-4 py-3.5 font-semibold text-right">Tindakan</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--garis)]">
+                <tbody className="divide-y divide-garis">
                   {hasil.map((s) => (
                     <tr key={s.id} className="hover:bg-latar-lembut/40 transition-colors">
-                      <td className="px-4 py-3 font-mono font-bold text-tinta">
-                        {s.kode}
-                      </td>
-                      <td className="px-4 py-3 font-medium text-tinta">
-                        {s.inisial}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-aksi-lembut text-aksi font-bold text-xs flex items-center justify-center shrink-0">
+                            {s.inisial}
+                          </div>
+                          <div>
+                            <span className="font-mono font-bold text-tinta block">{s.kode}</span>
+                            <span className="text-[11px] text-tinta-lembut block">Inisial: {s.inisial}</span>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant="outline" className="font-mono text-xs">
+                        <Badge variant="outline" className="font-mono text-xs rounded-lg">
                           {s.kelas}
                         </Badge>
                       </td>
@@ -299,7 +303,7 @@ export default function SiswaList() {
 
         {/* Kolom Kanan: Tambah Siswa Form (4 Kolom) */}
         <section className="anim-muncul lg:col-span-4">
-          <div className="border border-garis bg-kartu rounded-sm p-6 sticky top-24">
+          <div className="border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)] p-6 sticky top-24">
             <div className="flex items-center gap-2 mb-4 border-b border-garis pb-3">
               <Plus className="w-4 h-4 text-aksen" />
               <h2 className="font-display text-lg font-bold text-tinta">Tambah Siswa</h2>

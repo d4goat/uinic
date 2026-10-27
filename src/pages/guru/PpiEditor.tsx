@@ -1,4 +1,4 @@
-﻿/**
+/**
  * F4 + F5 — Inti PPI-Link: Rekomendasi Akomodasi & Draf PPI Berversi.
  * Setiap saran akomodasi wajib tampil bersama alasan, tingkat bukti, dan peninjau
  * dari tabel aturan; guru menyetujui atau menolak. Setiap simpan menambah versi
@@ -27,6 +27,7 @@ import {
   Target,
   Trash2,
   X,
+  ShieldCheck,
 } from 'lucide-react';
 import { ambilPpi, catatAkses, saranPpi, simpanPpi, versiPpi } from '../../lib/api';
 import type { Ppi, PpiSaran, PpiVersi, SaranAkomodasi, TingkatBukti } from '../../lib/types';
@@ -445,13 +446,23 @@ export default function PpiEditor() {
         </div>
       )}
 
+      {/* Banner Etika Non-Diagnosis (design.md Modul 2) */}
+      <div className="anim-muncul rounded-2xl border border-garis bg-latar-lembut/70 p-4 text-xs text-tinta-lembut flex items-center gap-3 shadow-xs">
+        <div className="w-8 h-8 rounded-xl bg-aksi-lembut text-aksi flex items-center justify-center shrink-0">
+          <ShieldCheck className="w-4 h-4" />
+        </div>
+        <p className="leading-relaxed">
+          <strong className="text-tinta font-semibold">Prinsip Etika & Aksesibilitas:</strong> Catatan ini merupakan observasi fungsional pembelajaran untuk penyusunan akomodasi, <strong className="text-tinta">bukan diagnosis medis atau psikologis</strong>.
+        </p>
+      </div>
+
       {/* Layout Editor: Form Input (Kiri 8) + Versi & Riwayat (Kanan 4) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Kolom Kiri: Form PPI */}
         <section className="anim-muncul lg:col-span-8 space-y-8">
           <form onSubmit={simpan} noValidate className="space-y-8">
             {/* 1. Rekomendasi Akomodasi dari Aturan */}
-            <div className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
+            <div className="border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)] p-6 space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-garis pb-4">
                 <div>
                   <div className="flex items-center gap-2">

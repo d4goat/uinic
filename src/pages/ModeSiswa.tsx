@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGSAP } from '@gsap/react';
@@ -364,26 +364,26 @@ export default function ModeSiswa() {
             {langkah.map((l, i) => (
               <div
                 key={l.id}
-                className={`p-4 border rounded-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                className={`p-5 border rounded-2xl transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                   l.selesai
-                    ? 'border-emerald-300 bg-emerald-50/40 opacity-70'
-                    : 'border-garis bg-kartu hover:border-garis-kuat shadow-xs'
+                    ? 'border-emerald-200 bg-emerald-50/50 scale-[0.985] opacity-80'
+                    : 'border-garis bg-kartu hover:border-garis-kuat shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)]'
                 }`}
               >
                 <div className="flex items-center gap-4">
-                  {/* Ikon Simbol Besar */}
-                  <span className={`w-11 h-11 shrink-0 rounded-sm flex items-center justify-center font-bold text-lg select-none ${
-                    l.selesai ? 'bg-emerald-600 text-white' : 'bg-latar-lembut text-tinta border border-garis'
+                  {/* Ikon Simbol Besar (design.md §5: touch target ramah anak) */}
+                  <span className={`w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center font-bold text-2xl select-none shadow-xs transition-colors ${
+                    l.selesai ? 'bg-aksi text-white' : 'bg-latar-lembut text-tinta border border-garis'
                   }`}>
                     {l.ikon}
                   </span>
 
                   <div>
-                    <span className="text-[11px] font-mono text-tinta-lembut block uppercase">
+                    <span className="text-[11px] font-mono text-tinta-lembut block uppercase tracking-wider">
                       Langkah #{i + 1}
                     </span>
-                    <p className={`text-base font-semibold leading-relaxed ${
-                      l.selesai ? 'line-through text-emerald-900' : 'text-tinta'
+                    <p className={`text-lg font-semibold leading-relaxed ${
+                      l.selesai ? 'line-through text-emerald-900/70' : 'text-tinta'
                     }`}>
                       {l.teks}
                     </p>
@@ -395,10 +395,10 @@ export default function ModeSiswa() {
                     size="lg"
                     variant={l.selesai ? 'outline' : 'default'}
                     onClick={() => alihSelesai(l.id)}
-                    className={`h-11 px-5 text-sm font-bold tracking-wide ${
+                    className={`min-h-[48px] px-6 text-sm font-bold tracking-wide rounded-xl transition-all ${
                       l.selesai
-                        ? 'border-emerald-400 text-emerald-800 hover:bg-emerald-100'
-                        : 'bg-[var(--aksen)] hover:bg-[var(--aksen)]/90 text-white shadow-xs'
+                        ? 'border-emerald-300 text-emerald-800 hover:bg-emerald-100 bg-white'
+                        : 'bg-aksi hover:bg-aksi-gelap text-white shadow-xs'
                     }`}
                   >
                     {l.selesai ? (
@@ -408,8 +408,8 @@ export default function ModeSiswa() {
                       </>
                     ) : (
                       <>
-                        <Check className="w-4 h-4 mr-1.5" />
-                        Tandai Selesai
+                        <Check className="w-5 h-5 mr-1.5" />
+                        Selesai
                       </>
                     )}
                   </Button>

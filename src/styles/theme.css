@@ -44,56 +44,61 @@
  * --color-* -> utilitas bg-/text-/border-, --font-* -> font-display/sans/mono.
  * --font-sans menimpa font bawaan dokumen (preflight memakai --default-font-family). */
 @theme {
-  /* Kertas & tinta. Kartu sedikit lebih terang dari latar supaya kedalaman
-     dibangun dari nada, bukan dari bayangan. */
-  --color-latar: #f7f6f2;        /* Warm Alabaster */
-  --color-latar-lembut: #efede6;
-  --color-kartu: #ffffff;
-  --color-tinta: #111111;        /* Obsidian Ink — 17,5:1 di atas latar */
-  --color-tinta-lembut: #57534a; /*  7,1:1 di atas latar */
-  --color-garis: #dad5c9;        /* garis rambut struktural (pemisah, bukan batas kontrol) */
-  --color-garis-kuat: #8a8578;   /* batas kontrol: 3,4:1 — WCAG 1.4.11 */
+  /* Kertas & tinta: Warm Oat Sanctuary (design.md §1 & §3) */
+  --color-latar: #fbf9f5;        /* Warm Oat Canvas */
+  --color-latar-lembut: #f3efe6; /* Warm Subtle Oat Cream */
+  --color-kartu: #ffffff;        /* Surface */
+  --color-bacaan: #fdf8ec;       /* Mode Baca Aksesibel */
+  --color-tinta: #1e2420;        /* Deep Forest Charcoal — 14.8:1 */
+  --color-tinta-lembut: #4a554e; /* Ink Secondary — 7.2:1 */
+  --color-tinta-pudar: #6e7a72;  /* Ink Muted — 4.6:1 */
+  --color-garis: #e6e0d4;        /* Border Soft */
+  --color-garis-kuat: #847e71;   /* Border Strong / Kontrol — 3.8:1 */
 
-  /* Satu aksen berdaya tinggi: vermilion oksida. Dipakai untuk tanda merek,
-     penanda bagian, garis aktif, dan bidang tombol utama. */
-  --color-aksen: #b8340f;        /* 5,5:1 di atas latar; putih di atasnya 5,9:1 */
-  --color-aksi: #123c69;         /* tautan & tombol; putih di atasnya 11,2:1 */
-  --color-aksi-gelap: #0f2c4f;   /* isian arah saat hover */
+  /* Aksen & Aksi: Primary Sage & Warm Terracotta (design.md §3) */
+  --color-aksi: #2d6a4f;         /* Primary Sage — 6.1:1; putih di atasnya 6.5:1 */
+  --color-aksi-gelap: #1b4332;   /* Sage Dark — putih di atasnya 10.7:1 */
+  --color-aksi-lembut: #e8f3ee;  /* Sage Soft Fill */
+  --color-aksen: #a8482e;        /* Warm Terracotta Deep — 6.5:1; putih di atasnya 6.8:1 */
+  --color-terracotta: #c86d51;   /* Warm Terracotta */
+  --color-amber: #d9822b;        /* Amber Honey */
+  --color-indigo: #3d5a80;       /* Calm Indigo Bukti Ilmiah */
 
-  /* Status. Semuanya >= 4,5:1 di atas latar dan latar-lembut, dan selalu
-     disertai label teks (warna tidak pernah jadi satu-satunya pembeda). */
-  --color-berhasil: #175c31;
-  --color-peringatan: #8a3b00;
-  --color-galat: #8c1d1d;
+  /* Status semantik (semuanya >= 4.5:1) */
+  --color-berhasil: #2d6a4f;     /* Sage Success */
+  --color-peringatan: #945000;   /* Amber Honey Deep */
+  --color-galat: #8c1d1d;        /* Muted Crimson */
 
-  /* Pasangan tipografi: grotesk rapat untuk tajuk, Neue Montreal untuk badan
-     bacaan (karakter humanis dengan kepribadian yang tetap bersih), monospace
-     untuk metadata/tag/penghitung/stempel waktu. */
+  /* Pasangan tipografi (design.md §4) */
   --font-display: 'Archivo Variable', Archivo, 'Helvetica Neue', Arial, sans-serif;
   --font-sans: 'Neue Montreal', 'Inter Variable', Inter, system-ui, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
 }
 
-/* Nama pendek lama tetap hidup: halaman dan skrip lain memakai var(--garis),
-   var(--aksi), dst. Alias satu arah (pendek -> token), jadi sumber kebenaran
-   tetap @theme — dan mode kontras di bawah cukup menimpa --color-*. */
+/* Nama pendek lama tetap hidup: alias ke token @theme */
 :root {
   --latar: var(--color-latar);
   --latar-lembut: var(--color-latar-lembut);
   --kartu: var(--color-kartu);
+  --bacaan: var(--color-bacaan);
   --tinta: var(--color-tinta);
   --tinta-lembut: var(--color-tinta-lembut);
+  --tinta-pudar: var(--color-tinta-pudar);
   --garis: var(--color-garis);
   --garis-kuat: var(--color-garis-kuat);
   --aksi: var(--color-aksi);
   --aksi-gelap: var(--color-aksi-gelap);
+  --aksi-lembut: var(--color-aksi-lembut);
   --aksen: var(--color-aksen);
+  --terracotta: var(--color-terracotta);
+  --amber: var(--color-amber);
+  --indigo: var(--color-indigo);
   --berhasil: var(--color-berhasil);
   --peringatan: var(--color-peringatan);
   --galat: var(--color-galat);
-  --radius: 2px;                 /* siku mikro — bukan pil, bukan 8px bawaan */
+  --radius: 0.875rem;            /* 14px — soft-tactile architecture (design.md §1 & §5) */
   --lebar-baca: 60ch;            /* batas lebar teks badan */
-  --lebar-panggung: 82rem;       /* batas lebar kisi lebar */
+  --lebar-panggung: 84rem;       /* batas lebar panggung */
   color-scheme: light;
 
   /* --- jembatan shadcn ------------------------------------------------

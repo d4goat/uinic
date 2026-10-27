@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGSAP } from '@gsap/react';
 import { gsap } from 'gsap';
@@ -229,9 +229,9 @@ export default function OrangTuaView() {
           {/* Kolom Kiri: PPI & Sesi (8 Kolom) */}
           <section className="anim-muncul lg:col-span-8 space-y-8">
             {/* Kartu Profil Anak */}
-            <div className="border border-garis bg-kartu rounded-sm p-6">
+            <div className="border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)] p-6">
               <div className="flex items-center gap-2 border-b border-garis pb-3 mb-4">
-                <User className="w-4 h-4 text-aksen" />
+                <User className="w-4 h-4 text-aksi" />
                 <h2 className="font-display text-lg font-bold text-tinta">Identitas Peserta Didik</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm font-mono">
@@ -255,10 +255,10 @@ export default function OrangTuaView() {
             </div>
 
             {/* Program Pembelajaran Individual (PPI) */}
-            <div className="border border-garis bg-kartu rounded-sm p-6 space-y-6">
+            <div className="border border-garis bg-kartu rounded-2xl shadow-[0_4px_24px_-4px_rgba(30,36,32,0.05)] p-6 space-y-6">
               <div className="flex items-center justify-between border-b border-garis pb-4">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-aksen" />
+                  <FileText className="w-4 h-4 text-aksi" />
                   <h2 className="font-display text-xl font-bold text-tinta">Rencana Pembelajaran (PPI)</h2>
                 </div>
                 {ppi && (

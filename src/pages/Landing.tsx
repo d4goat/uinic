@@ -20,6 +20,8 @@ import { Separator } from '@/components/ui/separator';
 import AnatomiSaran from '@/components/AnatomiSaran';
 import Magnetik from '@/components/Magnetik';
 import RevealText from '@/components/RevealText';
+import DemoSwitcher from '@/components/DemoSwitcher';
+import PwaStatusPill from '@/components/PwaStatusPill';
 
 /** PRD §2 apa adanya: masalah, sumber, dan seberapa kuat buktinya. */
 const MASALAH = [
@@ -50,19 +52,37 @@ export default function Landing() {
     <>
       <a className="lompati-ke-konten" href="#konten-utama">Lewati ke konten utama</a>
 
-      <header className="bilah">
-        <span className="bilah-merek">PPI-Link</span>
-        <Badge variant="outline" className="normal-case">UINIC 8.0 · subtema pendidikan</Badge>
-        <div className="bilah-akhir">
-          <Button asChild variant="outline" className="h-9">
-            <Link to="/api-docs">
-              <FileJson aria-hidden="true" />
-              Dokumentasi API
-            </Link>
-          </Button>
-          <Button asChild className="h-9">
-            <Link to="/login">Masuk</Link>
-          </Button>
+      <header className="border-b border-garis bg-latar/90 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-aksi flex items-center justify-center text-white shadow-xs">
+              <ShieldCheck size={18} className="text-white" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="font-display font-bold text-lg leading-tight tracking-tight text-tinta">
+                  PPI-Link
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-aksen" aria-hidden="true"></span>
+              </div>
+              <span className="text-[10px] font-mono text-tinta-lembut uppercase tracking-wider hidden sm:inline">
+                Sanctuary Inklusif · UINIC 8.0
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <PwaStatusPill />
+            <DemoSwitcher />
+            <Button asChild variant="outline" className="h-8 text-xs rounded-xl hidden sm:inline-flex">
+              <Link to="/api-docs">
+                <FileJson size={13} className="mr-1" />
+                API Docs
+              </Link>
+            </Button>
+            <Button asChild className="h-8 text-xs font-semibold rounded-xl bg-aksi text-white hover:bg-aksi-gelap shadow-xs">
+              <Link to="/login">Masuk</Link>
+            </Button>
+          </div>
         </div>
       </header>
 
